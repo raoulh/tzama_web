@@ -18,3 +18,4 @@ hugo --gc --baseURL https://test.tzama.fr/pr-1/     # build d'une preview servie
 - Validation : `layouts/_partials/validate.html` fait échouer le build, en nommant le fichier et le champ, si un champ obligatoire manque ou est invalide.
 - Mode strict : `HUGO_PARAMS_STRICT=true hugo --gc` refuse en plus les témoignages fictifs (`placeholder: true`). À poser pour le build de production seulement.
 - Ajouter une langue : la déclarer dans `hugo.yaml` avec son `contentDir`, créer `content/<lang>/` et `i18n/<lang>.yaml`.
+- CMS : `../cms/`, monté sur `/cms/` (voir `cms/README.md`).
