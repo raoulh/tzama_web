@@ -4,13 +4,17 @@ title: Tzama
 
 defaultContentLanguage: fr
 defaultContentLanguageInSubdir: false
-enableRobotsTXT: false
+enableRobotsTXT: true
 disableKinds: [taxonomy, term, rss]
 
 module:
   hugoVersion:
     min: "0.162.0"
     extended: false
+  # Déclarer un montage static remplace celui par défaut : il est répété.
+  mounts:
+    - { source: static, target: static }
+    - { source: ../cms, target: static/cms, files: ["! README.md"] }
 
 languages:
   fr:

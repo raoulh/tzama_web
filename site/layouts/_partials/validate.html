@@ -160,3 +160,37 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
+
+{{- /* Page d'accueil : blocs du front matter ; les chemins d'image sont relatifs à assets/ */ -}}
+{{- $file := printf "content/%s/_index.md" site.Language.Lang -}}
+{{- $hp := site.Home.Params -}}
+{{- $blocks := dict
+  "hero" (slice "image" "image_alt" "tagline" "intro")
+  "words" (slice "title")
+  "day" (slice "title" "photo" "photo_alt" "photo_caption")
+  "support" (slice "text")
+  "visit" (slice "title" "photo" "photo_alt" "photo_caption")
+-}}
+{{- range $block, $fields := $blocks -}}
+  {{- $b := index $hp $block | default dict -}}
+  {{- range $fields -}}
+    {{- if not (index $b .) }}{{ errorf "%s : champ obligatoire absent : %s.%s" $file $block . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- $images := slice ($hp.hero.image | default "") ($hp.day.photo | default "") ($hp.visit.photo | default "") -}}
+{{- range ($hp.hero.photos | default slice) -}}
+  {{- if not (and .image .alt .caption) }}{{ errorf "%s : hero.photos : chaque entrée exige image, alt et caption" $file }}{{ end -}}
+  {{- $images = $images | append (.image | default "") -}}
+{{- end -}}
+{{- range $images -}}
+  {{- if and . (not (resources.Get .)) }}{{ errorf "%s : image introuvable dans assets/ : %s" $file . }}{{ end -}}
+{{- end -}}
+{{- range slice "words" "day" -}}
+  {{- $items := (index $hp . | default dict).items -}}
+  {{- if not $items }}{{ errorf "%s : champ obligatoire absent : %s.items" $file . }}{{ end -}}
+  {{- $block := . -}}
+  {{- range $items -}}
+    {{- if not (and .title .text) }}{{ errorf "%s : %s.items : chaque entrée exige title et text" $file $block }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not ($hp.visit.text | default slice) }}{{ errorf "%s : champ obligatoire absent : visit.text" $file }}{{ end -}}

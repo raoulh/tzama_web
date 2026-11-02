@@ -1,0 +1,3 @@
+{{- /* Lisière de feuillage entre deux blocs. Usage : partial "home/trans.html" "haut" (haut, bas ou hero). */ -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+<div class="trans trans--{{ . }}" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#t-feuillage"/></svg></div>

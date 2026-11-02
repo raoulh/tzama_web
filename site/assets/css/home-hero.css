@@ -1,0 +1,49 @@
+/* Ouverture : photo plein écran sous la pilule, texte en bas, calques de feuillage dessiné, photo scotchée à droite (grand écran) */
+.hero { position: relative; isolation: isolate; display: grid; align-items: end; overflow: hidden; height: clamp(32rem, calc(100vh - var(--thumb-h)), 50rem); height: clamp(32rem, calc(100svh - var(--thumb-h)), 50rem); }
+.hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; pointer-events: none; }
+/* voile soutenu : le titre monte haut dans la photo (≥ 3:1 au pire pixel) ; bande sombre en haut sous la pilule */
+.hero__veil { position: absolute; inset: 0; z-index: 2; pointer-events: none; background:
+  linear-gradient(to bottom, var(--voile-50) 0, var(--voile-0) 7rem),
+  linear-gradient(to top, var(--voile-93) 0, var(--voile-86) 40%, var(--voile-74) 62%, var(--voile-60) 82%, var(--voile-45) 100%); }
+/* la boîte du texte laisse passer le survol vers les feuilles dessous, sauf sur le texte et le bouton */
+.hero__text { position: relative; z-index: 5; width: 100%; max-width: var(--col); margin: 0 auto; padding: calc(var(--header-h) + var(--pill-top) + 1.5rem) var(--gutter) calc(1.5rem + var(--trans-h)); color: var(--blanc); pointer-events: none; }
+.hero__text > * { pointer-events: auto; }
+.hero__text h1, .hero__text p { text-shadow: var(--ombre-texte); }
+.hero__text h1 { color: var(--blanc); max-width: 18ch; }
+/* sur la photo, le surligné devient un trait fin sous les mots, pour garder le texte blanc lisible */
+.hero__text .marque { --marque-c: var(--f2); background-image: linear-gradient(transparent 88%, var(--f2) 88%); }
+.hero__text p { font-size: 1.15rem; max-width: 46ch; }
+.hero__text .btn { margin-top: .25rem; }
+
+.calque { position: absolute; inset: 0; pointer-events: none; }
+.calque--3, .calque--2 { z-index: 1; }
+.calque--1 { z-index: 3; }
+.calque--1 { --p: -150px; } .calque--2 { --p: -90px; } .calque--3 { --p: -45px; }
+.f { position: absolute; aspect-ratio: 1 / 1; height: auto; transform: rotate(var(--r, 0deg)) scale(var(--s, 1)); transform-origin: center; filter: drop-shadow(0 2px 3px var(--ombre-feuille)); transition: opacity 1.4s ease-in; }
+.f--1 { color: var(--f1); } .f--2 { color: var(--f2); }
+.calque--3 .f { opacity: .7; } .calque--2 .f { opacity: .85; }
+@media (max-width: 47.99em) { .f { --s: .6; } .calque--3, .f[data-m="hide"] { display: none; } }
+
+/* Photo scotchée : le papier (cadre, photo, légende) bouge ; le ruban (::before) bouge à part */
+.hero__polaroid { display: none; -webkit-user-select: none; user-select: none; }
+.hero__polaroid .paper { position: relative; background: var(--cadre); padding: .55rem .55rem 2.4rem; box-shadow: var(--ombre-photo); transform: rotate(var(--rot, 0deg)); transform-origin: 50% 0; transition: transform .45s cubic-bezier(.3, 1.4, .5, 1); }
+.hero__polaroid .paper img, .hero__polaroid:hover .paper img { padding: 0; background: none; box-shadow: none; transform: none; transition: none; }
+.hero__polaroid .paper__img:not([src]) { display: none; }
+.hero__polaroid:hover .paper { transform: rotate(calc(var(--rot, 0deg) + 2.2deg)); }
+.hero__polaroid .paper .etiq { position: absolute; left: .65rem; right: .65rem; bottom: .5rem; margin: 0; max-width: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transform: rotate(0); box-shadow: none; background: transparent; font-size: 1.1rem; }
+/* bouton transparent sur la figure, tourné comme le papier pour que le contour de focus suive le cadre */
+.polaroid__swap { position: absolute; inset: 0; z-index: 3; padding: 0; border: 0; background: transparent; cursor: pointer; transform: rotate(var(--rot, 0deg)); transform-origin: 50% 0; }
+.polaroid__swap[hidden] { display: none; }
+.polaroid__swap:focus-visible { outline: 3px solid var(--blanc); outline-offset: 4px; }
+
+@media (min-width: 60em) {
+  .hero__text { padding-bottom: calc(2.5rem + var(--trans-h)); }
+  .hero__text h1 { max-width: 17ch; }
+  .hero__text p { max-width: 42ch; }
+  .hero__polaroid { display: block; position: absolute; z-index: 4; right: max(var(--gutter), calc((100% - var(--col)) / 2 + var(--gutter) + 1rem)); bottom: calc(var(--trans-h) + 4.5rem); width: 15rem; margin: 0; --rot: 3.5deg; }
+  .hero__polaroid::before { background: var(--f2); opacity: .8; }
+}
+@media (min-width: 60em) and (max-height: 44em) { .hero__polaroid { width: 12rem; bottom: calc(var(--trans-h) + 3rem); } }
+@media (prefers-reduced-motion: reduce) {
+  .f, .hero__polaroid .paper { transition: none; }
+}

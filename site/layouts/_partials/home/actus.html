@@ -1,0 +1,50 @@
+{{- /*
+  Actualités récentes : événement à venir (event_date ≥ aujourd'hui) ou publiées depuis moins de 90 jours ;
+  épinglées d'abord, puis de la plus récente à la plus ancienne ; trois au plus. Bloc masqué si aucune.
+*/ -}}
+{{- $section := site.GetPage "/actualites" -}}
+{{- $today := now.Format "2006-01-02" -}}
+{{- $since := now.AddDate 0 0 -90 -}}
+{{- $recent := slice -}}
+{{- with $section -}}
+  {{- range .RegularPages.ByDate.Reverse -}}
+    {{- $upcoming := false -}}
+    {{- with .Params.event_date }}{{ $upcoming = ge ((time.AsTime .).Format "2006-01-02") $today }}{{ end -}}
+    {{- if or $upcoming (.Date.After $since) }}{{ $recent = $recent | append . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- $list := slice -}}
+{{- range where $recent "Params.pinned" true }}{{ $list = $list | append . }}{{ end -}}
+{{- range where $recent "Params.pinned" "!=" true }}{{ $list = $list | append . }}{{ end -}}
+{{- $rots := slice "-2deg" "1.5deg" "-1deg" -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+{{- with first 3 $list }}
+<section class="actus" id="actualites" aria-labelledby="actus-titre">
+  {{ partial "home/trans.html" "haut" }}
+  <div class="section-head">
+    <h2 id="actus-titre" class="titre" data-idle="souligner"><span class="marque">{{ T "home.newsTitle" }}</span></h2>
+    <a class="link" href="{{ $section.RelPermalink }}">{{ T "home.newsAll" }}</a>
+  </div>
+  <ul class="actus__list">
+    {{- range $i, $n := . }}
+    {{- $when := time.AsTime ($n.Params.event_date | default $n.Date) }}
+    <li class="actu reveal" data-idle="balancer" style="--i:{{ $i }};--rot:{{ index $rots $i | safeCSS }}">
+      <a href="{{ $n.RelPermalink }}">
+        <span class="actu__img">
+          {{- with and $n.Params.flyer ($n.Resources.GetMatch $n.Params.flyer) }}
+          {{- partial "image.html" (dict "src" . "decorative" true "widths" (slice 240 480) "sizes" "(min-width: 48em) 15rem, 6rem") }}
+          {{- else }}
+          <span class="actu__vide"><svg aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-feuille-simple"/></svg></span>
+          {{- end -}}
+        </span>
+        <span class="actu__body">
+          <time datetime="{{ $when.Format "2006-01-02" }}">{{ strings.FirstUpper ($when | time.Format ":date_full") }}</time>
+          <span class="actu__title">{{ partial "home/text.html" $n.Title }}</span>
+        </span>
+      </a>
+    </li>
+    {{- end }}
+  </ul>
+  {{ partial "home/trans.html" "bas" }}
+</section>
+{{- end }}

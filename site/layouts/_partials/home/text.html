@@ -1,0 +1,10 @@
+{{- /*
+  Texte éditorial de l'accueil : échappé, espaces insécables de la typographie française,
+  *mots* rendus en surligné au marqueur. Usage : partial "home/text.html" "…".
+*/ -}}
+{{- $s := . | htmlEscape -}}
+{{- $s = replaceRE `\s+([:;!?»])` "&nbsp;$1" $s -}}
+{{- $s = replaceRE `«\s+` "«&nbsp;" $s -}}
+{{- $s = replaceRE `(\d) (ans|€)` "$1&nbsp;$2" $s -}}
+{{- $s = replaceRE `\*([^*]+)\*` `<span class="marque">$1</span>` $s -}}
+{{- return (safeHTML $s) -}}

@@ -1,0 +1,13 @@
+{{- $href := hugo.Data.settings.donation_url -}}
+{{- with site.GetPage "/association" }}{{ $href = printf "%s#soutenir" .RelPermalink }}{{ end -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+<section class="soutien" aria-labelledby="soutien-titre">
+  <div class="soutien__in reveal">
+    <svg class="soutien__main" data-idle="coucou" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-main-droite"/></svg>
+    <div>
+      <h2 id="soutien-titre" class="titre" data-idle="souligner"><span class="marque">{{ T "home.supportTitle" }}</span></h2>
+      <p>{{ partial "home/text.html" .Params.support.text }}</p>
+      <a class="btn btn--outline" href="{{ $href }}">{{ T "cta.donate" }}</a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,497 @@
+# Configuration de Sveltia CMS, servie sur /cms/config.yml. Guide : cms/README.md.
+# Les champs obligatoires suivent site/layouts/_partials/validate.html : modifier les deux ensemble.
+
+backend:
+  name: github
+  repo: raoulh/tzama_web
+  branch: main
+  base_url: https://deploy.tzama.fr
+  auth_endpoint: auth
+  # Le relais OAuth impose public_repo ; le demander évite un écran d'autorisation trompeur.
+  auth_scope: public_repo
+  # Pas de saisie de jeton personnel : la connexion passe toujours par le relais.
+  auth_methods: [oauth]
+  # Environnement des déploiements de preview créés par .github/workflows/site.yml.
+  preview_context: preview
+  commit_messages:
+    create: "Création de {{collection}} « {{slug}} »"
+    update: "Modification de {{collection}} « {{slug}} »"
+    delete: "Suppression de {{collection}} « {{slug}} »"
+    uploadMedia: "Ajout du fichier « {{path}} »"
+    deleteMedia: "Suppression du fichier « {{path}} »"
+
+# Chaque modification ouvre une pull request ; la preview sert de relecture avant publication.
+publish_mode: editorial_workflow
+
+app_title: Gestion du site Tzama
+site_url: https://v2.tzama.fr
+show_preview_links: true
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: "-"
+
+# Exigé par Sveltia, mais aucun champ ne s'en sert : les images vivent dans le dossier de leur fiche.
+media_folder: site/static/medias
+public_folder: /medias
+
+media_libraries:
+  default:
+    config:
+      max_file_size: 15728640
+      slugify_filename: true
+      # Les photos de téléphone sont réduites et converties en WebP dans le navigateur avant l'envoi.
+      transformations:
+        raster_image:
+          format: webp
+          quality: 82
+          width: 2000
+          height: 2000
+  # Photos réelles de l'école uniquement.
+  stock_assets: false
+
+output:
+  omit_empty_optional_fields: true
+
+i18n:
+  structure: multiple_folders
+  locales: [fr]
+  default_locale: fr
+
+collections:
+  # La collection « Accueil » (site/content/fr/_index.md) viendra ici avec la page d'accueil.
+
+  - name: actualites
+    label: Actualités
+    label_singular: actualité
+    description: Annonces et événements, du plus récent au plus ancien.
+    icon: newspaper
+    folder: site/content/{{locale}}/actualites
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    i18n: true
+    create: true
+    identifier_field: title
+    summary: "{{title}} · {{date | date('DD/MM/YYYY')}}"
+    thumbnail: flyer
+    sortable_fields:
+      fields: [date, title]
+      default: { field: date, direction: descending }
+    preview_path: actualites/{{slug}}/
+    fields:
+      - name: title
+        i18n: true
+        label: Titre
+      - name: summary
+        i18n: true
+        label: Résumé
+        widget: text
+        hint: Une ou deux phrases, affichées sur la carte de l'actualité et en tête de la page.
+      - name: date
+        i18n: duplicate
+        label: Date de publication
+        widget: datetime
+        type: date
+        format: YYYY-MM-DD
+        default: "{{now}}"
+        hint: Sert au classement des actualités.
+      - name: event_date
+        i18n: duplicate
+        label: Date de l'événement
+        widget: datetime
+        type: date
+        format: YYYY-MM-DD
+        required: false
+        hint: Seulement si l'actualité annonce un événement.
+      - name: pinned
+        i18n: duplicate
+        label: Épingler en tête de liste
+        widget: boolean
+        default: false
+      - name: flyer
+        i18n: duplicate
+        label: Image ou flyer
+        widget: image
+        required: false
+        accept: image/jpeg,image/png,image/webp
+        choose_url: false
+        hint: JPEG, PNG ou WebP, 15 Mo au plus. L'image est réduite automatiquement.
+      - name: flyer_alt
+        i18n: true
+        label: Description de l'image
+        required: false
+        hint: >-
+          **Obligatoire dès qu'une image est ajoutée**, sinon la preview échoue.
+          Décrire ce que montre l'image, en une phrase : ce texte est lu aux personnes aveugles
+          et s'affiche si l'image ne charge pas.
+      - name: body
+        i18n: true
+        label: Texte
+        widget: markdown
+        required: false
+        editor_components: []
+
+  - name: equipe
+    label: Équipe et CA
+    label_singular: personne
+    description: L'équipe de l'école et les membres du conseil d'administration.
+    icon: groups
+    folder: site/content/{{locale}}/equipe
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    i18n: true
+    create: true
+    identifier_field: name
+    slug: "{{name}}"
+    summary: "{{name}} · {{role}}"
+    thumbnail: photo
+    sortable_fields:
+      fields: [order, name]
+      default: { field: order, direction: ascending }
+    view_groups:
+      - { label: Groupe, field: group }
+    fields:
+      - name: name
+        i18n: duplicate
+        label: Prénom et nom
+      - name: role
+        i18n: true
+        label: Rôle
+        hint: Par exemple « Enseignante, cycle 2 » ou « Trésorerie ».
+      - name: group
+        i18n: duplicate
+        label: Groupe
+        widget: select
+        default: equipe
+        options:
+          - { label: Équipe de l'école, value: equipe }
+          - { label: Conseil d'administration, value: ca }
+      - name: order
+        i18n: duplicate
+        label: Ordre d'affichage
+        widget: number
+        value_type: int
+        default: 99
+        min: 1
+        hint: Les plus petits nombres s'affichent en premier dans leur groupe.
+      - name: photo
+        i18n: duplicate
+        label: Photo
+        widget: image
+        required: false
+        accept: image/jpeg,image/png,image/webp
+        choose_url: false
+        hint: Sans photo, un portrait générique s'affiche. JPEG, PNG ou WebP, 15 Mo au plus.
+      - name: photo_alt
+        i18n: true
+        label: Description de la photo
+        required: false
+        hint: >-
+          **Obligatoire dès qu'une photo est ajoutée**, sinon la preview échoue.
+          Par exemple « Portrait de Claire, souriante, dans le jardin » : ce texte est lu aux
+          personnes aveugles.
+      # Hugo lit `title` ; il reprend le nom pour ne pas le saisir deux fois.
+      - name: title
+        i18n: true
+        label: Titre de la fiche
+        widget: compute
+        value: "{{fields.name}}"
+
+  - name: stages
+    label: Stages
+    label_singular: stage
+    description: Stages de vacances proposés aux enfants.
+    icon: forest
+    folder: site/content/{{locale}}/stages
+    i18n: true
+    create: true
+    identifier_field: title
+    summary: "{{title}} · {{dates}}"
+    sortable_fields:
+      fields: [start_date, title]
+      default: { field: start_date, direction: descending }
+    fields:
+      - name: title
+        i18n: true
+        label: Nom du stage
+      - name: start_date
+        i18n: duplicate
+        label: Premier jour
+        widget: datetime
+        type: date
+        format: YYYY-MM-DD
+        default: "{{now}}"
+        hint: Sert au tri et à masquer les stages passés.
+      - name: dates
+        i18n: true
+        label: Dates et horaires affichés
+        hint: Par exemple « Du lundi 26 au vendredi 30 octobre, de 9 h à 12 h ».
+      - name: ages
+        i18n: true
+        label: Âges
+        hint: Par exemple « 3 à 10 ans ».
+      - name: price
+        i18n: true
+        label: Tarif particulier
+        required: false
+        hint: À laisser vide pour afficher le tarif habituel des réglages du site.
+      - name: registration_url
+        i18n: duplicate
+        label: Lien d'inscription
+        pattern: ['^(https://|mailto:)', "Le lien doit commencer par https:// ou mailto:"]
+        hint: Lien HelloAsso, ou mailto:adresse@exemple.fr.
+      - name: body
+        i18n: true
+        label: Description
+        widget: markdown
+        required: false
+        editor_components: []
+
+  - name: postes
+    label: Postes
+    label_singular: poste
+    description: Offres d'emploi et de bénévolat.
+    icon: work
+    folder: site/content/{{locale}}/postes
+    i18n: true
+    create: true
+    identifier_field: title
+    summary: "{{title}}"
+    view_groups:
+      - { label: Statut, field: open }
+    fields:
+      - name: title
+        i18n: true
+        label: Intitulé du poste
+        hint: Garder la mention « (F/H) ».
+      - name: open
+        i18n: duplicate
+        label: Poste ouvert
+        widget: boolean
+        default: true
+        hint: Décocher quand le poste est pourvu.
+      - name: summary
+        i18n: true
+        label: Résumé
+        widget: text
+        hint: Une ou deux phrases.
+      - name: contract
+        i18n: true
+        label: Type de contrat
+        required: false
+        hint: Par exemple CDD, CDI ou service civique.
+      - name: body
+        i18n: true
+        label: Description du poste
+        widget: markdown
+        required: false
+        editor_components: []
+
+  - name: temoignages
+    label: Témoignages
+    label_singular: témoignage
+    description: Paroles de parents et d'anciens élèves.
+    icon: format_quote
+    folder: site/content/{{locale}}/temoignages
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    i18n: true
+    create: true
+    identifier_field: author
+    slug: "{{author}}"
+    summary: "{{author}}"
+    thumbnail: photo
+    sortable_fields:
+      fields: [order, author]
+      default: { field: order, direction: ascending }
+    fields:
+      - name: author
+        i18n: true
+        label: Auteur ou autrice
+        hint: Tel qu'il s'affiche, par exemple « Julie, maman de Léo ».
+      - name: relation
+        i18n: duplicate
+        label: Lien avec l'école
+        widget: select
+        default: parent
+        options:
+          - { label: Parent d'élève, value: parent }
+          - { label: Ancien élève, value: former_pupil }
+      - name: text
+        i18n: true
+        label: Témoignage
+        widget: text
+      - name: order
+        i18n: duplicate
+        label: Ordre d'affichage
+        widget: number
+        value_type: int
+        default: 99
+        min: 1
+        hint: Les plus petits nombres s'affichent en premier.
+      - name: placeholder
+        i18n: duplicate
+        label: Témoignage fictif
+        widget: boolean
+        default: false
+        hint: Texte de démonstration, refusé par le site de production. Laisser décoché.
+      - name: photo
+        i18n: duplicate
+        label: Photo
+        widget: image
+        required: false
+        accept: image/jpeg,image/png,image/webp
+        choose_url: false
+        hint: Sans photo, un portrait générique s'affiche. JPEG, PNG ou WebP, 15 Mo au plus.
+      - name: photo_alt
+        i18n: true
+        label: Description de la photo
+        required: false
+        hint: >-
+          **Obligatoire dès qu'une photo est ajoutée**, sinon la preview échoue.
+          Décrire la photo en une phrase : ce texte est lu aux personnes aveugles.
+      # Hugo lit `title` ; il reprend l'auteur pour ne pas le saisir deux fois.
+      - name: title
+        i18n: true
+        label: Titre de la fiche
+        widget: compute
+        value: "{{fields.author}}"
+
+  - name: faq
+    label: Questions fréquentes
+    label_singular: question
+    description: Questions et réponses de la page « Questions fréquentes ».
+    icon: help
+    folder: site/content/{{locale}}/faq
+    i18n: true
+    create: true
+    identifier_field: title
+    summary: "{{title}}"
+    sortable_fields:
+      fields: [order, title]
+      default: { field: order, direction: ascending }
+    view_groups:
+      - { label: Rubrique, field: category }
+    fields:
+      - name: title
+        i18n: true
+        label: Question
+        hint: Formulée comme la poserait un parent, avec le point d'interrogation.
+      - name: category
+        i18n: duplicate
+        label: Rubrique
+        widget: select
+        default: ecole
+        options:
+          - { label: L'école, value: ecole }
+          - { label: Vie quotidienne, value: vie-quotidienne }
+          - { label: Inscription, value: inscription }
+          - { label: L'association, value: association }
+          - { label: Extrascolaire, value: extrascolaire }
+      - name: order
+        i18n: duplicate
+        label: Ordre dans la rubrique
+        widget: number
+        value_type: int
+        default: 99
+        min: 1
+        hint: Les plus petits nombres s'affichent en premier.
+      - name: body
+        i18n: true
+        label: Réponse
+        widget: markdown
+        required: false
+        editor_components: []
+
+  - name: reglages
+    label: Réglages du site
+    icon: settings
+    files:
+      - name: settings
+        label: Coordonnées, tarifs et bandeau
+        file: site/data/settings.yaml
+        fields:
+          - name: name
+            label: Nom de l'association
+            comment: "Coordonnées et liens communs à toutes les langues : seule source pour les gabarits."
+          - name: email
+            label: Adresse de contact
+            pattern: ['^[^@\s]+@[^@\s]+\.[^@\s]+$', "Adresse e-mail invalide"]
+          - name: address
+            label: Adresse
+            widget: object
+            fields:
+              - { name: street, label: Rue }
+              - name: postalCode
+                label: Code postal
+                pattern: ['^[0-9]{5}$', "Cinq chiffres"]
+              - { name: city, label: Ville }
+          - name: social
+            label: Réseaux sociaux
+            label_singular: réseau
+            widget: list
+            summary: "{{id}}"
+            fields:
+              - name: id
+                label: Réseau
+                widget: select
+                options:
+                  - { label: Facebook, value: facebook }
+                  - { label: Instagram, value: instagram }
+                  - { label: YouTube, value: youtube }
+              - name: url
+                label: Adresse de la page
+                pattern: ['^https://', "Le lien doit commencer par https://"]
+          - name: donation_url
+            label: Lien de don
+            pattern: ['^https://', "Le lien doit commencer par https://"]
+            hint: Formulaire HelloAsso de la page « Nous soutenir ».
+          - name: pricing
+            label: Tarifs
+            widget: object
+            comment: "Montants en euros, sans symbole : les gabarits mettent en forme."
+            hint: Montants en euros, sans le symbole €.
+            fields:
+              - { name: school_year, label: Scolarité annuelle (€), widget: number, value_type: int, min: 0 }
+              - name: monthly
+                label: Paiement mensuel
+                widget: object
+                fields:
+                  - { name: count, label: Nombre de mensualités, widget: number, value_type: int, min: 1 }
+                  - { name: amount, label: Montant d'une mensualité (€), widget: number, value_type: int, min: 0 }
+              - name: sibling_discount_percent
+                label: Réduction fratrie (%)
+                widget: object
+                fields:
+                  - { name: second, label: Deuxième enfant (%), widget: number, value_type: int, min: 0, max: 100 }
+                  - { name: third, label: Troisième enfant (%), widget: number, value_type: int, min: 0, max: 100 }
+              - name: club_nature
+                label: Club nature
+                widget: object
+                fields:
+                  - { name: year, label: Année (€), widget: number, value_type: int, min: 0 }
+                  - { name: card_10, label: Carte de 10 séances (€), widget: number, value_type: int, min: 0 }
+              - { name: stage_week, label: Semaine de stage (€), widget: number, value_type: int, min: 0 }
+          # Un sous-champ par langue de hugo.yaml : le fichier de réglages est commun aux langues.
+          - name: banner
+            label: Bandeau d'annonce
+            widget: object
+            comment: "Une entrée par langue déclarée dans hugo.yaml ; bandeau masqué si enabled est faux."
+            fields:
+              - name: enabled
+                label: Afficher le bandeau
+                widget: boolean
+                default: false
+              - name: text
+                label: Texte du bandeau
+                widget: object
+                fields:
+                  - name: fr
+                    label: Texte en français
+                    widget: text
+                    required: false
+                    hint: Obligatoire si le bandeau est affiché.

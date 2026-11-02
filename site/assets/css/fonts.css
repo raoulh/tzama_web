@@ -1,4 +1,4 @@
 {{- /* Gabarit Hugo : les URLs des polices et masques prennent l'empreinte et le sous-chemin du baseURL. */ -}}
 @font-face { font-family: "Gochi Hand"; font-style: normal; font-weight: 400; font-display: swap; src: url("{{ (resources.Get "fonts/gochi-hand-400-normal.woff2" | fingerprint).RelPermalink }}") format("woff2"); }
 @font-face { font-family: "Baloo 2"; font-style: normal; font-weight: 400 800; font-display: swap; src: url("{{ (resources.Get "fonts/baloo-2-400-800-normal.woff2" | fingerprint).RelPermalink }}") format("woff2"); }
-:root { --trait-marqueur: url("{{ (resources.Get "img/trait-marqueur.svg" | fingerprint).RelPermalink }}"); }
+:root { --trait-marqueur: url("{{ (resources.Get "img/trait-marqueur.svg" | fingerprint).RelPermalink }}"); --ruban: url("{{ (resources.Get "img/ruban.svg" | fingerprint).RelPermalink }}"); }

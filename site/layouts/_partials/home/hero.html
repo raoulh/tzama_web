@@ -1,0 +1,63 @@
+{{- $p := .Params.hero -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+{{- $contact := site.GetPage "/contact" -}}
+{{- /* Feuillage dessiné en trois calques ; calque 1 au-dessus de la photo scotchée. f--tombe : les feuilles qui tombent à l'arrivée. */ -}}
+{{- $back := slice
+  (dict "n" 3 "leaves" (slice
+    (dict "c" "f--2" "id" "d-feuille-simple" "s" "left:42%;top:-3%;width:3.5rem;--r:50deg")
+    (dict "c" "f--1" "id" "d-feuille-chene" "s" "left:90%;top:70%;width:5rem;--r:-20deg")
+    (dict "c" "f--2" "id" "d-feuille-simple" "s" "left:50%;top:85%;width:4rem;--r:15deg")))
+  (dict "n" 2 "leaves" (slice
+    (dict "c" "f--2" "id" "d-feuille-simple" "s" "left:8%;top:-3%;width:5rem;--r:20deg")
+    (dict "c" "f--1" "id" "d-feuille-chene" "s" "left:22%;top:-5%;width:5rem;--r:-10deg")
+    (dict "c" "f--1" "id" "d-feuille-simple" "s" "left:78%;top:-4%;width:5rem;--r:35deg")
+    (dict "c" "f--2" "id" "d-feuille-chene" "s" "left:60%;top:4%;width:4rem;--r:-50deg")
+    (dict "c" "f--2" "id" "d-fougere" "s" "left:-3%;top:35%;width:7rem;--r:40deg" "hide" true)))
+-}}
+{{- $front := dict "n" 1 "leaves" (slice
+    (dict "c" "f--1" "id" "d-feuille-chene" "s" "left:-3%;top:-4%;width:7rem;--r:-35deg")
+    (dict "c" "f--1" "id" "d-fougere" "s" "left:88%;top:-3%;width:10rem;--r:15deg")
+    (dict "c" "f--2" "id" "d-feuille-chene" "s" "left:94%;top:14%;width:6rem;--r:60deg")
+    (dict "c" "f--2" "id" "d-feuille-simple" "s" "left:62%;top:84%;width:5rem;--r:20deg" "hide" true)
+    (dict "c" "f--1" "id" "d-feuille-simple" "s" "left:-2%;top:70%;width:5rem;--r:-70deg" "hide" true)
+    (dict "c" "f--tombe f--1" "id" "d-feuille-simple" "s" "left:30%;top:8%;width:3.2rem;--r:-20deg;--d:0s")
+    (dict "c" "f--tombe f--2" "id" "d-feuille-chene" "s" "left:58%;top:10%;width:2.6rem;--r:40deg;--d:.5s")
+    (dict "c" "f--tombe f--1" "id" "d-feuille-simple" "s" "left:82%;top:6%;width:2.2rem;--r:-60deg;--d:1s"))
+-}}
+{{- $photos := slice -}}
+{{- range $p.photos -}}
+  {{- $ph := . -}}
+  {{- with resources.Get $ph.image -}}
+    {{- $s := .Process "resize 360x webp" -}}
+    {{- $l := .Process "resize 540x webp" -}}
+    {{- $photos = $photos | append (dict "src" $l.RelPermalink "srcset" (printf "%s 360w, %s 540w" $s.RelPermalink $l.RelPermalink) "alt" $ph.alt "caption" $ph.caption) -}}
+  {{- end -}}
+{{- end -}}
+<section class="hero">
+  {{ partial "image.html" (dict "src" (resources.Get $p.image) "alt" $p.image_alt "class" "hero__img" "eager" true "widths" (slice 480 720 1080 1280)) }}
+  <div class="hero__veil" aria-hidden="true"></div>
+  {{- range $back }}
+  {{ partial "home/calque.html" (dict "layer" . "sprite" $sprite.RelPermalink) }}
+  {{- end }}
+  <div class="hero__text" data-idle-text>
+    <h1>{{ partial "home/text.html" $p.tagline }}</h1>
+    <p>{{ partial "home/text.html" $p.intro }}</p>
+    <a class="btn btn--big" href="{{ $contact.RelPermalink }}" data-hero-cta>{{ T "cta.visit" }}</a>
+  </div>
+  {{- with $photos }}
+  {{- $first := index . 0 }}
+  <figure class="photo hero__polaroid" data-idle="balancer" data-hero-photo>
+    <div class="paper">
+      <img class="paper__img" alt="" width="540" height="720" sizes="15rem" loading="lazy" decoding="async">
+      <noscript><img src="{{ $first.src }}" srcset="{{ $first.srcset }}" sizes="15rem" alt="{{ $first.alt }}" width="540" height="720" loading="lazy"></noscript>
+      <figcaption class="etiq">{{ $first.caption }}</figcaption>
+    </div>
+    <button class="polaroid__swap" type="button" hidden><span class="visually-hidden">{{ T "home.swapPhoto" }}</span></button>
+  </figure>
+  <script type="application/json" id="hero-photos">{{ . | jsonify | safeJS }}</script>
+  {{- /* Tirage avant la première peinture, pour ne télécharger qu'une image. */}}
+  <script>(function(){var f=document.querySelector('[data-hero-photo]'),l=JSON.parse(document.getElementById('hero-photos').textContent),i=Math.floor(Math.random()*l.length),m=f.querySelector('.paper__img');m.srcset=l[i].srcset;m.src=l[i].src;m.alt=l[i].alt;f.querySelector('.etiq').textContent=l[i].caption;f.dataset.photoIndex=i;})();</script>
+  {{- end }}
+  {{ partial "home/calque.html" (dict "layer" $front "sprite" $sprite.RelPermalink) }}
+  {{ partial "home/trans.html" "hero" }}
+</section>

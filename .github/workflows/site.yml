@@ -41,7 +41,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BEFORE: ${{ github.event.before }}
-        run: sh .github/scripts/changed.sh '^(site/|\.github/workflows/site\.yml$|\.github/scripts/)'
+        run: sh .github/scripts/changed.sh '^(site/|cms/|\.github/workflows/site\.yml$|\.github/scripts/)'
 
   checks:
     name: Site - checks
