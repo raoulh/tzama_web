@@ -1,0 +1,83 @@
+{{- /*
+  Vérifie au build les données du modèle de contenu ; appelé depuis baseof pour la page d'accueil
+  (une fois par langue). Toute erreur nomme le fichier et le champ. Ne produit aucun HTML.
+  Mode strict (params.strict, posé par HUGO_PARAMS_STRICT=true) : refuse aussi les témoignages fictifs.
+*/ -}}
+{{- $strict := eq (printf "%v" site.Params.strict) "true" -}}
+
+{{- if not (resources.Get "img/divers/portrait-generique.png") }}{{ errorf "assets/img/divers/portrait-generique.png : portrait générique absent" }}{{ end -}}
+
+{{- /* Réglages */ -}}
+{{- $s := hugo.Data.settings -}}
+{{- if not $s }}{{ errorf "data/settings.yaml : fichier absent ou vide" }}{{ end -}}
+{{- range slice "name" "email" "donation_url" -}}
+  {{- if not (index $s .) }}{{ errorf "data/settings.yaml : champ obligatoire absent : %s" . }}{{ end -}}
+{{- end -}}
+{{- range slice "street" "postalCode" "city" -}}
+  {{- if not (index ($s.address | default dict) .) }}{{ errorf "data/settings.yaml : champ obligatoire absent : address.%s" . }}{{ end -}}
+{{- end -}}
+{{- range $s.social -}}
+  {{- if not (and .id .url) }}{{ errorf "data/settings.yaml : social : chaque entrée exige id et url" }}{{ end -}}
+{{- end -}}
+{{- $p := $s.pricing | default dict -}}
+{{- range slice "school_year" "stage_week" -}}
+  {{- if not (index $p .) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.%s" . }}{{ end -}}
+{{- end -}}
+{{- if not (and $p.monthly.count $p.monthly.amount) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.monthly.count ou amount" }}{{ end -}}
+{{- if not (and $p.sibling_discount_percent.second $p.sibling_discount_percent.third) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.sibling_discount_percent.second ou third" }}{{ end -}}
+{{- if not (and $p.club_nature.year $p.club_nature.card_10) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.club_nature.year ou card_10" }}{{ end -}}
+{{- with $s.banner -}}
+  {{- if and .enabled (not (index (.text | default dict) site.Language.Lang)) }}{{ errorf "data/settings.yaml : banner.text.%s absent alors que le bandeau est activé" site.Language.Lang }}{{ end -}}
+{{- end -}}
+
+{{- /*
+  Règles par section de content/<langue>/ :
+  required  chaînes non vides ; bool  booléens obligatoires ; int  entiers obligatoires ;
+  date  dates obligatoires ; optdate  dates facultatives ; enum  champ -> valeurs permises ;
+  image  champ -> champ du texte alternatif (image facultative, présente dans le bundle si renseignée).
+*/ -}}
+{{- $rules := dict
+  "actualites" (dict "required" (slice "title" "summary") "date" (slice "date") "optdate" (slice "event_date") "bool" (slice "pinned") "image" (dict "flyer" "flyer_alt"))
+  "equipe" (dict "required" (slice "name" "role" "group") "int" (slice "order") "enum" (dict "group" (slice "equipe" "ca")) "image" (dict "photo" "photo_alt"))
+  "stages" (dict "required" (slice "title" "dates" "ages" "registration_url") "date" (slice "start_date"))
+  "postes" (dict "required" (slice "title" "summary") "bool" (slice "open"))
+  "temoignages" (dict "required" (slice "author" "text") "bool" (slice "placeholder") "int" (slice "order") "enum" (dict "relation" (slice "parent" "former_pupil")) "image" (dict "photo" "photo_alt"))
+  "faq" (dict "required" (slice "title" "category") "int" (slice "order") "enum" (dict "category" (slice "ecole" "vie-quotidienne" "inscription" "association" "extrascolaire")))
+-}}
+{{- range $section, $r := $rules -}}
+  {{- with site.GetPage (printf "/%s" $section) -}}
+    {{- range .RegularPages -}}
+      {{- $page := . -}}
+      {{- $file := .File.Path -}}
+      {{- range $r.required -}}
+        {{- if not (index $page.Params .) }}{{ errorf "%s : champ obligatoire absent ou vide : %s" $file . }}{{ end -}}
+      {{- end -}}
+      {{- range $r.bool -}}
+        {{- if ne (printf "%T" (index $page.Params .)) "bool" }}{{ errorf "%s : champ obligatoire absent ou non booléen : %s" $file . }}{{ end -}}
+      {{- end -}}
+      {{- range $r.int -}}
+        {{- if not (in (slice "int" "int64" "uint64") (printf "%T" (index $page.Params .))) }}{{ errorf "%s : champ obligatoire absent ou non entier : %s" $file . }}{{ end -}}
+      {{- end -}}
+      {{- range $r.date -}}
+        {{- $f := . -}}
+        {{- $v := index $page.Params $f -}}
+        {{- if not $v }}{{ errorf "%s : champ obligatoire absent : %s" $file $f }}{{ else if (try (time.AsTime $v)).Err }}{{ errorf "%s : date invalide dans %s (attendu AAAA-MM-JJ)" $file $f }}{{ end -}}
+      {{- end -}}
+      {{- range $r.optdate -}}
+        {{- $f := . -}}
+        {{- with index $page.Params $f }}{{ if (try (time.AsTime .)).Err }}{{ errorf "%s : date invalide dans %s (attendu AAAA-MM-JJ)" $file $f }}{{ end }}{{ end -}}
+      {{- end -}}
+      {{- range $field, $allowed := $r.enum -}}
+        {{- $v := index $page.Params $field -}}
+        {{- if not (in $allowed $v) }}{{ errorf "%s : %s doit valoir l'une des valeurs %s (reçu : %q)" $file $field (delimit $allowed ", ") $v }}{{ end -}}
+      {{- end -}}
+      {{- range $field, $alt := $r.image -}}
+        {{- with index $page.Params $field -}}
+          {{- if not ($page.Resources.GetMatch .) }}{{ errorf "%s : %s : image introuvable dans le dossier de la page : %s" $file $field . }}{{ end -}}
+          {{- if not (index $page.Params $alt) }}{{ errorf "%s : %s est renseigné, %s est obligatoire" $file $field $alt }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if and $strict (eq $section "temoignages") .Params.placeholder }}{{ errorf "%s : témoignage fictif (placeholder: true) interdit en build strict" $file }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
