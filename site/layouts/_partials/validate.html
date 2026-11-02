@@ -10,7 +10,7 @@
 {{- /* Réglages */ -}}
 {{- $s := hugo.Data.settings -}}
 {{- if not $s }}{{ errorf "data/settings.yaml : fichier absent ou vide" }}{{ end -}}
-{{- range slice "name" "email" "donation_url" -}}
+{{- range slice "name" "email" "phone" "donation_url" "opening_date" -}}
   {{- if not (index $s .) }}{{ errorf "data/settings.yaml : champ obligatoire absent : %s" . }}{{ end -}}
 {{- end -}}
 {{- range slice "street" "postalCode" "city" -}}
@@ -24,7 +24,8 @@
   {{- if not (index $p .) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.%s" . }}{{ end -}}
 {{- end -}}
 {{- if not (and $p.monthly.count $p.monthly.amount) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.monthly.count ou amount" }}{{ end -}}
-{{- if not (and $p.sibling_discount_percent.second $p.sibling_discount_percent.third) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.sibling_discount_percent.second ou third" }}{{ end -}}
+{{- if (try (time.AsTime $s.opening_date)).Err }}{{ errorf "data/settings.yaml : date invalide dans opening_date (attendu AAAA-MM-JJ)" }}{{ end -}}
+{{- if not (in (slice "int" "int64" "uint64") (printf "%T" $p.sibling_discount_percent)) }}{{ errorf "data/settings.yaml : champ obligatoire absent ou non entier : pricing.sibling_discount_percent" }}{{ end -}}
 {{- if not (and $p.club_nature.year $p.club_nature.card_10) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.club_nature.year ou card_10" }}{{ end -}}
 {{- with $s.banner -}}
   {{- if and .enabled (not (index (.text | default dict) site.Language.Lang)) }}{{ errorf "data/settings.yaml : banner.text.%s absent alors que le bandeau est activé" site.Language.Lang }}{{ end -}}
@@ -34,7 +35,8 @@
   Règles par section de content/<langue>/ :
   required  chaînes non vides ; bool  booléens obligatoires ; int  entiers obligatoires ;
   date  dates obligatoires ; optdate  dates facultatives ; enum  champ -> valeurs permises ;
-  image  champ -> champ du texte alternatif (image facultative, présente dans le bundle si renseignée).
+  image  champ -> champ du texte alternatif (image facultative, présente dans le bundle si renseignée) ;
+  pdf  champs obligatoires désignant un PDF du dossier de la page.
 */ -}}
 {{- $rules := dict
   "actualites" (dict "required" (slice "title" "summary") "date" (slice "date") "optdate" (slice "event_date") "bool" (slice "pinned") "image" (dict "flyer" "flyer_alt"))
@@ -43,6 +45,9 @@
   "postes" (dict "required" (slice "title" "summary") "bool" (slice "open"))
   "temoignages" (dict "required" (slice "author" "text") "bool" (slice "placeholder") "int" (slice "order") "enum" (dict "relation" (slice "parent" "former_pupil")) "image" (dict "photo" "photo_alt"))
   "faq" (dict "required" (slice "title" "category") "int" (slice "order") "enum" (dict "category" (slice "ecole" "vie-quotidienne" "inscription" "association" "extrascolaire")))
+  "partenaires" (dict "required" (slice "name" "category") "int" (slice "order") "enum" (dict "category" (slice "pedagogique" "territoire" "associatif")) "image" (dict "logo" "logo_alt"))
+  "evenements" (dict "required" (slice "title" "period") "int" (slice "order") "image" (dict "photo" "photo_alt"))
+  "documents" (dict "required" (slice "title" "file") "int" (slice "order") "pdf" (slice "file"))
 -}}
 {{- range $section, $r := $rules -}}
   {{- with site.GetPage (printf "/%s" $section) -}}
@@ -77,7 +82,81 @@
           {{- if not (index $page.Params $alt) }}{{ errorf "%s : %s est renseigné, %s est obligatoire" $file $field $alt }}{{ end -}}
         {{- end -}}
       {{- end -}}
+      {{- range $r.pdf -}}
+        {{- $f := . -}}
+        {{- with index $page.Params $f -}}
+          {{- $res := $page.Resources.Get . -}}
+          {{- if not $res }}{{ errorf "%s : %s : fichier introuvable dans le dossier de la page : %s" $file $f . }}{{ else if ne $res.MediaType.SubType "pdf" }}{{ errorf "%s : %s doit être un PDF (reçu : %s)" $file $f $res.MediaType.Type }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
       {{- if and $strict (eq $section "temoignages") .Params.placeholder }}{{ errorf "%s : témoignage fictif (placeholder: true) interdit en build strict" $file }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /*
+  Sections des pages (front matter « sections », voir sections/page.html) :
+  required  champs obligatoires du type ; enum  champ -> valeurs permises (facultatif si absent de required) ;
+  list  champ liste obligatoire -> champs obligatoires de chaque élément.
+*/ -}}
+{{- $types := dict
+  "text" (dict)
+  "team" (dict "required" (slice "group") "enum" (dict "group" (slice "equipe" "ca")))
+  "faq" (dict "required" (slice "category") "enum" (dict "category" (slice "ecole" "vie-quotidienne" "inscription" "association" "extrascolaire")))
+  "figures" (dict "list" (dict "items" (slice)))
+  "partners" (dict "required" (slice "category") "enum" (dict "category" (slice "pedagogique" "territoire" "associatif")))
+  "events" (dict)
+  "documents" (dict)
+  "schedule" (dict "list" (dict "cycles" (slice "name")))
+  "pricing" (dict "enum" (dict "scope" (slice "ecole" "club_nature")))
+  "steps" (dict "list" (dict "steps" (slice "title")))
+  "stages" (dict)
+  "jobs" (dict)
+  "donate" (dict)
+  "contact_form" (dict)
+  "video" (dict "list" (dict "videos" (slice "id" "title")))
+-}}
+{{- $typeNames := slice }}{{ range $k, $_ := $types }}{{ $typeNames = $typeNames | append $k }}{{ end -}}
+{{- range site.Pages -}}
+  {{- $page := . -}}
+  {{- with .Params.sections -}}
+    {{- $file := $page.File.Path -}}
+    {{- $ids := slice -}}
+    {{- range . -}}
+      {{- $sec := . -}}
+      {{- if not (findRE `^[a-z0-9]+(-[a-z0-9]+)*$` (.id | default "")) }}{{ errorf "%s : section %q : id absent ou invalide (minuscules, chiffres et tirets)" $file .title }}{{ end -}}
+      {{- if in $ids .id }}{{ errorf "%s : id de section en double : %s" $file .id }}{{ end -}}
+      {{- $ids = $ids | append .id -}}
+      {{- if not .title }}{{ errorf "%s : section %s : title obligatoire" $file .id }}{{ end -}}
+      {{- $r := index $types (.type | default "") | default (dict) -}}
+      {{- if not (isset $types (.type | default "")) }}{{ errorf "%s : section %s : type inconnu %q (attendu : %s)" $file .id .type (delimit $typeNames ", ") }}{{ end -}}
+      {{- range $r.required -}}
+        {{- if not (index $sec .) }}{{ errorf "%s : section %s : champ obligatoire absent : %s" $file $sec.id . }}{{ end -}}
+      {{- end -}}
+      {{- range $field, $allowed := $r.enum -}}
+        {{- with index $sec $field }}{{ if not (in $allowed .) }}{{ errorf "%s : section %s : %s doit valoir l'une des valeurs %s (reçu : %q)" $file $sec.id $field (delimit $allowed ", ") . }}{{ end }}{{ end -}}
+      {{- end -}}
+      {{- range $field, $sub := $r.list -}}
+        {{- $items := index $sec $field -}}
+        {{- if not $items }}{{ errorf "%s : section %s : liste %s absente ou vide" $file $sec.id $field }}{{ end -}}
+        {{- range $items -}}
+          {{- $item := . -}}
+          {{- range $sub }}{{ if not (index $item .) }}{{ errorf "%s : section %s : %s : champ obligatoire absent dans un élément : %s" $file $sec.id $field . }}{{ end }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if eq .type "figures" -}}
+        {{- range .items -}}
+          {{- if .compute }}{{ if not (in (slice "years" "staff") .compute) }}{{ errorf "%s : section %s : compute doit valoir years ou staff (reçu : %q)" $file $sec.id .compute }}{{ end -}}
+          {{- else if not (and .value .label) }}{{ errorf "%s : section %s : chaque chiffre exige value et label, ou compute" $file $sec.id }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if eq .type "video" -}}
+        {{- range .videos }}{{ if not (findRE `^[A-Za-z0-9_-]{11}$` (printf "%v" .id)) }}{{ errorf "%s : section %s : identifiant YouTube invalide : %v" $file $sec.id .id }}{{ end }}{{ end -}}
+      {{- end -}}
+      {{- with .photo -}}
+        {{- if not ($page.Resources.Get .) }}{{ errorf "%s : section %s : photo introuvable dans le dossier de la page : %s" $file $sec.id . }}{{ end -}}
+        {{- if not $sec.photo_alt }}{{ errorf "%s : section %s : photo est renseignée, photo_alt est obligatoire" $file $sec.id }}{{ end -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

@@ -1,3 +1,0 @@
----
-title: "Rejoindre l'équipe"
----

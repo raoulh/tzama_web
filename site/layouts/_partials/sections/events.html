@@ -1,0 +1,19 @@
+{{- /* Événements récurrents de content/<langue>/evenements/, triés par order. */ -}}
+{{- $list := slice }}{{ with site.GetPage "/evenements" }}{{ $list = sort .RegularPages "Params.order" }}{{ end -}}
+{{- with $list }}
+<ul class="events">
+  {{- range . }}
+  {{- $e := . }}
+  <li class="events__item">
+    {{- with $e.Params.photo }}
+    {{- partial "image.html" (dict "src" ($e.Resources.Get .) "alt" $e.Params.photo_alt "sizes" "(min-width: 48em) 20rem, 100vw" "widths" (slice 480 720) "class" "events__photo") }}
+    {{- end }}
+    <h3 class="events__title">{{ $e.Title }}</h3>
+    <p class="events__period">{{ $e.Params.period }}</p>
+    {{ $e.Content }}
+  </li>
+  {{- end }}
+</ul>
+{{- else }}
+<p>{{ T "sections.events.none" }}</p>
+{{- end }}

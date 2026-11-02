@@ -1,0 +1,16 @@
+{{- /*
+  videos : { id, title } (id YouTube). Rien n'est chargé depuis YouTube avant le clic :
+  sections.js remplace le bouton par un lecteur youtube-nocookie ; sans JS, le lien seul.
+*/ -}}
+<div class="videos">
+  {{- range .s.videos }}
+  <figure class="video">
+    <button class="video__play" type="button" data-video="{{ .id }}" data-title="{{ .title }}">
+      <span class="video__icon" aria-hidden="true"></span>
+      <span>{{ T "sections.video.play" (dict "title" .title) }}</span>
+    </button>
+    <figcaption>{{ .title }}<br><a href="https://www.youtube.com/watch?v={{ .id }}">{{ T "sections.video.youtube" }}<span class="visually-hidden"> : {{ .title }}</span></a></figcaption>
+  </figure>
+  {{- end }}
+</div>
+<p class="videos__notice">{{ T "sections.video.notice" }}</p>

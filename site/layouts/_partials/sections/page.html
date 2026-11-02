@@ -1,0 +1,36 @@
+{{- /*
+  Page à sections : le front matter « sections » liste les blocs, rendus dans l'ordre.
+  Champs communs : id (ancre), title, type, body (markdown), photo + photo_alt, draft_note.
+  Les champs propres au type sont lus par sections/<type>.html ; validate.html les vérifie.
+  draft_note s'affiche tant que le build n'est pas strict (previews et v2), jamais en production stricte.
+*/ -}}
+{{- $page := . -}}
+{{- $showDraft := ne (printf "%v" site.Params.strict) "true" -}}
+<article class="page page--sections">
+  <header class="page__head"><h1>{{ .Title }}</h1></header>
+  {{- range .Params.sections }}
+  {{- $sec := . }}
+  <section class="sec sec--{{ .type }}" id="{{ .id }}" aria-labelledby="{{ .id }}-titre">
+    <div class="sec__main{{ if .photo }} sec__main--photo{{ end }}">
+      <div class="sec__text">
+        <h2 id="{{ .id }}-titre">{{ .title }}</h2>
+        {{- if and $showDraft .draft_note }}
+        <p class="sec__draft"><strong>{{ T "sections.draft" }}.</strong> {{ .draft_note }}</p>
+        {{- end }}
+        {{- with .body }}
+        <div class="sec__body">{{ $page.RenderString (dict "display" "block") . }}</div>
+        {{- end }}
+      </div>
+      {{- with .photo }}
+      <figure class="sec__photo">
+        {{- partial "image.html" (dict "src" ($page.Resources.Get .) "alt" $sec.photo_alt "sizes" "(min-width: 48em) 26rem, 100vw" "widths" (slice 480 720 1080)) -}}
+      </figure>
+      {{- end }}
+    </div>
+    {{- partial (printf "sections/%s.html" .type) (dict "page" $page "s" .) }}
+  </section>
+  {{- end }}
+</article>
+{{- with resources.Get "js/sections.js" | js.Build (dict "minify" true "target" "es2017") | fingerprint }}
+<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>
+{{- end }}

@@ -1,0 +1,16 @@
+{{- /* Documents de content/<langue>/documents/ : un PDF par dossier, triés par order. */ -}}
+{{- $list := slice }}{{ with site.GetPage "/documents" }}{{ $list = sort .RegularPages "Params.order" }}{{ end -}}
+{{- with $list }}
+<ul class="documents">
+  {{- range . }}
+  {{- $f := .Resources.Get .Params.file }}
+  <li class="documents__item">
+    <a href="{{ $f.RelPermalink }}">{{ .Title }}</a>
+    <span class="documents__meta">({{ T "sections.documents.pdf" (dict "size" (math.Ceil (div (float (len $f.Content)) 1024))) }})</span>
+    {{- with .Params.description }}<p>{{ . }}</p>{{ end }}
+  </li>
+  {{- end }}
+</ul>
+{{- else }}
+<p>{{ T "sections.documents.none" }}</p>
+{{- end }}

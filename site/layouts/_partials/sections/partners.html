@@ -1,0 +1,15 @@
+{{- /* category : pedagogique, territoire ou associatif ; sans logo, le nom seul. */ -}}
+{{- with site.GetPage "/partenaires" }}
+<ul class="partners">
+  {{- range sort (where .RegularPages "Params.category" $.s.category) "Params.order" }}
+  {{- $p := . }}
+  <li class="partners__item">
+    {{- with $p.Params.logo }}
+    {{- partial "image.html" (dict "src" ($p.Resources.Get .) "alt" $p.Params.logo_alt "sizes" "6rem" "widths" (slice 120 240) "class" "partners__logo") }}
+    {{- end }}
+    <p class="partners__name">{{ with $p.Params.website }}<a href="{{ . }}">{{ $p.Params.name }}</a>{{ else }}{{ $p.Params.name }}{{ end }}</p>
+    {{- with $p.Content }}<div class="partners__text">{{ . }}</div>{{ end }}
+  </li>
+  {{- end }}
+</ul>
+{{- end }}
