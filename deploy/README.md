@@ -42,3 +42,27 @@ tar czf - -C deploy . | ssh root@<vm> 'rm -rf /root/tzama-deploy && mkdir /root/
 ## Sauvegarde
 
 À sauvegarder : `/srv/tzama/.env`, `/srv/tzama/deployd.env` et `/srv/tzama/state/`. Le reste se recrée depuis ce dossier (`install.sh`) et depuis la CI (sites).
+
+## Intégration continue
+
+Workflows dans `.github/workflows/` ; scripts dans `.github/scripts/` (`build-site.sh`, `check-site.py`, `changed.sh`).
+
+| Workflow | Déclencheur | Effet |
+|---|---|---|
+| `site.yml` | PR (ouverte, mise à jour, fermée), push sur `main` | build Hugo + checks ; PR : preview `test.tzama.fr/pr-<N>/` et GitHub Deployment `preview` ; fermeture : preview supprimée, déploiements `inactive` ; `main` : prod et Deployment `production` |
+| `deployd.yml` | PR, push sur `main` | `gofmt`, `go vet`, `go test -race`, `shellcheck`, `docker build` ; sur `main` : image `ghcr.io/raoulh/tzama-deployd:<sha>` et `latest`, puis webhook `service` |
+
+Les workflows n'ont pas de filtre `paths:` : un job de checks au nom stable existe toujours (sans travail si rien ne concerne le site ou `deploy/`), pour pouvoir le rendre obligatoire sur `main`. Checks à exiger : **`Site - checks`** et **`deployd - checks`**.
+
+Checks du site (`build-site.sh`) : build Hugo sans aucun `WARN`, liens internes du build (fichiers et ancres ; les liens externes ne sont pas vérifiés ; une ancre absente n'est qu'un avertissement), poids d'une image au plus 500 Kio (`MAX_IMAGE_KIB`), mode strict si la variable `TZAMA_STRICT` vaut `true`. En local : `sh .github/scripts/build-site.sh https://test.tzama.fr/pr-1/ /tmp/site.tgz` depuis la racine.
+
+À configurer sur GitHub (Settings > Secrets and variables > Actions) :
+
+| Nom | Type | Rôle |
+|---|---|---|
+| `HOOK_SECRET` | secret | même valeur que `HOOK_SECRET` de `deployd.env` ; absent, les étapes de déploiement échouent avec un message explicite |
+| `TZAMA_STRICT` | variable | `true` pour refuser les témoignages fictifs (build de PR comme de prod) ; absente = non strict. À poser lors de la bascule vers `tzama.fr` |
+
+- `DEPLOY_URL` est l'URL complète du webhook (`https://deploy.tzama.fr/hooks/deploy`), posée dans les workflows.
+- Les PR de forks et celles de Dependabot n'ont pas les secrets : elles sont construites et vérifiées, pas déployées.
+- Après la première publication de l'image, rendre le package `tzama-deployd` public (GitHub > Packages > Package settings > Change visibility), sinon la VM ne peut pas le tirer sans identifiants.

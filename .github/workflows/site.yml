@@ -1,0 +1,257 @@
+name: Site
+
+# Pas de filtre `paths:` : voir .github/scripts/changed.sh. Le job « Site - checks » existe
+# toujours, ce qui permet de le rendre obligatoire sur main.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  push:
+    branches: [main]
+
+# Une preview par PR (la plus récente gagne) ; la prod n'est jamais interrompue en cours de route.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('site-pr-{0}', github.event.pull_request.number) || 'site-prod' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
+
+env:
+  HUGO_VERSION: 0.162.1
+  DEPLOY_URL: https://deploy.tzama.fr/hooks/deploy
+  PROD_URL: https://v2.tzama.fr/
+  MAX_IMAGE_KIB: 500
+
+jobs:
+  changes:
+    name: Site - changements
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      site: ${{ steps.diff.outputs.changed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - id: diff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+        run: sh .github/scripts/changed.sh '^(site/|\.github/workflows/site\.yml$|\.github/scripts/)'
+
+  checks:
+    name: Site - checks
+    needs: changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Rien à vérifier
+        if: needs.changes.outputs.site != 'true'
+        run: echo "Aucun fichier du site modifié."
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.site == 'true'
+        with:
+          persist-credentials: false
+      - name: Installer Hugo ${{ env.HUGO_VERSION }}
+        if: needs.changes.outputs.site == 'true'
+        run: |
+          set -eu
+          tarball="hugo_${HUGO_VERSION}_linux-amd64.tar.gz"
+          url="https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}"
+          dir=$(mktemp -d)
+          curl -sSfL --retry 3 -o "$dir/$tarball" "$url/$tarball"
+          curl -sSfL --retry 3 -o "$dir/checksums.txt" "$url/hugo_${HUGO_VERSION}_checksums.txt"
+          (cd "$dir" && grep " $tarball\$" checksums.txt | sha256sum -c -)
+          mkdir -p "$RUNNER_TEMP/hugo"
+          tar xzf "$dir/$tarball" -C "$RUNNER_TEMP/hugo" hugo
+          echo "$RUNNER_TEMP/hugo" >>"$GITHUB_PATH"
+      - name: Build, checks et archive
+        if: needs.changes.outputs.site == 'true'
+        env:
+          TZAMA_STRICT: ${{ vars.TZAMA_STRICT }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -eu
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            base="https://test.tzama.fr/pr-${PR_NUMBER}/"
+          else
+            base="$PROD_URL"
+          fi
+          hugo version
+          sh .github/scripts/build-site.sh "$base" "$RUNNER_TEMP/site.tgz"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: needs.changes.outputs.site == 'true'
+        with:
+          name: site
+          path: ${{ runner.temp }}/site.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy-preview:
+    name: Site - preview
+    needs: [changes, checks]
+    # Les PR de forks n'ont pas accès aux secrets : build et checks seulement.
+    if: >-
+      github.event_name == 'pull_request' && github.event.action != 'closed'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && needs.changes.outputs.site == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: deploy/deployd/scripts
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: ${{ runner.temp }}/artifact
+      - name: Vérifier le secret
+        env:
+          HOOK_SECRET: ${{ secrets.HOOK_SECRET }}
+        run: |
+          if [ -z "$HOOK_SECRET" ]; then
+            echo "::error::Secret HOOK_SECRET absent : le créer dans Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - name: Ouvrir le déploiement
+        id: deployment
+        run: |
+          set -eu
+          id=$(jq -n --arg ref "$SHA" --argjson pr "$PR_NUMBER" '{
+              ref: $ref, environment: "preview", auto_merge: false, required_contexts: [],
+              transient_environment: true, production_environment: false,
+              description: "Preview de la PR", payload: {pr: $pr}}' |
+            gh api -X POST "repos/$GITHUB_REPOSITORY/deployments" --input - -q .id)
+          echo "id=$id" >>"$GITHUB_OUTPUT"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" \
+            -f state=in_progress -f environment=preview >/dev/null
+      - name: Déployer la preview
+        env:
+          HOOK_SECRET: ${{ secrets.HOOK_SECRET }}
+        run: sh deploy/deployd/scripts/deploy-hook.sh preview "$PR_NUMBER" "$SHA" "$RUNNER_TEMP/artifact/site.tgz"
+      - name: Statut du déploiement
+        if: always() && steps.deployment.outputs.id != ''
+        env:
+          ID: ${{ steps.deployment.outputs.id }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -eu
+          state=failure
+          [ "$JOB_STATUS" != success ] || state=success
+          gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$ID/statuses" \
+            -f state="$state" -f environment=preview \
+            -f environment_url="https://test.tzama.fr/pr-${PR_NUMBER}/" \
+            -f log_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >/dev/null
+
+  cleanup-preview:
+    name: Site - suppression de la preview
+    if: >-
+      github.event_name == 'pull_request' && github.event.action == 'closed'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      # Branche par défaut : le ref de fusion d'une PR fermée peut ne plus exister.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: deploy/deployd/scripts
+          persist-credentials: false
+      - name: Supprimer la preview
+        env:
+          HOOK_SECRET: ${{ secrets.HOOK_SECRET }}
+        run: |
+          if [ -z "$HOOK_SECRET" ]; then
+            echo "::error::Secret HOOK_SECRET absent : le créer dans Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          # 404 : la PR n'a jamais eu de preview (elle ne touchait pas au site).
+          if ! out=$(sh deploy/deployd/scripts/deploy-hook.sh delete-preview "$PR_NUMBER" 2>&1); then
+            echo "$out"
+            case "$out" in *"error: 404"*) ;; *) exit 1 ;; esac
+          else
+            echo "$out"
+          fi
+      - name: Déploiements inactifs
+        run: |
+          set -eu
+          ids=$(gh api --paginate "repos/$GITHUB_REPOSITORY/deployments?environment=preview&per_page=100" \
+            -q ".[] | select(.payload.pr == $PR_NUMBER) | .id")
+          for id in $ids; do
+            gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" \
+              -f state=inactive -f environment=preview >/dev/null
+          done
+
+  deploy-prod:
+    name: Site - production
+    needs: [changes, checks]
+    if: github.event_name == 'push' && needs.changes.outputs.site == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: deploy/deployd/scripts
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: ${{ runner.temp }}/artifact
+      - name: Vérifier le secret
+        env:
+          HOOK_SECRET: ${{ secrets.HOOK_SECRET }}
+        run: |
+          if [ -z "$HOOK_SECRET" ]; then
+            echo "::error::Secret HOOK_SECRET absent : le créer dans Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - name: Ouvrir le déploiement
+        id: deployment
+        run: |
+          set -eu
+          id=$(jq -n --arg ref "$GITHUB_SHA" '{
+              ref: $ref, environment: "production", auto_merge: false, required_contexts: [],
+              transient_environment: false, production_environment: true,
+              description: "Mise en production"}' |
+            gh api -X POST "repos/$GITHUB_REPOSITORY/deployments" --input - -q .id)
+          echo "id=$id" >>"$GITHUB_OUTPUT"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" \
+            -f state=in_progress -f environment=production >/dev/null
+      - name: Déployer la production
+        env:
+          HOOK_SECRET: ${{ secrets.HOOK_SECRET }}
+        run: sh deploy/deployd/scripts/deploy-hook.sh prod "$GITHUB_SHA" "$RUNNER_TEMP/artifact/site.tgz"
+      - name: Statut du déploiement
+        if: always() && steps.deployment.outputs.id != ''
+        env:
+          ID: ${{ steps.deployment.outputs.id }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -eu
+          state=failure
+          [ "$JOB_STATUS" != success ] || state=success
+          gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$ID/statuses" \
+            -f state="$state" -f environment=production \
+            -f environment_url="$PROD_URL" \
+            -f log_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >/dev/null
