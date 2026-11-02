@@ -1,0 +1,11 @@
+[Unit]
+Description=Mise à jour de l'image de deployd
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+# pull + attente de santé (60 s) + retour arrière : borné pour qu'un pull bloqué ne fige pas
+# les déclenchements suivants.
+TimeoutStartSec=15min
+ExecStart=/usr/local/sbin/tzama-deployd-update.sh

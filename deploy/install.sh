@@ -24,7 +24,9 @@ systemctl enable --now docker
 id tzama >/dev/null 2>&1 || useradd --system --home-dir "$DIR" --no-create-home --shell /usr/sbin/nologin tzama
 
 install -d -m 0755 "$DIR"
-install -d -m 0755 -o tzama -g tzama "$DIR/sites" "$DIR/sites/prod" "$DIR/sites/previews" "$DIR/state"
+install -d -m 0755 -o tzama -g tzama "$DIR/sites" "$DIR/sites/releases" "$DIR/sites/previews" "$DIR/state"
+# Après le premier déploiement, prod est un lien vers une release : ne pas le remplacer.
+[ -e "$DIR/sites/prod" ] || [ -L "$DIR/sites/prod" ] || install -d -m 0755 -o tzama -g tzama "$DIR/sites/prod"
 install -d -m 0755 "$DIR/sites/mockups"
 [ -e "$DIR/sites/previews/index.html" ] || install -m 0644 -o tzama -g tzama "$SRC/www/previews-index.html" "$DIR/sites/previews/index.html"
 
@@ -34,6 +36,18 @@ if [ ! -e "$DIR/.env" ]; then
 	printf 'HAPROXY_IP=%s\nTZAMA_UID=%s\nTZAMA_GID=%s\n' "${HAPROXY_IP:?HAPROXY_IP requis au premier passage (adresse du HAProxy)}" "$(id -u tzama)" "$(id -g tzama)" > "$DIR/.env"
 	chmod 0600 "$DIR/.env"
 fi
+grep -q '^DEPLOYD_TAG=' "$DIR/.env" || echo 'DEPLOYD_TAG=latest' >> "$DIR/.env"
+# Secrets de deployd : modèle vide au premier passage, à remplir sur la VM.
+if [ ! -e "$DIR/deployd.env" ]; then
+	install -m 0600 "$SRC/deployd.env.example" "$DIR/deployd.env"
+	echo "à compléter : $DIR/deployd.env" >&2
+fi
+
+# Mise à jour de deployd demandée par la CI (deployd écrit state/deployd.tag).
+install -m 0755 "$SRC/host/tzama-deployd-update.sh" /usr/local/sbin/tzama-deployd-update.sh
+install -m 0644 "$SRC/host/tzama-deployd-update.path" "$SRC/host/tzama-deployd-update.service" /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now tzama-deployd-update.path
 
 cd "$DIR"
 docker compose pull --quiet
