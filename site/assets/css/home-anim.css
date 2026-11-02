@@ -68,7 +68,7 @@
   .calque.idle-frisson .f:nth-child(3n) { animation-delay: .22s; }
   .idle-tournoyer { animation: idle-tournoyer 2.4s ease-in-out both; }
   .mot__ico.idle-tourner { animation: idle-tourner 1.8s ease-in-out both; }
-  .photo.idle-balancer img, .actu.idle-balancer img, .actu.idle-balancer .actu__vide, .portrait.idle-balancer img { animation: idle-balancer 2.8s ease-in-out both; }
+  .photo.idle-balancer img, .actu.idle-balancer img, .actu.idle-balancer .actu__vide { animation: idle-balancer 2.8s ease-in-out both; }
   .titre.idle-souligner .marque { animation: idle-souligner 1.5s ease-in-out both; }
   .idle-coucou { animation: idle-coucou 1.6s ease-in-out both; transform-origin: 50% 100%; }
   /* survol au pointeur fin : autocollants, feuille du témoignage, feuilles des calques */

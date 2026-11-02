@@ -1,3 +1,37 @@
+// Galerie et témoignage : hors des animations, actifs même sans IntersectionObserver.
+(function () {
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  var band = document.querySelector('[data-galerie]');
+  var nav = band && band.parentNode.querySelector('.galerie__nav');
+  if (band && nav) (function () {
+    var items = band.querySelector('ul').children;
+    var btns = [].slice.call(nav.querySelectorAll('button'));
+    function update() {
+      var max = band.scrollWidth - band.clientWidth - 2;
+      nav.hidden = max <= 0;
+      btns.forEach(function (b) { b.setAttribute('aria-disabled', b.dataset.dir < 0 ? band.scrollLeft <= 2 : band.scrollLeft >= max); });
+    }
+    // aria-disabled plutôt que disabled : un bouton désactivé perdrait le focus clavier en bout de bande
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (b.getAttribute('aria-disabled') === 'true') return;
+        var step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : band.clientWidth;
+        var n = Math.max(1, Math.floor(band.clientWidth / step));
+        band.scrollBy({ left: b.dataset.dir * n * step, behavior: reduce.matches ? 'auto' : 'smooth' });
+      });
+    });
+    band.addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', update);
+    update();
+  })();
+
+  var temoignages = document.querySelector('[data-temoignages]');
+  if (temoignages) {
+    var figs = temoignages.querySelectorAll('figure'), k = Math.floor(Math.random() * figs.length);
+    for (var i = 0; i < figs.length; i++) figs[i].hidden = i !== k;
+  }
+})();
+
 // Animations de l'accueil. Tout est décoratif : sans ce script, la page reste complète et immobile.
 (function () {
   if (!('IntersectionObserver' in window)) return;
@@ -16,19 +50,17 @@
 
   // Brise à l'arrivée des photos scotchées, posée quand la photo est collée (55 % visible avec view(), fin de « coller » sinon).
   // Avec view(), l'entrée rejoue quand la photo ressort par le bas puis revient : la brise aussi.
-  // Portraits : à peine perceptible et départs décalés, pour ne pas bouger en rangée.
-  var photos = [].slice.call(document.querySelectorAll('.actu.reveal, .photo.reveal, .equipe__list li.reveal'));
+  var photos = [].slice.call(document.querySelectorAll('.actu.reveal, .photo.reveal'));
   if (photos.length) (function () {
     function start(el) {
       el.classList.add('is-swaying');
       clearTimeout(el.__swayTimer); el.__swayTimer = setTimeout(function () { el.classList.remove('is-swaying'); }, 4000);
     }
     photos.forEach(function (el) {
-      var portrait = !!el.querySelector('.portrait');
-      el.dataset.sway = portrait ? 1 : 1 + Math.floor(Math.random() * 3);
-      el.style.setProperty('--sway-amp', (portrait ? rnd(.4, .6) : rnd(1, 3)).toFixed(2) + 'deg');
-      el.style.setProperty('--sway-dur', (portrait ? rnd(1.3, 1.7) : rnd(1.2, 2)).toFixed(2) + 's');
-      el.style.setProperty('--sway-delay', (portrait ? rnd(0, .6) : rnd(0, .3)).toFixed(2) + 's');
+      el.dataset.sway = 1 + Math.floor(Math.random() * 3);
+      el.style.setProperty('--sway-amp', rnd(1, 3).toFixed(2) + 'deg');
+      el.style.setProperty('--sway-dur', rnd(1.2, 2).toFixed(2) + 's');
+      el.style.setProperty('--sway-delay', rnd(0, .3).toFixed(2) + 's');
       el.style.setProperty('--sway-dir', Math.random() < .5 ? -1 : 1);
       el.__swayArmed = true;
       if (!replay) el.addEventListener('animationend', function (e) { if (e.target === el && e.animationName === 'coller' && el.__swayArmed) { el.__swayArmed = false; start(el); } });

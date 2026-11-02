@@ -60,7 +60,494 @@ i18n:
   default_locale: fr
 
 collections:
-  # La collection « Accueil » (site/content/fr/_index.md) viendra ici avec la page d'accueil.
+  - name: pages
+    label: Pages
+    description: Les pages du site, découpées en sections (texte, listes, formulaire…).
+    icon: web
+    i18n: true
+    files:
+      - name: ecole
+        label: L'école
+        file: site/content/{{locale}}/ecole/_index.md
+        i18n: true
+        media_folder: ""
+        public_folder: ""
+        preview_path: ecole/
+        fields:
+          - &page_title
+            name: title
+            i18n: true
+            label: Titre de la page
+            hint: Le grand titre en haut de la page.
+          - &page_description
+            name: description
+            i18n: true
+            label: Description pour les moteurs de recherche
+            widget: text
+            required: false
+            hint: Une ou deux phrases, affichées dans les résultats de recherche.
+          - &page_sections
+            name: sections
+            i18n: true
+            label: Sections de la page
+            label_singular: section
+            widget: list
+            typeKey: type
+            min: 1
+            summary: "{{title}}"
+            hint: >-
+              Les sections s'affichent dans cet ordre, de haut en bas. Le type d'une section décide de ses champs.
+            types:
+              - name: text
+                label: Texte
+                widget: object
+                summary: "{{title}}"
+                fields:
+                  - &sec_title
+                    name: title
+                    label: Titre de la section
+                  - &sec_id
+                    name: id
+                    label: Ancre (repère dans l'adresse)
+                    pattern: ['^[a-z0-9]+(-[a-z0-9]+)*$', "Minuscules, chiffres et tirets seulement, sans espace ni accent"]
+                    hint: >-
+                      À ne pas changer pour une section existante : le menu et les liens du site renvoient
+                      à cette ancre. Pour une nouvelle section, minuscules, chiffres et tirets
+                      (par exemple « mon-projet »), unique dans la page.
+                  - &sec_body
+                    name: body
+                    label: Texte
+                    widget: markdown
+                    required: false
+                    editor_components: []
+                  - &sec_photo
+                    name: photo
+                    label: Photo
+                    widget: image
+                    required: false
+                    accept: image/jpeg,image/png,image/webp
+                    choose_url: false
+                    hint: Photo réelle de l'école, affichée à côté du texte. JPEG, PNG ou WebP, 15 Mo au plus.
+                  - &sec_photo_alt
+                    name: photo_alt
+                    label: Description de la photo
+                    required: false
+                    hint: >-
+                      Obligatoire dès qu'une photo est ajoutée, sinon la preview échoue.
+                      Décrire ce que montre la photo, en une phrase : ce texte est lu aux personnes aveugles.
+                  - &sec_draft
+                    name: draft_note
+                    label: Texte provisoire
+                    widget: text
+                    required: false
+                    hint: >-
+                      Encadré « Texte provisoire » visible seulement en prévisualisation, jamais sur le site publié.
+                      Sert à signaler ce qui reste à fournir. Le vider quand le texte est définitif.
+              - name: team
+                label: Équipe ou CA
+                widget: object
+                summary: "{{title}}"
+                hint: Les portraits viennent de la collection « Équipe et CA ».
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - name: group
+                    label: Groupe affiché
+                    widget: select
+                    default: equipe
+                    options:
+                      - { label: Équipe de l'école, value: equipe }
+                      - { label: Conseil d'administration, value: ca }
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: faq
+                label: Questions fréquentes
+                widget: object
+                summary: "{{title}}"
+                hint: Les questions viennent de la collection « Questions fréquentes ».
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - name: category
+                    label: Rubrique affichée
+                    widget: select
+                    default: ecole
+                    options:
+                      - { label: L'école, value: ecole }
+                      - { label: Vie quotidienne, value: vie-quotidienne }
+                      - { label: Inscription, value: inscription }
+                      - { label: L'association, value: association }
+                      - { label: Extrascolaire, value: extrascolaire }
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: figures
+                label: Chiffres
+                widget: object
+                summary: "{{title}}"
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - name: items
+                    label: Chiffres
+                    label_singular: chiffre
+                    widget: list
+                    min: 1
+                    summary: "{{label}}"
+                    fields:
+                      - name: value
+                        label: Valeur
+                        required: false
+                        hint: Par exemple « 25 ». À laisser vide si le chiffre est calculé.
+                      - name: label
+                        label: Légende
+                        required: false
+                        hint: Obligatoire avec une valeur. Facultative pour un chiffre calculé.
+                      - name: compute
+                        label: Chiffre calculé
+                        widget: select
+                        required: false
+                        hint: Remplace la valeur par un nombre recalculé à chaque mise en ligne.
+                        options:
+                          - { label: Années depuis l'ouverture, value: years }
+                          - { label: Nombre de membres de l'équipe, value: staff }
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: partners
+                label: Partenaires
+                widget: object
+                summary: "{{title}}"
+                hint: Les logos viennent de la collection « Partenaires ».
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - name: category
+                    label: Catégorie affichée
+                    widget: select
+                    default: pedagogique
+                    options:
+                      - { label: Pédagogique, value: pedagogique }
+                      - { label: Territoire, value: territoire }
+                      - { label: Associatif, value: associatif }
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: events
+                label: Événements
+                widget: object
+                summary: "{{title}}"
+                hint: Les événements viennent de la collection « Événements ».
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: documents
+                label: Documents à télécharger
+                widget: object
+                summary: "{{title}}"
+                hint: Les PDF viennent de la collection « Documents ».
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: schedule
+                label: Semaine type par cycle
+                widget: object
+                summary: "{{title}}"
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - name: cycles
+                    label: Cycles
+                    label_singular: cycle
+                    widget: list
+                    min: 1
+                    summary: "{{name}}"
+                    fields:
+                      - { name: name, label: Nom du cycle }
+                      - name: ages
+                        label: Âges
+                        required: false
+                        hint: Par exemple « de 3 à 6 ans ».
+                      - name: body
+                        label: Planning de la semaine
+                        widget: markdown
+                        required: false
+                        editor_components: []
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: pricing
+                label: Tarifs
+                widget: object
+                summary: "{{title}}"
+                hint: Les montants se modifient dans « Réglages du site », jamais ici.
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - name: scope
+                    label: Tarifs affichés
+                    widget: select
+                    required: false
+                    default: ecole
+                    options:
+                      - { label: Scolarité, value: ecole }
+                      - { label: Club nature, value: club_nature }
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: steps
+                label: Étapes
+                widget: object
+                summary: "{{title}}"
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - name: steps
+                    label: Étapes
+                    label_singular: étape
+                    widget: list
+                    min: 1
+                    summary: "{{title}}"
+                    fields:
+                      - { name: title, label: Titre de l'étape }
+                      - name: body
+                        label: Explication
+                        widget: markdown
+                        required: false
+                        editor_components: []
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: stages
+                label: Stages à venir
+                widget: object
+                summary: "{{title}}"
+                hint: Les stages viennent de la collection « Stages ».
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: jobs
+                label: Postes ouverts
+                widget: object
+                summary: "{{title}}"
+                hint: Les postes viennent de la collection « Postes ».
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: donate
+                label: Don
+                widget: object
+                summary: "{{title}}"
+                hint: Le lien du formulaire de don se règle dans « Réglages du site ».
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: contact_form
+                label: Formulaire de contact
+                widget: object
+                summary: "{{title}}"
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+              - name: video
+                label: Vidéos YouTube
+                widget: object
+                summary: "{{title}}"
+                fields:
+                  - *sec_title
+                  - *sec_id
+                  - name: videos
+                    label: Vidéos
+                    label_singular: vidéo
+                    widget: list
+                    min: 1
+                    summary: "{{title}}"
+                    fields:
+                      - name: id
+                        label: Identifiant YouTube
+                        pattern: ['^[A-Za-z0-9_-]{11}$', "11 caractères : lettres, chiffres, - et _"]
+                        hint: Les 11 caractères après « v= » dans l'adresse de la vidéo.
+                      - { name: title, label: Titre de la vidéo }
+                  - *sec_body
+                  - *sec_photo
+                  - *sec_photo_alt
+                  - *sec_draft
+
+      - name: inscription
+        label: Inscription
+        file: site/content/{{locale}}/inscription/_index.md
+        i18n: true
+        media_folder: ""
+        public_folder: ""
+        preview_path: inscription/
+        fields:
+          - *page_title
+          - *page_description
+          - *page_sections
+
+      - name: extrascolaire
+        label: Extrascolaire
+        file: site/content/{{locale}}/extrascolaire/index.md
+        i18n: true
+        media_folder: ""
+        public_folder: ""
+        preview_path: extrascolaire/
+        fields:
+          - *page_title
+          - *page_description
+          - *page_sections
+
+      - name: association
+        label: L'association
+        file: site/content/{{locale}}/association/_index.md
+        i18n: true
+        media_folder: ""
+        public_folder: ""
+        preview_path: association/
+        fields:
+          - *page_title
+          - *page_description
+          - *page_sections
+
+      - name: contact
+        label: Contact
+        file: site/content/{{locale}}/contact/_index.md
+        i18n: true
+        media_folder: ""
+        public_folder: ""
+        preview_path: contact/
+        fields:
+          - *page_title
+          - *page_description
+          - *page_sections
+
+      - name: accueil
+        label: Accueil
+        file: site/content/{{locale}}/_index.md
+        i18n: true
+        # Les images de l'accueil sont des ressources de assets/, pas du dossier de la page.
+        media_folder: site/assets/img/accueil
+        public_folder: img/accueil
+        preview_path: /
+        fields:
+          # À ajouter après le merge de la PR de l'accueil : « Pourquoi choisir Tzama »,
+          # journée en quatre moments, carrousel (champs : voir validate.html).
+          - name: hero
+            i18n: true
+            label: En-tête
+            widget: object
+            fields:
+              - name: image
+                label: Grande photo
+                widget: image
+                accept: image/jpeg,image/png,image/webp
+                choose_url: false
+              - { name: image_alt, label: Description de la grande photo }
+              - name: tagline
+                label: Phrase d'accroche
+                widget: text
+              - { name: intro, label: Introduction, widget: text }
+              - name: photos
+                label: Photos « polaroid »
+                label_singular: photo
+                widget: list
+                required: false
+                summary: "{{caption}}"
+                fields:
+                  - name: image
+                    label: Photo
+                    widget: image
+                    accept: image/jpeg,image/png,image/webp
+                    choose_url: false
+                  - { name: alt, label: Description de la photo }
+                  - { name: caption, label: Légende }
+          - name: words
+            i18n: true
+            label: « Tzama en trois mots »
+            widget: object
+            fields:
+              - { name: title, label: Titre }
+              - &home_items
+                name: items
+                label: Éléments
+                label_singular: élément
+                widget: list
+                min: 1
+                summary: "{{title}}"
+                fields:
+                  - { name: title, label: Titre }
+                  - { name: text, label: Texte, widget: text }
+          - name: day
+            i18n: true
+            label: « Une journée à Tzama »
+            widget: object
+            fields:
+              - { name: title, label: Titre }
+              - *home_items
+              - name: photo
+                label: Photo
+                widget: image
+                accept: image/jpeg,image/png,image/webp
+                choose_url: false
+              - { name: photo_alt, label: Description de la photo }
+              - { name: photo_caption, label: Légende de la photo }
+          - name: support
+            i18n: true
+            label: Soutenir l'école
+            widget: object
+            fields:
+              - { name: text, label: Texte, widget: text }
+          - name: visit
+            i18n: true
+            label: « Venir voir »
+            widget: object
+            fields:
+              - { name: title, label: Titre }
+              - name: text
+                label: Paragraphes
+                label_singular: paragraphe
+                widget: list
+                min: 1
+                field: { name: paragraph, label: Paragraphe, widget: text }
+              - name: photo
+                label: Photo
+                widget: image
+                accept: image/jpeg,image/png,image/webp
+                choose_url: false
+              - { name: photo_alt, label: Description de la photo }
+              - { name: photo_caption, label: Légende de la photo }
 
   - name: actualites
     label: Actualités
@@ -199,6 +686,180 @@ collections:
         label: Titre de la fiche
         widget: compute
         value: "{{fields.name}}"
+
+  - name: partenaires
+    label: Partenaires
+    label_singular: partenaire
+    icon: handshake
+    folder: site/content/{{locale}}/partenaires
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    i18n: true
+    create: true
+    identifier_field: name
+    slug: "{{name}}"
+    summary: "{{name}} · {{category}}"
+    sortable_fields:
+      fields: [order, name]
+      default: { field: order, direction: ascending }
+    view_groups:
+      - { label: Catégorie, field: category }
+    preview_path: ecole/
+    fields:
+      - name: name
+        i18n: duplicate
+        label: Nom
+      - name: category
+        i18n: duplicate
+        label: Catégorie
+        widget: select
+        default: pedagogique
+        options:
+          - { label: Pédagogique, value: pedagogique }
+          - { label: Territoire, value: territoire }
+          - { label: Associatif, value: associatif }
+      - name: order
+        i18n: duplicate
+        label: Ordre d'affichage
+        widget: number
+        value_type: int
+        default: 99
+        min: 1
+        hint: Les plus petits nombres s'affichent en premier dans leur catégorie.
+      - name: website
+        i18n: duplicate
+        label: Site web
+        required: false
+        pattern: ['^https://', "Le lien doit commencer par https://"]
+      - name: logo
+        i18n: duplicate
+        label: Logo
+        widget: image
+        required: false
+        accept: image/jpeg,image/png,image/webp
+        choose_url: false
+        hint: Sans logo, le nom seul s'affiche. JPEG, PNG ou WebP, 15 Mo au plus.
+      - name: logo_alt
+        i18n: true
+        label: Description du logo
+        required: false
+        hint: >-
+          Obligatoire dès qu'un logo est ajouté, sinon la preview échoue.
+          Par exemple « Logo de l'Archipel de Kembs ».
+      - name: body
+        i18n: true
+        label: Présentation
+        widget: markdown
+        required: false
+        editor_components: []
+      # Hugo lit `title` ; il reprend le nom pour ne pas le saisir deux fois.
+      - name: title
+        i18n: true
+        label: Titre de la fiche
+        widget: compute
+        value: "{{fields.name}}"
+
+  - name: evenements
+    label: Événements
+    label_singular: événement
+    icon: event
+    folder: site/content/{{locale}}/evenements
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    i18n: true
+    create: true
+    identifier_field: title
+    summary: "{{title}} · {{period}}"
+    sortable_fields:
+      fields: [order, title]
+      default: { field: order, direction: ascending }
+    preview_path: association/
+    fields:
+      - name: title
+        i18n: true
+        label: Nom de l'événement
+      - name: period
+        i18n: true
+        label: Période
+        hint: Texte affiché, par exemple « Au printemps » ou « Début décembre ».
+      - name: order
+        i18n: duplicate
+        label: Ordre d'affichage
+        widget: number
+        value_type: int
+        default: 99
+        min: 1
+        hint: Les plus petits nombres s'affichent en premier.
+      - name: photo
+        i18n: duplicate
+        label: Photo
+        widget: image
+        required: false
+        accept: image/jpeg,image/png,image/webp
+        choose_url: false
+        hint: Photo réelle de l'événement. JPEG, PNG ou WebP, 15 Mo au plus.
+      - name: photo_alt
+        i18n: true
+        label: Description de la photo
+        required: false
+        hint: >-
+          Obligatoire dès qu'une photo est ajoutée, sinon la preview échoue.
+          Décrire ce que montre la photo, en une phrase.
+      - name: body
+        i18n: true
+        label: Description
+        widget: markdown
+        required: false
+        editor_components: []
+
+  - name: documents
+    label: Documents
+    label_singular: document
+    icon: description
+    folder: site/content/{{locale}}/documents
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    i18n: true
+    create: true
+    identifier_field: title
+    summary: "{{title}}"
+    sortable_fields:
+      fields: [order, title]
+      default: { field: order, direction: ascending }
+    preview_path: inscription/
+    fields:
+      - name: title
+        i18n: true
+        label: Titre du document
+        hint: Le texte du lien de téléchargement, par exemple « Règlement intérieur ».
+      - name: file
+        i18n: duplicate
+        label: Fichier PDF
+        widget: file
+        accept: application/pdf
+        choose_url: false
+        media_libraries:
+          default:
+            config:
+              max_file_size: 10485760
+        hint: Un fichier PDF, 10 Mo au plus.
+      - name: description
+        i18n: true
+        label: Description
+        widget: text
+        required: false
+        hint: Une phrase affichée sous le lien.
+      - name: order
+        i18n: duplicate
+        label: Ordre d'affichage
+        widget: number
+        value_type: int
+        default: 99
+        min: 1
+        hint: Les plus petits nombres s'affichent en premier.
 
   - name: stages
     label: Stages
@@ -421,6 +1082,15 @@ collections:
           - name: email
             label: Adresse de contact
             pattern: ['^[^@\s]+@[^@\s]+\.[^@\s]+$', "Adresse e-mail invalide"]
+          - name: phone
+            label: Téléphone
+            hint: Par exemple « 03 89 00 00 00 ».
+          - name: opening_date
+            label: Date d'ouverture de l'école
+            widget: datetime
+            type: date
+            format: YYYY-MM-DD
+            hint: Sert à calculer le nombre d'années d'existence.
           - name: address
             label: Adresse
             widget: object
@@ -449,7 +1119,7 @@ collections:
           - name: donation_url
             label: Lien de don
             pattern: ['^https://', "Le lien doit commencer par https://"]
-            hint: Formulaire HelloAsso de la page « Nous soutenir ».
+            hint: Adresse du formulaire HelloAsso, affiché dans la section de don de la page « L'association ».
           - name: pricing
             label: Tarifs
             widget: object
@@ -465,10 +1135,11 @@ collections:
                   - { name: amount, label: Montant d'une mensualité (€), widget: number, value_type: int, min: 0 }
               - name: sibling_discount_percent
                 label: Réduction fratrie (%)
-                widget: object
-                fields:
-                  - { name: second, label: Deuxième enfant (%), widget: number, value_type: int, min: 0, max: 100 }
-                  - { name: third, label: Troisième enfant (%), widget: number, value_type: int, min: 0, max: 100 }
+                widget: number
+                value_type: int
+                min: 0
+                max: 100
+                hint: Appliquée dès le deuxième enfant.
               - name: club_nature
                 label: Club nature
                 widget: object

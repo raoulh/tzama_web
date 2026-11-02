@@ -10,7 +10,7 @@
 {{ end }}
 {{ $fonts := resources.Get "css/fonts.css" | resources.ExecuteAsTemplate "css/fonts.css" . }}
 {{ $css := slice $fonts }}
-{{ range slice "tokens" "base" "header" "footer" "page" "home-common" "home-hero" "home-mots" "home-actus" "home-equipe" "home-journee" "home-temoignage" "home-soutien" "home-visite" "home-anim" "sections" }}{{ $css = $css | append (resources.Get (printf "css/%s.css" .)) }}{{ end }}
+{{ range slice "tokens" "base" "header" "footer" "page" "home-common" "home-hero" "home-mots" "home-actus" "home-pourquoi" "home-journee" "home-galerie" "home-temoignage" "home-soutien" "home-visite" "home-anim" "equipe" "sections" }}{{ $css = $css | append (resources.Get (printf "css/%s.css" .)) }}{{ end }}
 {{ with $css | resources.Concat "css/site.css" | minify | fingerprint }}
 <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">
 {{ end }}

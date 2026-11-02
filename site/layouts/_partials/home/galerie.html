@@ -1,0 +1,28 @@
+{{- /* Bande de photos défilable à la main ; les boutons n'apparaissent qu'avec le JS (home.js). */ -}}
+{{- $g := .Params.gallery -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+<section class="galerie" id="galerie" aria-labelledby="galerie-titre">
+  <div class="section-head">
+    <h2 id="galerie-titre" class="titre" data-idle="souligner"><span class="marque">{{ partial "home/text.html" $g.title }}</span></h2>
+    <a class="link" href="{{ (site.GetPage "/ecole").RelPermalink }}#equipe">{{ T "home.teamAll" }}</a>
+  </div>
+  {{- if and $g.draft_note (ne (printf "%v" site.Params.strict) "true") }}
+  <p class="sec__draft"><strong>{{ T "sections.draft" }}.</strong> {{ $g.draft_note }}</p>
+  {{- end }}
+  <div class="galerie__band" id="galerie-bande" role="region" tabindex="0" aria-label="{{ T "home.galleryLabel" }}" data-galerie>
+    <ul class="galerie__list">
+      {{- range $i, $item := $g.items }}
+      <li>
+        <figure class="photo" style="--rot:{{ index (slice "-1.5" "1" "-.5" "1.5") (mod $i 4) }}deg">
+          {{ partial "image.html" (dict "src" (resources.Get $item.image) "alt" $item.alt "widths" (slice 360 540 720) "sizes" "(min-width: 40em) 22rem, 78vw") }}
+          <figcaption class="etiq">{{ partial "home/text.html" $item.caption }}</figcaption>
+        </figure>
+      </li>
+      {{- end }}
+    </ul>
+  </div>
+  <div class="galerie__nav" hidden>
+    <button type="button" class="galerie__btn galerie__btn--prev" aria-controls="galerie-bande" data-dir="-1"><svg aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-fleche-courbe"/></svg><span class="visually-hidden">{{ T "home.galleryPrev" }}</span></button>
+    <button type="button" class="galerie__btn galerie__btn--next" aria-controls="galerie-bande" data-dir="1"><svg aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-fleche-courbe"/></svg><span class="visually-hidden">{{ T "home.galleryNext" }}</span></button>
+  </div>
+</section>

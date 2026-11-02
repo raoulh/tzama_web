@@ -1,0 +1,17 @@
+/* Galerie : bande de photos scotchées, défilement horizontal natif aimanté ; sans JS, la bande reste défilable */
+.galerie { max-width: var(--col); margin: 0 auto; padding: 1rem var(--gutter) 3rem; }
+.galerie .sec__draft { margin: 0 0 1rem; max-width: var(--measure); }
+.galerie__band { margin: 0 calc(-1 * var(--gutter)); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); scrollbar-width: thin; scrollbar-color: var(--f1) transparent; }
+.galerie__band:focus-visible { outline: 3px solid var(--encre); outline-offset: -3px; }
+/* marge haute pour le ruban, que le défilement couperait */
+.galerie__list { list-style: none; margin: 0; padding: 1.5rem var(--gutter) 1.25rem; display: flex; gap: 1.5rem; width: max-content; }
+.galerie__list li { flex: none; width: min(78vw, 22rem); scroll-snap-align: start; }
+.galerie .photo img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.galerie__nav:not([hidden]) { display: flex; justify-content: flex-end; gap: .75rem; margin-top: .25rem; }
+.galerie__btn { display: grid; place-items: center; width: 3rem; height: 3rem; padding: 0; border: 2px solid var(--sapin); border-radius: 50%; background: var(--fond); color: var(--sapin); cursor: pointer; transition: background-color .2s; }
+.galerie__btn:hover { background: var(--teinte); }
+.galerie__btn[aria-disabled="true"] { opacity: .4; cursor: default; }
+.galerie__btn[aria-disabled="true"]:hover { background: var(--fond); }
+.galerie__btn svg { width: 1.8rem; height: 1.1rem; }
+.galerie__btn--prev svg { transform: scaleX(-1); }
+@media (prefers-reduced-motion: reduce) { .galerie__btn { transition: none; } }

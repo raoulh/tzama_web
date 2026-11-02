@@ -1,13 +1,23 @@
-/* Journée : une feuille ou un soleil devant chaque moment */
-.journee { max-width: var(--col); margin: 0 auto; padding: 1.5rem var(--gutter) 3rem; display: grid; gap: 3rem; }
-.journee__list { list-style: none; margin: 0 0 1.25rem; padding: 0; display: grid; gap: 1.1rem; }
-.journee__list li { position: relative; padding-left: 3.4rem; }
-.journee__ico { position: absolute; left: 0; top: 0; width: 2.4rem; height: 2.4rem; color: var(--f1); }
+/* Journée : quatre moments, un doodle chacun, une photo scotchée quand il y en a une */
+.journee { max-width: var(--col); margin: 0 auto; padding: 1.5rem var(--gutter) 3rem; }
+.journee__list { list-style: none; margin: 0 0 1.75rem; padding: 0; display: grid; gap: 2.25rem; }
+.journee__list li { display: flex; flex-direction: column; gap: .5rem; }
+.journee__head { display: flex; align-items: center; gap: .75rem; }
+.journee__ico { flex: none; width: 2.6rem; height: 2.6rem; color: var(--f1); }
 .journee__list li:nth-child(even) .journee__ico { color: var(--f2); }
-.journee__list h3 { margin-bottom: .1em; font-size: 1.55rem; }
+.journee__list h3 { margin: 0; font-size: 1.6rem; }
 .journee__list p { margin: 0; }
-.photo--journee { max-width: 17rem; --rot: 2deg; margin: 1rem auto 0; }
+/* photos calées en bas de colonne, pour qu'elles s'alignent quelle que soit la longueur du texte */
+.photo--journee { width: min(100%, 20rem); margin-top: auto; padding-top: 1.25rem; }
+.photo--journee::before { top: .5rem; }
+.photo--journee img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.journee__vide { display: none; }
+.journee__more { margin: 0; }
+@media (min-width: 40em) {
+  .journee__list { grid-template-columns: repeat(2, 1fr); gap: 2.5rem 2rem; }
+  .journee__vide { display: grid; place-items: center; width: min(100%, 20rem); aspect-ratio: 4 / 3; margin-top: auto; background: var(--cadre); box-shadow: var(--ombre-photo); color: var(--f2); transform: rotate(1.5deg); }
+  .journee__vide svg { width: 38%; height: auto; aspect-ratio: 1; }
+}
 @media (min-width: 60em) {
-  .journee { grid-template-columns: 1.3fr 1fr; align-items: center; gap: 4rem; }
-  .photo--journee { margin: 0 auto; max-width: 19rem; }
+  .journee__list { grid-template-columns: repeat(4, 1fr); gap: 1.75rem; }
 }

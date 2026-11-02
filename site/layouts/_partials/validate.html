@@ -167,7 +167,9 @@
 {{- $blocks := dict
   "hero" (slice "image" "image_alt" "tagline" "intro")
   "words" (slice "title")
-  "day" (slice "title" "photo" "photo_alt" "photo_caption")
+  "why" (slice "title")
+  "day" (slice "title")
+  "gallery" (slice "title")
   "support" (slice "text")
   "visit" (slice "title" "photo" "photo_alt" "photo_caption")
 -}}
@@ -177,15 +179,27 @@
     {{- if not (index $b .) }}{{ errorf "%s : champ obligatoire absent : %s.%s" $file $block . }}{{ end -}}
   {{- end -}}
 {{- end -}}
-{{- $images := slice ($hp.hero.image | default "") ($hp.day.photo | default "") ($hp.visit.photo | default "") -}}
+{{- $images := slice ($hp.hero.image | default "") ($hp.visit.photo | default "") -}}
 {{- range ($hp.hero.photos | default slice) -}}
   {{- if not (and .image .alt .caption) }}{{ errorf "%s : hero.photos : chaque entrée exige image, alt et caption" $file }}{{ end -}}
+  {{- $images = $images | append (.image | default "") -}}
+{{- end -}}
+{{- range ($hp.day.items | default slice) -}}
+  {{- with .photo -}}
+    {{- $images = $images | append . -}}
+  {{- end -}}
+  {{- if and .photo (not (and .photo_alt .photo_caption)) }}{{ errorf "%s : day.items : une photo exige photo_alt et photo_caption" $file }}{{ end -}}
+{{- end -}}
+{{- $gallery := $hp.gallery.items | default slice -}}
+{{- if lt (len $gallery) 2 }}{{ errorf "%s : gallery.items : au moins deux photos" $file }}{{ end -}}
+{{- range $gallery -}}
+  {{- if not (and .image .alt .caption) }}{{ errorf "%s : gallery.items : chaque entrée exige image, alt et caption" $file }}{{ end -}}
   {{- $images = $images | append (.image | default "") -}}
 {{- end -}}
 {{- range $images -}}
   {{- if and . (not (resources.Get .)) }}{{ errorf "%s : image introuvable dans assets/ : %s" $file . }}{{ end -}}
 {{- end -}}
-{{- range slice "words" "day" -}}
+{{- range slice "words" "why" "day" -}}
   {{- $items := (index $hp . | default dict).items -}}
   {{- if not $items }}{{ errorf "%s : champ obligatoire absent : %s.items" $file . }}{{ end -}}
   {{- $block := . -}}
@@ -193,4 +207,14 @@
     {{- if not (and .title .text) }}{{ errorf "%s : %s.items : chaque entrée exige title et text" $file $block }}{{ end -}}
   {{- end -}}
 {{- end -}}
+{{- /* doodles du sprite proposés pour illustrer un point ou un moment */ -}}
+{{- $doodles := slice "d-feuille-chene" "d-feuille-simple" "d-fougere" "d-soleil" "d-main-droite" "d-coeur" "d-etoile" -}}
+{{- range slice "why" "day" -}}
+  {{- $block := . -}}
+  {{- range (index $hp . | default dict).items -}}
+    {{- if not (in $doodles .icon) }}{{ errorf "%s : %s.items : icon doit valoir %s (reçu : %v)" $file $block (delimit $doodles ", ") .icon }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- $why := len ($hp.why.items | default slice) -}}
+{{- if or (lt $why 4) (gt $why 6) }}{{ errorf "%s : why.items : de 4 à 6 points (reçu : %d)" $file $why }}{{ end -}}
 {{- if not ($hp.visit.text | default slice) }}{{ errorf "%s : champ obligatoire absent : visit.text" $file }}{{ end -}}
