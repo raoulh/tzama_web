@@ -1,5 +1,5 @@
 {{- $href := hugo.Data.settings.donation_url -}}
-{{- with site.GetPage "/association/nous-soutenir" }}{{ $href = .RelPermalink }}{{ end -}}
+{{- with site.GetPage "/association" }}{{ $href = printf "%s#soutenir" .RelPermalink }}{{ end -}}
 {{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
 <section class="soutien" aria-labelledby="soutien-titre">
   <div class="soutien__in reveal">
