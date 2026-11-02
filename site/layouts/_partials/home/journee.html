@@ -1,22 +1,27 @@
 {{- $d := .Params.day -}}
-{{- $icons := slice "d-soleil" "d-fougere" "d-coeur" "d-etoile" -}}
 {{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+{{- $ecole := (site.GetPage "/ecole").RelPermalink -}}
 <section class="journee" id="journee" aria-labelledby="journee-titre">
-  <div class="journee__text">
-    <h2 id="journee-titre" class="titre" data-idle="souligner"><span class="marque">{{ partial "home/text.html" $d.title }}</span></h2>
-    <ol class="journee__list">
-      {{- range $i, $item := $d.items }}
-      <li>
-        <svg class="journee__ico" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ index $icons (mod $i (len $icons)) }}"/></svg>
+  <h2 id="journee-titre" class="titre" data-idle="souligner"><span class="marque">{{ partial "home/text.html" $d.title }}</span></h2>
+  <ol class="journee__list">
+    {{- range $i, $item := $d.items }}
+    <li>
+      <div class="journee__head">
+        <svg class="journee__ico" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ $item.icon }}"/></svg>
         <h3>{{ partial "home/text.html" $item.title }}</h3>
-        <p>{{ partial "home/text.html" $item.text }}</p>
-      </li>
+      </div>
+      <p>{{ partial "home/text.html" $item.text }}</p>
+      {{- with $item.photo }}
+      <figure class="photo photo--journee reveal" data-idle="balancer" style="--rot:{{ cond (modBool $i 2) "-1.5" "1.5" }}deg">
+        {{ partial "image.html" (dict "src" (resources.Get .) "alt" $item.photo_alt "widths" (slice 320 480 720) "sizes" "(min-width: 60em) 15rem, (min-width: 40em) 45vw, 90vw") }}
+        <figcaption class="etiq">{{ partial "home/text.html" $item.photo_caption }}</figcaption>
+      </figure>
+      {{- else }}
+      {{- /* sans photo : papier vierge et doodle, pour garder le rythme des colonnes */}}
+      <div class="journee__vide" aria-hidden="true"><svg focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ $item.icon }}"/></svg></div>
       {{- end }}
-    </ol>
-    <p><a class="link" href="{{ (site.GetPage "/ecole").RelPermalink }}#semaine-type">{{ T "home.dayAll" }}</a> {{ T "home.dayOr" }} <a class="link" href="{{ (site.GetPage "/ecole").RelPermalink }}#vision">{{ T "home.philosophyLink" }}</a>.</p>
-  </div>
-  <figure class="photo photo--journee reveal" data-idle="balancer">
-    {{ partial "image.html" (dict "src" (resources.Get $d.photo) "alt" $d.photo_alt "widths" (slice 320 533) "sizes" "(min-width: 60em) 19rem, 17rem") }}
-    <figcaption class="etiq">{{ partial "home/text.html" $d.photo_caption }}</figcaption>
-  </figure>
+    </li>
+    {{- end }}
+  </ol>
+  <p class="journee__more"><a class="link" href="{{ $ecole }}#semaine-type">{{ T "home.dayAll" }}</a> {{ T "home.dayOr" }} <a class="link" href="{{ $ecole }}#vision">{{ T "home.philosophyLink" }}</a>.</p>
 </section>
