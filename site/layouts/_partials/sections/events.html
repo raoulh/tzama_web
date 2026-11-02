@@ -1,16 +1,23 @@
-{{- /* Événements récurrents de content/<langue>/evenements/, triés par order. */ -}}
+{{- /* Événements récurrents de content/<langue>/evenements/, triés par order ; sans photo, un dessin sur papier. */ -}}
 {{- $list := slice }}{{ with site.GetPage "/evenements" }}{{ $list = sort .RegularPages "Params.order" }}{{ end -}}
+{{- $doodles := slice "d-soleil" "d-feuille-simple" "d-etoile" "d-fougere" "d-feuille-chene" -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
 {{- with $list }}
-<ul class="events">
-  {{- range . }}
-  {{- $e := . }}
-  <li class="events__item">
-    {{- with $e.Params.photo }}
-    {{- partial "image.html" (dict "src" ($e.Resources.Get .) "alt" $e.Params.photo_alt "sizes" "(min-width: 48em) 20rem, 100vw" "widths" (slice 480 720) "class" "events__photo") }}
-    {{- end }}
-    <h3 class="events__title">{{ $e.Title }}</h3>
-    <p class="events__period">{{ $e.Params.period }}</p>
-    {{ $e.Content }}
+<ul class="cartes">
+  {{- range $i, $e := . }}
+  <li class="carte">
+    <span class="carte__img reveal">
+      {{- with and $e.Params.photo ($e.Resources.Get $e.Params.photo) }}
+      {{- partial "image.html" (dict "src" . "alt" $e.Params.photo_alt "sizes" "(min-width: 48em) 12rem, 6rem" "widths" (slice 240 480)) }}
+      {{- else }}
+      <span class="carte__vide"><svg aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ index $doodles (mod $i (len $doodles)) }}"/></svg></span>
+      {{- end -}}
+    </span>
+    <div class="carte__body">
+      <p class="carte__quand">{{ $e.Params.period }}</p>
+      <h3>{{ $e.Title }}</h3>
+      {{ $e.Content }}
+    </div>
   </li>
   {{- end }}
 </ul>

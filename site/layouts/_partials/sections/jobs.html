@@ -1,20 +1,21 @@
 {{- /* Postes ouverts (open: true) de content/<langue>/postes/. */ -}}
 {{- $list := slice }}{{ with site.GetPage "/postes" }}{{ $list = where .RegularPages "Params.open" true }}{{ end -}}
 {{- with $list }}
-<ul class="jobs">
+<ul class="fiches">
   {{- range . }}
-  <li class="jobs__item">
+  <li class="fiches__item">
+    {{- with .Params.contract }}<p class="fiches__quand">{{ . }}</p>{{ end }}
     <h3>{{ .Title }}</h3>
-    <p>{{ with .Params.contract }}<strong>{{ . }}</strong> · {{ end }}{{ .Params.summary }}</p>
+    <p>{{ .Params.summary }}</p>
     {{- with .Content }}
-    <details>
+    <details class="plier">
       <summary>{{ T "sections.jobs.details" }}</summary>
-      {{ . }}
+      <div class="plier__body">{{ . }}</div>
     </details>
     {{- end }}
   </li>
   {{- end }}
 </ul>
 {{- else }}
-<p>{{ T "sections.jobs.none" }}</p>
+<p class="sec__vide">{{ T "sections.jobs.none" }}</p>
 {{- end }}

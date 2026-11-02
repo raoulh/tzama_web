@@ -7,16 +7,17 @@
   {{- end }}
 {{- end }}
 {{- with $list }}
-<ul class="stages">
+<ul class="fiches">
   {{- range . }}
-  <li class="stages__item">
+  <li class="fiches__item">
+    <p class="fiches__quand">{{ .Params.dates }}</p>
     <h3>{{ .Title }}</h3>
-    <p class="stages__meta">{{ .Params.dates }}<br>{{ .Params.ages }} · {{ .Params.price | default (T "sections.stages.price" (dict "amount" hugo.Data.settings.pricing.stage_week)) }}</p>
+    <p class="fiches__meta">{{ .Params.ages }} · {{ .Params.price | default (T "sections.stages.price" (dict "amount" hugo.Data.settings.pricing.stage_week)) }}</p>
     {{ .Content }}
-    <a class="btn" href="{{ .Params.registration_url }}">{{ T "sections.stages.register" }}<span class="visually-hidden"> : {{ .Title }}</span></a>
+    <p class="fiches__action"><a class="btn" href="{{ .Params.registration_url }}">{{ T "sections.stages.register" }}<span class="visually-hidden"> : {{ .Title }}</span></a></p>
   </li>
   {{- end }}
 </ul>
 {{- else }}
-<p>{{ T "sections.stages.none" }}</p>
+<p class="sec__vide">{{ T "sections.stages.none" }}</p>
 {{- end }}

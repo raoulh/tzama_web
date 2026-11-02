@@ -1,6 +1,7 @@
 {{- /*
-  items : { value, label } ou { compute, label }. compute vaut years (années écoulées depuis
-  settings.opening_date) ou staff (membres du groupe equipe) ; calculés au build.
+  items : { value, label } ou { compute, label }. compute vaut years (rentrées de septembre
+  depuis settings.opening_date, celle de l'année scolaire en cours comprise) ou staff (membres
+  du groupe equipe) ; calculés au build. Chiffres posés tels quels, sans compteur animé.
 */ -}}
 {{- $s := hugo.Data.settings -}}
 <ul class="figures">
@@ -9,7 +10,7 @@
   {{- if eq .compute "years" }}
     {{- $o := time.AsTime $s.opening_date }}
     {{- $v = sub now.Year $o.Year }}
-    {{- if or (lt now.Month $o.Month) (and (eq now.Month $o.Month) (lt now.Day $o.Day)) }}{{ $v = sub $v 1 }}{{ end }}
+    {{- if ge (int now.Month) (int $o.Month) }}{{ $v = add $v 1 }}{{ end }}
   {{- else if eq .compute "staff" }}
     {{- $v = len (where (site.GetPage "/equipe").RegularPages "Params.group" "equipe") }}
   {{- end }}

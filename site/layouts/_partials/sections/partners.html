@@ -1,14 +1,20 @@
-{{- /* category : pedagogique, territoire ou associatif ; sans logo, le nom seul. */ -}}
+{{- /* category : pedagogique, territoire ou associatif ; sans logo, l'initiale sur une pastille. */ -}}
 {{- with site.GetPage "/partenaires" }}
 <ul class="partners">
   {{- range sort (where .RegularPages "Params.category" $.s.category) "Params.order" }}
   {{- $p := . }}
   <li class="partners__item">
-    {{- with $p.Params.logo }}
-    {{- partial "image.html" (dict "src" ($p.Resources.Get .) "alt" $p.Params.logo_alt "sizes" "6rem" "widths" (slice 120 240) "class" "partners__logo") }}
-    {{- end }}
-    <p class="partners__name">{{ with $p.Params.website }}<a href="{{ . }}">{{ $p.Params.name }}</a>{{ else }}{{ $p.Params.name }}{{ end }}</p>
-    {{- with $p.Content }}<div class="partners__text">{{ . }}</div>{{ end }}
+    <span class="partners__logo">
+      {{- with and $p.Params.logo ($p.Resources.Get $p.Params.logo) }}
+      {{- partial "image.html" (dict "src" . "alt" $p.Params.logo_alt "sizes" "6rem" "widths" (slice 120 240)) }}
+      {{- else }}
+      <span class="partners__initiale" aria-hidden="true">{{ substr $p.Params.name 0 1 }}</span>
+      {{- end -}}
+    </span>
+    <div class="partners__body">
+      <h3 class="partners__name">{{ with $p.Params.website }}<a href="{{ . }}" rel="external">{{ $p.Params.name }}<span class="visually-hidden"> {{ T "sections.external" }}</span></a>{{ else }}{{ $p.Params.name }}{{ end }}</h3>
+      {{- with $p.Content }}<div class="partners__text">{{ . }}</div>{{ end }}
+    </div>
   </li>
   {{- end }}
 </ul>

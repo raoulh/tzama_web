@@ -1,21 +1,29 @@
 {{- /*
-  Coordonnées (data/settings.yaml) et formulaire du service de contact.
+  Coordonnées (data/settings.yaml), accès et formulaire du service de contact.
   L'action reste à la racine du domaine, même sous un préfixe de preview : Caddy y sert /api/*.
+  Pas de carte intégrée : elle chargerait un service tiers dès l'affichage ; le plan s'ouvre sur OpenStreetMap.
 */ -}}
 {{- $s := hugo.Data.settings -}}
 {{- $addr := printf "%s, %s %s" $s.address.street $s.address.postalCode $s.address.city -}}
 <div class="contact">
-  <div class="contact__details">
-    <h3>{{ T "sections.contact.details" }}</h3>
-    <dl>
-      <dt>{{ T "sections.contact.address" }}</dt>
-      <dd>{{ $s.address.street }}<br>{{ $s.address.postalCode }} {{ $s.address.city }}<br>
-        <a href="https://www.openstreetmap.org/search?query={{ $addr | urlquery }}">{{ T "sections.contact.map" }}</a></dd>
-      <dt>{{ T "sections.contact.phone" }}</dt>
-      <dd><a href="tel:{{ replace $s.phone " " "" }}">{{ $s.phone }}</a></dd>
-      <dt>{{ T "sections.contact.email" }}</dt>
-      <dd><a href="mailto:{{ $s.email }}">{{ $s.email }}</a></dd>
-    </dl>
+  <div class="contact__aside">
+    <div class="contact__details">
+      <h3>{{ T "sections.contact.details" }}</h3>
+      <dl>
+        <dt>{{ T "sections.contact.address" }}</dt>
+        <dd>{{ $s.address.street }}<br>{{ $s.address.postalCode }} {{ $s.address.city }}</dd>
+        <dt>{{ T "sections.contact.phone" }}</dt>
+        <dd><a href="tel:{{ replace $s.phone " " "" }}">{{ $s.phone }}</a></dd>
+        <dt>{{ T "sections.contact.email" }}</dt>
+        <dd><a href="mailto:{{ $s.email }}">{{ $s.email }}</a></dd>
+      </dl>
+    </div>
+    <div class="contact__acces">
+      {{- partial "icon.html" (dict "id" "d-soleil" "class" "contact__soleil") }}
+      <h3>{{ T "sections.contact.access" }}</h3>
+      <p>{{ T "sections.contact.access_text" }}</p>
+      <a class="btn btn--outline" href="https://www.openstreetmap.org/search?query={{ $addr | urlquery }}" rel="external">{{ T "sections.contact.map" }}<span class="visually-hidden"> {{ T "sections.external" }}</span></a>
+    </div>
   </div>
   <form class="contact__form" method="post" action="/api/contact">
     <h3>{{ T "sections.contact.form" }}</h3>
@@ -27,10 +35,12 @@
       <input id="c-email" name="email" type="email" autocomplete="email" required></p>
     <p><label for="c-phone">{{ T "sections.contact.phone_field" }}</label>
       <input id="c-phone" name="phone" type="tel" maxlength="30" autocomplete="tel"></p>
-    <p><label for="c-age">{{ T "sections.contact.child_age" }}</label>
-      <input id="c-age" name="child_age" type="text" maxlength="60" required></p>
-    <p><label for="c-year">{{ T "sections.contact.school_year" }}</label>
-      <input id="c-year" name="school_year" type="text" maxlength="60" required></p>
+    <div class="contact__duo">
+      <p><label for="c-age">{{ T "sections.contact.child_age" }}</label>
+        <input id="c-age" name="child_age" type="text" maxlength="60" required></p>
+      <p><label for="c-year">{{ T "sections.contact.school_year" }}</label>
+        <input id="c-year" name="school_year" type="text" maxlength="60" required></p>
+    </div>
     <p><label for="c-subject">{{ T "sections.contact.subject" }}</label>
       <select id="c-subject" name="subject">
         {{- range slice "visite" "question" "autre" }}
@@ -41,6 +51,6 @@
       <textarea id="c-message" name="message" rows="6" maxlength="5000" required></textarea></p>
     <p class="contact__hp" aria-hidden="true"><label for="c-website">{{ T "sections.contact.honeypot" }}</label>
       <input id="c-website" name="website" type="text" tabindex="-1" autocomplete="off"></p>
-    <p><button class="btn" type="submit">{{ T "sections.contact.submit" }}</button></p>
+    <p><button class="btn btn--big" type="submit">{{ T "sections.contact.submit" }}</button></p>
   </form>
 </div>

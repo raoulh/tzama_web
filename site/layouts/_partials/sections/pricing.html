@@ -2,10 +2,10 @@
 {{- $p := hugo.Data.settings.pricing -}}
 <ul class="pricing">
   {{- if eq .s.scope "club_nature" }}
-  <li>{{ T "sections.pricing.club_year" (dict "amount" $p.club_nature.year) }}</li>
-  <li>{{ T "sections.pricing.club_card" (dict "amount" $p.club_nature.card_10) }}</li>
+  <li class="pricing__item"><strong>{{ T "sections.pricing.club_year" (dict "amount" $p.club_nature.year) }}</strong></li>
+  <li class="pricing__item"><strong>{{ T "sections.pricing.club_card" (dict "amount" $p.club_nature.card_10) }}</strong></li>
   {{- else }}
-  <li><strong>{{ T "sections.pricing.year" (dict "amount" (lang.FormatNumberCustom 0 $p.school_year)) }}</strong>, {{ T "sections.pricing.monthly" (dict "count" $p.monthly.count "amount" $p.monthly.amount) }}</li>
-  <li>{{ T "sections.pricing.sibling" (dict "percent" $p.sibling_discount_percent) }}</li>
+  <li class="pricing__item"><strong>{{ T "sections.pricing.year" (dict "amount" (lang.FormatNumber 0 $p.school_year)) }}</strong><span>{{ T "sections.pricing.monthly" (dict "count" $p.monthly.count "amount" $p.monthly.amount) }}</span></li>
+  <li class="pricing__item"><strong>{{ T "sections.pricing.sibling" (dict "percent" $p.sibling_discount_percent) }}</strong></li>
   {{- end }}
 </ul>

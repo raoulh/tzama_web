@@ -1,4 +1,4 @@
-{{- /* Bouton vers le formulaire de dons HelloAsso (settings.donation_url). */ -}}
-<p><a class="btn btn--big" href="{{ hugo.Data.settings.donation_url }}">
+{{- /* Bouton vers le formulaire de dons HelloAsso (settings.donation_url) ; page.html pose l'encadré « Soutenir » de l'accueil autour. */ -}}
+<p><a class="btn" href="{{ hugo.Data.settings.donation_url }}">
   {{- partial "icon.html" (dict "id" "d-coeur" "class" "btn__ico") }}{{ T "cta.donate" -}}
 </a></p>

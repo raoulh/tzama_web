@@ -1,10 +1,12 @@
 {{- /* cycles : { name, ages, body } ; body en markdown (planning de la semaine du cycle). */ -}}
-<div class="schedule">
-  {{- range .s.cycles }}
-  <div class="schedule__cycle">
+{{- $doodles := slice "d-feuille-simple" "d-fougere" "d-feuille-chene" -}}
+<ul class="schedule">
+  {{- range $i, $c := .s.cycles }}
+  <li class="schedule__cycle">
+    {{- partial "icon.html" (dict "id" (index $doodles (mod $i (len $doodles))) "class" "schedule__ico") }}
     <h3>{{ .name }}</h3>
     {{- with .ages }}<p class="schedule__ages">{{ . }}</p>{{ end }}
     {{- with .body }}{{ $.page.RenderString (dict "display" "block") . }}{{ end }}
-  </div>
+  </li>
   {{- end }}
-</div>
+</ul>
