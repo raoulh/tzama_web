@@ -63,6 +63,8 @@ padded_key() {
 ipad=$(padded_key 54)
 opad=$(padded_key 92)
 
+# Les pads sont des séquences \ooo que seul le format de printf décode (%b exige \0ooo sous dash).
+# shellcheck disable=SC2059
 hmac_hex() {
 	{
 		printf "$opad"
