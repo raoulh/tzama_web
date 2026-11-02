@@ -1,0 +1,34 @@
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: calc(var(--header-c) + var(--pill-top) + 1rem); }
+html.menu-open { overflow: hidden; }
+body { margin: 0; position: relative; font-family: var(--font-body); font-size: 1.0625rem; line-height: 1.6; color: var(--encre); background: var(--fond); overflow-x: hidden; }
+img { max-width: 100%; height: auto; display: block; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; line-height: 1.05; margin: 0 0 .45em; letter-spacing: .01em; }
+h1 { font-size: clamp(2.3rem, 1.5rem + 3.2vw, 3.9rem); }
+h2 { font-size: clamp(2.2rem, 1.6rem + 2.2vw, 3.3rem); }
+h3 { font-size: 1.7rem; }
+p { margin: 0 0 1em; max-width: 62ch; }
+a { color: var(--sapin); text-underline-offset: .18em; text-decoration-thickness: .1em; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--encre); outline-offset: 3px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip { position: absolute; left: 1rem; top: -4rem; background: var(--encre); color: #fff; padding: .6rem 1rem; z-index: 100; }
+.skip:focus { top: 1rem; }
+.scroll-sentinel { position: absolute; top: 0; left: 0; width: 1px; height: 4rem; pointer-events: none; }
+
+/* Mots surlignés au marqueur, en fond de texte pour suivre chaque ligne quand le titre se replie */
+.marque { --marque-c: color-mix(in srgb, var(--f2) 62%, transparent); background: linear-gradient(transparent 58%, var(--marque-c) 58%, var(--marque-c) 92%, transparent 92%) no-repeat 0 0 / 100% 100%; -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0 .15em; margin: 0 -.15em; }
+/* pas d'inline-block : Brave mesure sa largeur trop étroite et le titre se replie */
+.titre { display: block; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: .7rem 1.6rem; background: var(--sapin); color: #fff; text-decoration: none; border-radius: 999px; font-family: var(--font-body); font-weight: 700; font-size: 1.08rem; line-height: 1.2; box-shadow: 0 1px 0 rgba(38,36,30,.15); transition: transform .2s, box-shadow .2s, background-color .2s; }
+.btn:hover { background: var(--sapin-fonce); transform: translateY(-2px); box-shadow: 0 6px 14px rgba(38,36,30,.22); }
+.btn--big { font-size: 1.18rem; padding: .9rem 2rem; }
+.btn--inverse { background: var(--cadre); color: var(--sapin); }
+.btn--inverse:hover { background: #fff; color: var(--encre); }
+.btn--outline { background: transparent; color: var(--sapin); border: 2px solid var(--sapin); box-shadow: none; }
+.btn--outline:hover { background: var(--teinte); color: var(--sapin-fonce); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn { transition: none; }
+}

@@ -1,0 +1,3 @@
+{{- /* Pas de barre « Venir nous rencontrer » sur la page où elle mène. */ -}}
+{{- $contact := site.GetPage "/contact" -}}
+{{- return (not (and $contact (eq .RelPermalink $contact.RelPermalink))) -}}

@@ -1,0 +1,85 @@
+# Surcharger en CLI pour les previews : hugo --baseURL https://test.tzama.fr/pr-<N>/
+baseURL: https://v2.tzama.fr/
+title: Tzama
+
+defaultContentLanguage: fr
+defaultContentLanguageInSubdir: false
+enableRobotsTXT: false
+disableKinds: [taxonomy, term, rss]
+
+module:
+  hugoVersion:
+    min: "0.162.0"
+    extended: false
+
+languages:
+  fr:
+    locale: fr-FR
+    label: Français
+    weight: 1
+    contentDir: content/fr
+    title: École Tzama
+    params:
+      description: École associative à Kembs (68) pour les enfants de 3 à 11 ans, la moitié du temps dehors.
+    menus:
+      main:
+        - identifier: ecole
+          name: L'école
+          pageRef: /ecole/philosophie
+          weight: 10
+          params: { icon: d-feuille-simple }
+        - { parent: ecole, name: Notre philosophie, pageRef: /ecole/philosophie, weight: 1 }
+        - { parent: ecole, name: Une journée à Tzama, pageRef: /ecole/une-journee, weight: 2 }
+        - { parent: ecole, name: L'équipe, pageRef: /ecole/equipe, weight: 3 }
+        - { parent: ecole, name: Notre histoire, pageRef: /ecole/histoire, weight: 4 }
+        - { parent: ecole, name: Témoignages, pageRef: /ecole/temoignages, weight: 5 }
+        - identifier: inscription
+          name: Inscription
+          pageRef: /inscription
+          weight: 20
+          params: { icon: d-fleche-courbe }
+        - { parent: inscription, name: S'inscrire pas à pas, pageRef: /inscription, weight: 1 }
+        - { parent: inscription, name: Tarifs, pageRef: /inscription/tarifs, weight: 2 }
+        - { parent: inscription, name: Questions fréquentes, pageRef: /inscription/questions-frequentes, weight: 3 }
+        - identifier: extrascolaire
+          name: Extrascolaire
+          pageRef: /extrascolaire
+          weight: 30
+          params: { icon: d-soleil }
+        - identifier: association
+          name: L'association
+          pageRef: /association
+          weight: 40
+          params: { icon: d-main-droite }
+        - { parent: association, name: L'association, pageRef: /association, weight: 1 }
+        - { parent: association, name: Nous soutenir, pageRef: /association/nous-soutenir, weight: 2 }
+        - { parent: association, name: Rejoindre l'équipe, pageRef: /association/rejoindre-l-equipe, weight: 3 }
+        - identifier: actualites
+          name: Actualités
+          pageRef: /actualites
+          weight: 50
+          params: { icon: d-etoile }
+      footer:
+        - { name: Plan du site, pageRef: /plan-du-site, weight: 1 }
+        - { name: Documents, pageRef: /inscription, params: { anchor: documents }, weight: 2 }
+        - { name: Mentions légales, pageRef: /mentions-legales, weight: 3 }
+        - { name: Confidentialité, pageRef: /confidentialite, weight: 4 }
+
+params:
+  # Retiré à la bascule sur tzama.fr (tâche 51).
+  noindex: true
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: false
+    parser:
+      attribute:
+        block: true
+
+imaging:
+  quality: 78
+  resampleFilter: lanczos
+
+minify:
+  minifyOutput: true
