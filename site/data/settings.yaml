@@ -5,6 +5,10 @@ address:
   postalCode: "68680"
   city: Kembs
 email: contact.tzama@gmail.com
+# Numéro factice en attendant le vrai.
+phone: "03 89 00 00 00"
+# Sert au calcul des années d'existence (section « figures »).
+opening_date: 2020-09-01
 social:
   - { id: facebook, url: "https://www.facebook.com/growtogetherTZAMA/" }
   - { id: instagram, url: "https://www.instagram.com/ecole_tzama" }
@@ -14,7 +18,8 @@ social:
 pricing:
   school_year: 5700
   monthly: { count: 12, amount: 475 }
-  sibling_discount_percent: { second: 20, third: 30 }
+  # Remise par enfant, dès le deuxième enfant inscrit.
+  sibling_discount_percent: 20
   club_nature: { year: 360, card_10: 150 }
   stage_week: 130
 

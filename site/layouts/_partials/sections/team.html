@@ -1,0 +1,24 @@
+{{- /* group : equipe ou ca ; membres lus dans content/<langue>/equipe/, triés par order. */ -}}
+{{- $fallback := resources.Get "img/divers/portrait-generique.png" -}}
+{{- with site.GetPage "/equipe" }}
+<ul class="team">
+  {{- range sort (where .RegularPages "Params.group" $.s.group) "Params.order" }}
+  {{- $m := . }}
+  <li class="team__item">
+    {{- with $m.Params.photo }}
+    {{- partial "image.html" (dict "src" ($m.Resources.Get .) "alt" $m.Params.photo_alt "sizes" "8rem" "widths" (slice 160 320) "class" "team__photo") }}
+    {{- else }}
+    {{- partial "image.html" (dict "src" $fallback "decorative" true "sizes" "8rem" "widths" (slice 160 320) "class" "team__photo") }}
+    {{- end }}
+    <p class="team__name">{{ $m.Params.name }}</p>
+    <p class="team__role">{{ $m.Params.role }}</p>
+    {{- with $m.Content }}
+    <details class="team__bio">
+      <summary>{{ T "sections.team.bio" }}<span class="visually-hidden"> : {{ $m.Params.name }}</span></summary>
+      {{ . }}
+    </details>
+    {{- end }}
+  </li>
+  {{- end }}
+</ul>
+{{- end }}

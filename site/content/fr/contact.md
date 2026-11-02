@@ -1,3 +1,0 @@
----
-title: "Venir nous rencontrer"
----

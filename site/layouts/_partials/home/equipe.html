@@ -14,8 +14,8 @@
     <li class="reveal" style="--i:{{ $i }}"><span class="portrait" data-idle="balancer">{{ partial "image.html" (dict "src" $photo "decorative" true "widths" (slice 160 240 360) "sizes" "(min-width: 60em) 8rem, (min-width: 40em) 22vw, 45vw") }}</span><strong>{{ index (split $m.Params.name " ") 0 }}</strong><span>{{ $m.Params.role }}</span></li>
     {{- end }}
   </ul>
-  {{- with site.GetPage "/ecole/equipe" }}
-  <p class="equipe__more"><a class="link" href="{{ .RelPermalink }}">{{ T "home.teamAll" }}</a>{{ T "home.teamMore" }}</p>
+  {{- with site.GetPage "/ecole" }}
+  <p class="equipe__more"><a class="link" href="{{ .RelPermalink }}#equipe">{{ T "home.teamAll" }}</a>{{ T "home.teamMore" }}</p>
   {{- end }}
 </section>
 {{- end }}

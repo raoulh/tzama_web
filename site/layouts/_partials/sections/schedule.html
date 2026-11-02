@@ -1,0 +1,10 @@
+{{- /* cycles : { name, ages, body } ; body en markdown (planning de la semaine du cycle). */ -}}
+<div class="schedule">
+  {{- range .s.cycles }}
+  <div class="schedule__cycle">
+    <h3>{{ .name }}</h3>
+    {{- with .ages }}<p class="schedule__ages">{{ . }}</p>{{ end }}
+    {{- with .body }}{{ $.page.RenderString (dict "display" "block") . }}{{ end }}
+  </div>
+  {{- end }}
+</div>

@@ -1,0 +1,9 @@
+{{- /* steps : { title, body } ; body en markdown. */ -}}
+<ol class="steps">
+  {{- range .s.steps }}
+  <li class="steps__item">
+    <h3>{{ .title }}</h3>
+    {{- with .body }}{{ $.page.RenderString (dict "display" "block") . }}{{ end }}
+  </li>
+  {{- end }}
+</ol>

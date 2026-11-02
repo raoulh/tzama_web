@@ -3,7 +3,7 @@
   <div class="footer__in">
     <div class="footer__col">
       <p><strong>{{ $s.name }}</strong><br>{{ $s.address.street }}<br>{{ $s.address.postalCode }} {{ $s.address.city }}</p>
-      <p><a href="mailto:{{ $s.email }}">{{ $s.email }}</a><br><a href="{{ (site.GetPage "/contact").RelPermalink }}">{{ T "footer.write" }}</a> · <a href="{{ (site.GetPage "/association/nous-soutenir").RelPermalink }}">{{ T "cta.donate" }}</a></p>
+      <p><a href="mailto:{{ $s.email }}">{{ $s.email }}</a><br><a href="{{ (site.GetPage "/contact").RelPermalink }}">{{ T "footer.write" }}</a> · <a href="{{ (site.GetPage "/association").RelPermalink }}#soutenir">{{ T "cta.donate" }}</a></p>
     </div>
     <div class="footer__col">
       <p>{{ T "footer.about" }}</p>

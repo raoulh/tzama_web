@@ -1,0 +1,11 @@
+{{- /* category : questions de content/<langue>/faq/ de cette catégorie, triées par order. */ -}}
+{{- with site.GetPage "/faq" }}
+<div class="faq">
+  {{- range sort (where .RegularPages "Params.category" $.s.category) "Params.order" }}
+  <details class="faq__item">
+    <summary>{{ .Title }}</summary>
+    <div class="faq__answer">{{ .Content }}</div>
+  </details>
+  {{- end }}
+</div>
+{{- end }}

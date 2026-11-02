@@ -1,4 +1,5 @@
 {{ define "main" }}
+{{- if .Params.sections }}{{ partial "sections/page.html" . }}{{ else }}
 <article class="page">
   <header class="page__head"><h1>{{ .Title }}</h1></header>
   <div class="page__body">
@@ -10,4 +11,5 @@
     {{ end }}
   </div>
 </article>
+{{- end }}
 {{ end }}

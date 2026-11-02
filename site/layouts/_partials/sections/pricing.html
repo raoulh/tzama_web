@@ -1,0 +1,11 @@
+{{- /* scope : ecole (défaut) ou club_nature ; montants lus dans data/settings.yaml. */ -}}
+{{- $p := hugo.Data.settings.pricing -}}
+<ul class="pricing">
+  {{- if eq .s.scope "club_nature" }}
+  <li>{{ T "sections.pricing.club_year" (dict "amount" $p.club_nature.year) }}</li>
+  <li>{{ T "sections.pricing.club_card" (dict "amount" $p.club_nature.card_10) }}</li>
+  {{- else }}
+  <li><strong>{{ T "sections.pricing.year" (dict "amount" (lang.FormatNumberCustom 0 $p.school_year)) }}</strong>, {{ T "sections.pricing.monthly" (dict "count" $p.monthly.count "amount" $p.monthly.amount) }}</li>
+  <li>{{ T "sections.pricing.sibling" (dict "percent" $p.sibling_discount_percent) }}</li>
+  {{- end }}
+</ul>

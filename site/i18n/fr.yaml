@@ -11,7 +11,7 @@ cta:
   donate: Faire un don
 
 footer:
-  about: École privée, laïque et associative, immatriculée auprès de l'Inspection académique. Label Eco-École niveau OR 2026.
+  about: École privée, laïque et associative, immatriculée auprès de l'Inspection académique. Label Eco‑École niveau OR 2026.
   write: Nous écrire
   follow: Nous suivre
   links: Liens utiles
@@ -42,6 +42,58 @@ testimonial:
   relation:
     parent: Parent
     former_pupil: Ancien élève
+
+sections:
+  draft: Texte provisoire
+  video:
+    play: "Lire la vidéo : {{ .title }}"
+    notice: La vidéo se charge depuis YouTube quand vous la lancez.
+    youtube: Voir sur YouTube
+  team:
+    bio: Lire la présentation
+  figures:
+    years: ans d'existence
+    staff: personnes dans l'équipe
+  pricing:
+    year: "{{ .amount }} € par an et par enfant"
+    monthly: "soit {{ .count }} mensualités de {{ .amount }} €"
+    sibling: "Remise de {{ .percent }} % pour chaque enfant à partir du deuxième"
+    club_year: "{{ .amount }} € pour l'année"
+    club_card: "{{ .amount }} € la carte de 10 séances"
+    stage: "{{ .amount }} € la semaine de stage"
+  stages:
+    price: "{{ .amount }} € la semaine"
+    register: Inscrire mon enfant
+    none: Les dates des prochains stages seront annoncées ici.
+  jobs:
+    none: Aucun poste n'est ouvert pour le moment. Vous pouvez tout de même nous envoyer une candidature spontanée.
+    details: Lire l'offre
+  documents:
+    none: Les documents seront bientôt disponibles ici. En attendant, vous pouvez nous les demander par e-mail.
+    pdf: "PDF, {{ .size }} Ko"
+  events:
+    none: Le calendrier des événements sera bientôt publié.
+  contact:
+    details: Nos coordonnées
+    address: Adresse
+    email: E-mail
+    phone: Téléphone
+    map: Voir le plan d'accès
+    form: Écrivez-nous
+    name: Votre nom
+    email_field: Votre adresse e-mail
+    phone_field: Votre téléphone (facultatif)
+    child_age: Âge de votre enfant
+    school_year: Rentrée envisagée
+    subject: Objet de votre demande
+    subjects:
+      visite: Venir visiter l'école
+      question: Poser une question
+      autre: Autre demande
+    message: Votre message
+    honeypot: Laissez ce champ vide
+    submit: Envoyer ma demande
+    error: "Votre message n'a pas pu être envoyé. Vérifiez les champs et réessayez, ou écrivez-nous à {{ .email }}."
 
 home:
   swapPhoto: Changer de photo

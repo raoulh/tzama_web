@@ -26,41 +26,47 @@ languages:
     params:
       description: École associative à Kembs (68) pour les enfants de 3 à 11 ans, la moitié du temps dehors.
     menus:
+      # Une page par entrée ; les sous-entrées pointent vers une section (params.anchor = son id).
       main:
         - identifier: ecole
           name: L'école
-          pageRef: /ecole/philosophie
+          pageRef: /ecole
           weight: 10
           params: { icon: d-feuille-simple }
-        - { parent: ecole, name: Notre philosophie, pageRef: /ecole/philosophie, weight: 1 }
-        - { parent: ecole, name: Une journée à Tzama, pageRef: /ecole/une-journee, weight: 2 }
-        - { parent: ecole, name: L'équipe, pageRef: /ecole/equipe, weight: 3 }
-        - { parent: ecole, name: Notre histoire, pageRef: /ecole/histoire, weight: 4 }
-        - { parent: ecole, name: Témoignages, pageRef: /ecole/temoignages, weight: 5 }
+        - { parent: ecole, name: Notre vision, pageRef: /ecole, params: { anchor: vision }, weight: 1 }
+        - { parent: ecole, name: La pédagogie Tzama, pageRef: /ecole, params: { anchor: pedagogie }, weight: 2 }
+        - { parent: ecole, name: Une semaine type, pageRef: /ecole, params: { anchor: semaine-type }, weight: 3 }
+        - { parent: ecole, name: L'équipe, pageRef: /ecole, params: { anchor: equipe }, weight: 4 }
+        - { parent: ecole, name: Faire équipe avec les familles, pageRef: /ecole, params: { anchor: familles }, weight: 5 }
+        - { parent: ecole, name: Notre territoire, pageRef: /ecole, params: { anchor: territoire }, weight: 6 }
         - identifier: inscription
           name: Inscription
           pageRef: /inscription
           weight: 20
           params: { icon: d-fleche-courbe }
-        - { parent: inscription, name: S'inscrire pas à pas, pageRef: /inscription, weight: 1 }
-        - { parent: inscription, name: Tarifs, pageRef: /inscription/tarifs, weight: 2 }
-        - { parent: inscription, name: Questions fréquentes, pageRef: /inscription/questions-frequentes, weight: 3 }
+        - { parent: inscription, name: S'inscrire pas à pas, pageRef: /inscription, params: { anchor: pas-a-pas }, weight: 1 }
+        - { parent: inscription, name: Tarifs, pageRef: /inscription, params: { anchor: tarifs }, weight: 2 }
+        - { parent: inscription, name: Questions fréquentes, pageRef: /inscription, params: { anchor: questions }, weight: 3 }
         - identifier: extrascolaire
           name: Extrascolaire
           pageRef: /extrascolaire
           weight: 30
           params: { icon: d-soleil }
+        - { parent: extrascolaire, name: Accueil périscolaire, pageRef: /extrascolaire, params: { anchor: periscolaire }, weight: 1 }
+        - { parent: extrascolaire, name: Club nature, pageRef: /extrascolaire, params: { anchor: club-nature }, weight: 2 }
         - identifier: association
           name: L'association
           pageRef: /association
           weight: 40
           params: { icon: d-main-droite }
-        - { parent: association, name: L'association, pageRef: /association, weight: 1 }
-        - { parent: association, name: Nous soutenir, pageRef: /association/nous-soutenir, weight: 2 }
-        - { parent: association, name: Rejoindre l'équipe, pageRef: /association/rejoindre-l-equipe, weight: 3 }
-        - identifier: actualites
-          name: Actualités
-          pageRef: /actualites
+        - { parent: association, name: L'association, pageRef: /association, params: { anchor: association }, weight: 1 }
+        - { parent: association, name: Le conseil d'administration, pageRef: /association, params: { anchor: ca }, weight: 2 }
+        - { parent: association, name: L'Archipel de Kembs, pageRef: /association, params: { anchor: archipel }, weight: 3 }
+        - { parent: association, name: Nous soutenir, pageRef: /association, params: { anchor: soutenir }, weight: 4 }
+        - { parent: association, name: Postes à pourvoir, pageRef: /association, params: { anchor: postes }, weight: 5 }
+        - identifier: contact
+          name: Contact
+          pageRef: /contact
           weight: 50
           params: { icon: d-etoile }
       footer:
@@ -82,6 +88,10 @@ markup:
     parser:
       attribute:
         block: true
+    # Les liens internes écrits dans le CMS (« /association/#ca ») suivent le baseURL des aperçus.
+    renderHooks:
+      link:
+        useEmbedded: always
 
 imaging:
   quality: 78

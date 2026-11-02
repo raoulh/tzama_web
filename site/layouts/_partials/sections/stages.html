@@ -1,0 +1,22 @@
+{{- /* Stages à venir de content/<langue>/stages/ (start_date pas encore passée au build). */ -}}
+{{- $today := now.Format "2006-01-02" -}}
+{{- $list := slice -}}
+{{- with site.GetPage "/stages" }}
+  {{- range sort .RegularPages "Params.start_date" }}
+    {{- if ge ((time.AsTime .Params.start_date).Format "2006-01-02") $today }}{{ $list = $list | append . }}{{ end }}
+  {{- end }}
+{{- end }}
+{{- with $list }}
+<ul class="stages">
+  {{- range . }}
+  <li class="stages__item">
+    <h3>{{ .Title }}</h3>
+    <p class="stages__meta">{{ .Params.dates }}<br>{{ .Params.ages }} · {{ .Params.price | default (T "sections.stages.price" (dict "amount" hugo.Data.settings.pricing.stage_week)) }}</p>
+    {{ .Content }}
+    <a class="btn" href="{{ .Params.registration_url }}">{{ T "sections.stages.register" }}<span class="visually-hidden"> : {{ .Title }}</span></a>
+  </li>
+  {{- end }}
+</ul>
+{{- else }}
+<p>{{ T "sections.stages.none" }}</p>
+{{- end }}
