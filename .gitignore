@@ -1,0 +1,11 @@
+ressources
+site/public/
+site/resources/_gen/
+.hugo_build.lock
+node_modules/
+.env
+*.local
+.DS_Store
+mockups/captures/
+ressources
+mockups
