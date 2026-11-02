@@ -118,3 +118,26 @@ func TestDeployHookScript(t *testing.T) {
 		t.Fatal("usage invalide accepté")
 	}
 }
+
+// Au-delà de 64 octets, HMAC hache d'abord la clé : le script doit faire de même. Les « % »
+// et « \ » vérifient que la clé n'est jamais interprétée comme un format printf.
+func TestDeployHookScriptLongSecret(t *testing.T) {
+	for _, bin := range []string{"sh", "openssl", "curl"} {
+		if _, err := exec.LookPath(bin); err != nil {
+			t.Skipf("%s absent", bin)
+		}
+	}
+	long := strings.Repeat(`6\%s-secret-long-`, 7)
+	cfg, err := loadConfig(envOf(map[string]string{"SITES_DIR": t.TempDir(), "STATE_DIR": t.TempDir(), "HOOK_SECRET": long}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	logger := slog.New(slog.DiscardHandler)
+	srv := httptest.NewServer(newMux(cfg, logger, newStore(cfg, logger), contact.NewLimiter(5, time.Minute, nil)))
+	t.Cleanup(srv.Close)
+	cmd := exec.Command("sh", "scripts/deploy-hook.sh", "service", "v2.0.0")
+	cmd.Env = append(os.Environ(), "DEPLOY_URL="+srv.URL+"/hooks/deploy", "HOOK_SECRET="+long)
+	if out, err := cmd.CombinedOutput(); err != nil || !strings.Contains(string(out), `"ok":true`) {
+		t.Fatalf("%v\n%s", err, out)
+	}
+}

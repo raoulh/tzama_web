@@ -24,8 +24,9 @@ const (
 	stateTTL    = 10 * time.Minute
 )
 
-// Scopes demandables par le CMS ; tout autre valeur est ignorée au profit de "repo".
-var allowedScopes = []string{"repo", "public_repo", "repo,user", "public_repo,user"}
+// Portée imposée quel que soit le « scope » demandé : le dépôt est public, un jeton volé ne
+// doit pas ouvrir les dépôts privés du compte.
+const scope = "public_repo"
 
 type Config struct {
 	ClientID     string
@@ -95,10 +96,6 @@ func (h *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 		h.cfg.Logger.Warn("connexion CMS pour un site refusé", "site_id", site)
 		http.Error(w, "site non autorisé", http.StatusForbidden)
 		return
-	}
-	scope := q.Get("scope")
-	if !slices.Contains(allowedScopes, scope) {
-		scope = "repo"
 	}
 	state, err := randomToken(32)
 	if err != nil {
@@ -206,7 +203,8 @@ func randomToken(n int) (string, error) {
 }
 
 // La page annonce « authorizing:github » aux origines autorisées, attend la réponse du CMS et
-// n'envoie le résultat qu'à l'origine exacte de cette réponse, si elle est autorisée.
+// n'envoie le résultat qu'à l'origine exacte de cette réponse, si elle est autorisée et vient
+// de la fenêtre qui a ouvert la connexion (pas d'un autre onglet de la même origine).
 var pageTmpl = template.Must(template.New("cb").Parse(`<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Connexion</title></head>
@@ -218,7 +216,7 @@ var pageTmpl = template.Must(template.New("cb").Parse(`<!DOCTYPE html>
   var message = {{.Message}};
   if (!window.opener) { return; }
   window.addEventListener("message", function receive(e) {
-    if (allowed.indexOf(e.origin) === -1) { return; }
+    if (e.source !== window.opener || allowed.indexOf(e.origin) === -1) { return; }
     window.removeEventListener("message", receive);
     window.opener.postMessage(message, e.origin);
   });

@@ -4,6 +4,9 @@
 	admin off
 	servers {
 		trusted_proxies static {$HAPROXY_IP}
+		# IP cliente = dernière adresse de X-Forwarded-For non fiable, pas la première, que le
+		# client peut écrire lui-même.
+		trusted_proxies_strict
 		client_ip_headers X-Forwarded-For
 	}
 }

@@ -34,7 +34,8 @@ tar czf - -C deploy . | ssh root@<vm> 'rm -rf /root/tzama-deploy && mkdir /root/
 
 - Port exposé : 80 (Caddy). La VM n'est pas exposée directement à Internet : seul le HAProxy la joint, d'où l'absence de pare-feu local. Caddy ne fait pas de TLS.
 - Journaux d'accès en JSON sur la sortie de Caddy : `docker compose -f /srv/tzama/compose.yml logs caddy` ; `client_ip` = IP réelle du visiteur.
-- Le HAProxy doit laisser passer les envois de la CI vers `deploy.tzama.fr` : corps jusqu'à 512 Mio, délais client/serveur d'au moins 30 minutes.
+- Le HAProxy doit laisser passer les envois de la CI vers `deploy.tzama.fr` : corps jusqu'à 512 Mio, délais client/serveur d'au moins 10 minutes (deployd coupe un envoi au-delà de 5 minutes).
+- Le HAProxy doit supprimer le `X-Forwarded-For` reçu du client avant d'ajouter le sien (`http-request del-header X-Forwarded-For` puis `option forwardfor`, voir `haproxy.example.cfg`). Caddy prend la dernière adresse non fiable de l'en-tête (`trusted_proxies_strict`), mais sans cette suppression une adresse inventée par le client resterait dans la chaîne transmise.
 - deployd n'a pas de port publié ; il tourne sous l'uid de `tzama`, en lecture seule hors `sites/` et `state/`.
 - Volumes Docker `caddy_data`, `caddy_config` : sans données utiles (pas de certificats ici).
 
