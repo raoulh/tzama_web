@@ -16,17 +16,34 @@ services:
       driver: json-file
       options: { max-size: 10m, max-file: "5" }
 
-  # deployd:
-  #   image: ghcr.io/raoulh/tzama-deployd:${DEPLOYD_TAG:-latest}
-  #   restart: unless-stopped
-  #   user: "${TZAMA_UID}:${TZAMA_GID}"
-  #   env_file: deployd.env
-  #   volumes:
-  #     - ./sites:/srv/sites
-  #     - ./state:/state
-  #   logging:
-  #     driver: json-file
-  #     options: { max-size: 10m, max-file: "5" }
+  # Seul service à écrire dans sites/ ; joint uniquement par Caddy (aucun port publié).
+  deployd:
+    image: ghcr.io/raoulh/tzama-deployd:${DEPLOYD_TAG:-latest}
+    restart: unless-stopped
+    user: "${TZAMA_UID:?TZAMA_UID manquant dans .env}:${TZAMA_GID:?TZAMA_GID manquant dans .env}"
+    env_file: deployd.env
+    environment:
+      SITES_DIR: /srv/sites
+      STATE_DIR: /state
+      # X-Real-IP posé par Caddy, seul client possible
+      TRUST_PROXY: "true"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    # Shutdown laisse 2 minutes aux requêtes en cours.
+    stop_grace_period: 2m15s
+    volumes:
+      - ./sites:/srv/sites
+      - ./state:/state
+    healthcheck:
+      test: ["CMD", "/deployd", "healthcheck"]
+      interval: 30s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: "5" }
 
 volumes:
   caddy_data:

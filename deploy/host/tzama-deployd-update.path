@@ -1,0 +1,8 @@
+[Unit]
+Description=Mise à jour de deployd sur demande de la CI
+
+[Path]
+PathChanged=/srv/tzama/state/deployd.tag
+
+[Install]
+WantedBy=multi-user.target

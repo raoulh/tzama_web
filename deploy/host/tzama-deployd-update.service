@@ -1,0 +1,8 @@
+[Unit]
+Description=Mise à jour de l'image de deployd
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/tzama-deployd-update.sh
