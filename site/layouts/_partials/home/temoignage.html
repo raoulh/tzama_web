@@ -1,27 +1,30 @@
 {{- /*
-  Premier témoignage réel (placeholder: false) par order. S'il n'y en a aucun, hors mode strict seulement,
-  le premier témoignage fictif, marqué comme exemple ; en mode strict, bloc masqué.
+  Témoignages réels (placeholder: false) par order ; s'il n'y en a aucun, hors mode strict seulement, les fictifs,
+  marqués comme exemples ; en mode strict, bloc masqué. Tous sont rendus et seul le premier est visible :
+  home.js en tire un au hasard, sans JS le premier reste affiché.
 */ -}}
 {{- $strict := eq (printf "%v" site.Params.strict) "true" -}}
 {{- $all := slice -}}
 {{- with site.GetPage "/temoignages" }}{{ $all = sort .RegularPages "Params.order" }}{{ end -}}
-{{- $pick := false -}}
-{{- with where $all "Params.placeholder" "!=" true }}{{ $pick = index . 0 }}{{ else }}{{ if and $all (not $strict) }}{{ $pick = index $all 0 }}{{ end }}{{ end -}}
+{{- $picks := where $all "Params.placeholder" "!=" true -}}
+{{- if and (not $picks) (not $strict) }}{{ $picks = $all }}{{ end -}}
 {{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
-{{- with $pick }}
-<section class="temoignage" aria-labelledby="temoignage-titre">
+{{- with $picks }}
+<section class="temoignage" aria-labelledby="temoignage-titre"{{ if gt (len .) 1 }} data-temoignages{{ end }}>
   <h2 id="temoignage-titre" class="visually-hidden">{{ T "home.testimonialTitle" }}</h2>
-  <figure class="reveal">
+  {{- range $i, $t := . }}
+  <figure class="reveal"{{ if $i }} hidden{{ end }}>
     <svg class="temoignage__feuille" data-idle="tournoyer" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-feuille-simple"/></svg>
     <blockquote>
-      <p>{{ partial "home/text.html" .Params.text }}</p>
+      <p>{{ partial "home/text.html" $t.Params.text }}</p>
     </blockquote>
     <figcaption>
-      <span class="legende">{{ .Params.author }}{{ with .Params.relation }}, {{ lower (T (printf "testimonial.relation.%s" .)) }}{{ end }}</span>
-      {{- if .Params.placeholder }}
+      <span class="legende">{{ $t.Params.author }}{{ with $t.Params.relation }}, {{ lower (T (printf "testimonial.relation.%s" .)) }}{{ end }}</span>
+      {{- if $t.Params.placeholder }}
       <span class="tag-exemple">{{ T "home.exampleTag" }}</span>
       {{- end }}
     </figcaption>
   </figure>
+  {{- end }}
 </section>
 {{- end }}

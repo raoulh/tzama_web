@@ -1,0 +1,17 @@
+{{- $w := .Params.why -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+<section class="pourquoi" id="pourquoi" aria-labelledby="pourquoi-titre">
+  <h2 id="pourquoi-titre" class="titre" data-idle="souligner"><span class="marque">{{ partial "home/text.html" $w.title }}</span></h2>
+  {{- if and $w.draft_note (ne (printf "%v" site.Params.strict) "true") }}
+  <p class="sec__draft"><strong>{{ T "sections.draft" }}.</strong> {{ $w.draft_note }}</p>
+  {{- end }}
+  <ul class="pourquoi__list">
+    {{- range $i, $item := $w.items }}
+    <li class="reveal" style="--i:{{ $i }}">
+      <svg class="pourquoi__ico" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ $item.icon }}"/></svg>
+      <h3>{{ partial "home/text.html" $item.title }}</h3>
+      <p>{{ partial "home/text.html" $item.text }}</p>
+    </li>
+    {{- end }}
+  </ul>
+</section>
