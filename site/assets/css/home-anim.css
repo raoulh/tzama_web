@@ -1,0 +1,143 @@
+/* Animations de l'accueil : seulement sans prefers-reduced-motion ; état final visible sans elles ni sans JS ; aucune boucle.
+   Les transformées de base des feuilles (--r, --s) et des photos (--rot) sont reprises dans chaque image clé. */
+@keyframes parallaxe { to { transform: translateY(var(--p)); } }
+@keyframes zoom-photo { to { transform: translateY(60px) scale(1.12); } }
+@keyframes tomber { 0% { opacity: 0; transform: translateY(-140px) rotate(calc(var(--r, 0deg) - 60deg)) scale(var(--s, 1)); } 25% { opacity: 1; } 60% { transform: translateY(-40px) translateX(14px) rotate(calc(var(--r, 0deg) + 10deg)) scale(var(--s, 1)); } 100% { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)) scale(var(--s, 1)); } }
+@keyframes surligner { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
+@keyframes coller { from { opacity: 0; transform: translateY(22px) scale(1.02); } to { opacity: 1; transform: none; } }
+@keyframes apparaitre { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  /* arrivée : le texte monte, le trait se dessine, trois feuilles tombent une fois */
+  .hero__text > * { animation: apparaitre .6s ease-out both; }
+  .hero__text p { animation-delay: .2s; }
+  .hero__text .btn { animation-delay: .35s; }
+  .hero__text .marque { animation: surligner .7s ease-out both; animation-delay: .7s; }
+  .f--tombe { animation: tomber 1.8s cubic-bezier(.4,.1,.5,1) both; animation-delay: calc(.4s + var(--d, 0s)); }
+
+  /* au défilement : parallaxe des calques et de la photo (scroll()), surlignés et photos qui se collent (view()) */
+  @supports (animation-timeline: scroll()) {
+    .calque { animation: parallaxe linear both; animation-timeline: scroll(root); animation-range: 0 50rem; }
+    .hero__img { animation: zoom-photo linear both; animation-timeline: scroll(root); animation-range: 0 50rem; }
+    .reveal { animation: coller linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
+    .titre .marque { animation: surligner linear both; animation-timeline: view(); animation-range: entry 30% entry 110%; }
+  }
+  @supports not (animation-timeline: scroll()) {
+    html.js .reveal:not(.is-in) { opacity: 0; }
+    html.js .reveal.is-in { animation: coller .6s cubic-bezier(.2,.8,.3,1) both; animation-delay: calc(var(--i, 0) * .08s); }
+    html.js .titre:not(.is-in) .marque { background-size: 0% 100%; }
+    html.js .titre.is-in .marque { animation: surligner .6s ease-out both; }
+  }
+}
+/* vie au repos : animations ponctuelles déclenchées par une classe idle-* posée par home.js */
+@keyframes idle-tomber {
+  0%   { opacity: 1; transform: rotate(var(--r, 0deg)) scale(var(--s, 1)); }
+  18%  { transform: translate(8px, 34px) rotate(calc(var(--r, 0deg) + 28deg)) scale(var(--s, 1)); }
+  48%  { opacity: 1; transform: translate(-16px, 128px) rotate(calc(var(--r, 0deg) - 26deg)) scale(var(--s, 1)); }
+  78%  { opacity: .7; transform: translate(10px, 214px) rotate(calc(var(--r, 0deg) + 22deg)) scale(var(--s, 1)); }
+  100% { opacity: 0; transform: translate(-4px, 280px) rotate(calc(var(--r, 0deg) + 60deg)) scale(var(--s, 1)); }
+}
+@keyframes idle-frisson {
+  0%, 100% { transform: rotate(var(--r, 0deg)) scale(var(--s, 1)); }
+  22%  { transform: translate(7px, -3px) rotate(calc(var(--r, 0deg) + 7deg)) scale(var(--s, 1)); }
+  52%  { transform: translate(-4px, 2px) rotate(calc(var(--r, 0deg) - 5deg)) scale(var(--s, 1)); }
+  78%  { transform: translate(3px, -1px) rotate(calc(var(--r, 0deg) + 3deg)) scale(var(--s, 1)); }
+}
+@keyframes idle-tournoyer {
+  0%   { transform: rotate(var(--r, 0deg)) scale(var(--s, 1)); }
+  50%  { transform: translateY(-10px) rotate(calc(var(--r, 0deg) + 180deg)) scale(var(--s, 1)); }
+  100% { transform: rotate(calc(var(--r, 0deg) + 360deg)) scale(var(--s, 1)); }
+}
+@keyframes idle-tourner { 0%, 100% { transform: none; } 45% { transform: rotate(28deg); } 70% { transform: rotate(-6deg); } }
+@keyframes idle-balancer {
+  0%, 100% { transform: rotate(var(--rot, 0deg)); }
+  25% { transform: rotate(calc(var(--rot, 0deg) + 2.6deg)); }
+  60% { transform: rotate(calc(var(--rot, 0deg) - 1.6deg)); }
+  85% { transform: rotate(calc(var(--rot, 0deg) + .6deg)); }
+}
+@keyframes idle-souligner { 0% { background-size: 100% 100%; } 35% { background-size: 0% 100%; } 100% { background-size: 100% 100%; } }
+@keyframes idle-coucou { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(16deg); } 50% { transform: rotate(-10deg); } 75% { transform: rotate(12deg); } }
+@keyframes hover-fremir {
+  0%, 100% { transform: rotate(var(--r, 0deg)) scale(var(--s, 1)); }
+  30% { transform: translate(4px, -4px) rotate(calc(var(--r, 0deg) + 9deg)) scale(var(--s, 1)); }
+  65% { transform: translate(-3px, 1px) rotate(calc(var(--r, 0deg) - 6deg)) scale(var(--s, 1)); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .f.idle-tomber { animation: idle-tomber 3.4s cubic-bezier(.4,.1,.6,1) both; }
+  .calque.idle-frisson .f { animation: idle-frisson 2.1s ease-in-out both; }
+  .calque.idle-frisson .f:nth-child(2n) { animation-delay: .12s; }
+  .calque.idle-frisson .f:nth-child(3n) { animation-delay: .22s; }
+  .idle-tournoyer { animation: idle-tournoyer 2.4s ease-in-out both; }
+  .mot__ico.idle-tourner { animation: idle-tourner 1.8s ease-in-out both; }
+  .photo.idle-balancer img, .actu.idle-balancer img, .actu.idle-balancer .actu__vide, .portrait.idle-balancer img { animation: idle-balancer 2.8s ease-in-out both; }
+  .titre.idle-souligner .marque { animation: idle-souligner 1.5s ease-in-out both; }
+  .idle-coucou { animation: idle-coucou 1.6s ease-in-out both; transform-origin: 50% 100%; }
+  /* survol au pointeur fin : autocollants, feuille du témoignage, feuilles des calques */
+  @media (hover: hover) {
+    .sticker, .temoignage__feuille { pointer-events: auto; }
+    .sticker:hover, .temoignage__feuille:hover { animation: hover-fremir .9s ease-in-out; }
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .calque .f { pointer-events: auto; }
+  .calque .f:hover { animation: hover-fremir .9s ease-in-out; }
+}
+/* photo de l'ouverture : le papier bouge, le ruban (::before) à part ; la photo part en tournant, la suivante est posée puis le ruban appuyé */
+@keyframes polaroid-poser {
+  0%   { opacity: 0; transform: translateY(-34px) rotate(calc(var(--rot, 0deg) - 7deg)); }
+  55%  { opacity: 1; transform: translateY(2px) rotate(calc(var(--rot, 0deg) + 1.5deg)); }
+  75%  { transform: translateY(0) rotate(var(--rot, 0deg)) scale(1.012, .985); }
+  100% { opacity: 1; transform: rotate(var(--rot, 0deg)); }
+}
+@keyframes tape-presser {
+  0%, 60% { opacity: 0; transform: translate(-50%, -8px) rotate(-12deg) scale(1.1); }
+  78%  { opacity: .8; transform: translate(-50%, 0) rotate(-4deg) scale(1.08); }
+  90%  { opacity: .8; transform: translate(-50%, 1px) rotate(-4deg) scale(.96, .9); }
+  100% { opacity: .8; transform: translate(-50%, 0) rotate(-4deg); }
+}
+@keyframes polaroid-decoller {
+  0%   { opacity: 1; transform: rotate(var(--rot, 0deg)); }
+  30%  { opacity: 1; transform: translateY(3px) rotate(calc(var(--rot, 0deg) + 5deg)); }
+  100% { opacity: 0; transform: translate(70px, 190px) rotate(calc(var(--rot, 0deg) + 30deg)); }
+}
+@keyframes tape-soulever {
+  0%   { opacity: .8; transform: translate(-50%, 0) rotate(-4deg); }
+  35%  { opacity: .9; transform: translate(-50%, -7px) rotate(-14deg) scale(1.04); }
+  60%  { opacity: .6; transform: translate(-50%, 4px) rotate(-10deg); }
+  100% { opacity: 0; transform: translate(-50%, 60px) rotate(10deg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html.js .hero__polaroid:not(.is-posed):not(.is-posing):not(.is-peeling) .paper { opacity: 0; }
+  .hero__polaroid.is-posing .paper { animation: polaroid-poser 1.1s cubic-bezier(.3,1.2,.4,1) both; }
+  .hero__polaroid.is-posing::before { animation: tape-presser 1.5s ease-out both; }
+  .hero__polaroid.is-peeling .paper { animation: polaroid-decoller 1s cubic-bezier(.5,0,.8,.4) both; }
+  .hero__polaroid.is-peeling::before { animation: tape-soulever 1s ease-in both; }
+  .hero__polaroid.idle-balancer .paper { animation: idle-balancer 2.8s ease-in-out both; }
+  .hero__polaroid.idle-balancer img { animation: none; }
+}
+/* brise à l'arrivée d'une photo scotchée : oscillations amorties tirées au sort par le JS (--sway-*) ;
+   fill backwards seulement, pour rendre la main au survol une fois finie */
+@keyframes sway-1 {
+  0%, 100% { transform: rotate(var(--rot, 0deg)); }
+  40% { transform: rotate(calc(var(--rot, 0deg) + var(--sway-dir, 1) * var(--sway-amp, 2deg))); }
+  78% { transform: rotate(calc(var(--rot, 0deg) - var(--sway-dir, 1) * var(--sway-amp, 2deg) * .35)); }
+}
+@keyframes sway-2 {
+  0%, 100% { transform: rotate(var(--rot, 0deg)); }
+  22% { transform: rotate(calc(var(--rot, 0deg) + var(--sway-dir, 1) * var(--sway-amp, 2deg))); }
+  48% { transform: rotate(calc(var(--rot, 0deg) - var(--sway-dir, 1) * var(--sway-amp, 2deg) * .55)); }
+  72% { transform: rotate(calc(var(--rot, 0deg) + var(--sway-dir, 1) * var(--sway-amp, 2deg) * .25)); }
+  90% { transform: rotate(calc(var(--rot, 0deg) - var(--sway-dir, 1) * var(--sway-amp, 2deg) * .08)); }
+}
+@keyframes sway-3 {
+  0%, 100% { transform: rotate(var(--rot, 0deg)); }
+  15% { transform: rotate(calc(var(--rot, 0deg) + var(--sway-dir, 1) * var(--sway-amp, 2deg))); }
+  32% { transform: rotate(calc(var(--rot, 0deg) - var(--sway-dir, 1) * var(--sway-amp, 2deg) * .6)); }
+  50% { transform: rotate(calc(var(--rot, 0deg) + var(--sway-dir, 1) * var(--sway-amp, 2deg) * .35)); }
+  68% { transform: rotate(calc(var(--rot, 0deg) - var(--sway-dir, 1) * var(--sway-amp, 2deg) * .18)); }
+  85% { transform: rotate(calc(var(--rot, 0deg) + var(--sway-dir, 1) * var(--sway-amp, 2deg) * .07)); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .is-swaying[data-sway="1"] img, .is-swaying[data-sway="1"] .actu__vide { animation: sway-1 var(--sway-dur, 1.6s) ease-in-out var(--sway-delay, 0s) backwards; }
+  .is-swaying[data-sway="2"] img, .is-swaying[data-sway="2"] .actu__vide { animation: sway-2 var(--sway-dur, 1.6s) ease-in-out var(--sway-delay, 0s) backwards; }
+  .is-swaying[data-sway="3"] img, .is-swaying[data-sway="3"] .actu__vide { animation: sway-3 var(--sway-dur, 1.6s) ease-in-out var(--sway-delay, 0s) backwards; }
+}

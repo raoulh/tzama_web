@@ -36,6 +36,23 @@
   --ombre-pilule: 0 6px 22px rgba(38, 36, 30, .16);
   --ombre-pilule-c: 0 4px 14px rgba(38, 36, 30, .18);
   --ombre-menu: 0 12px 30px rgba(38, 36, 30, .16);
+
+  /* accueil : texte et contours sur photo ou sur l'accent de saison, voile de l'ouverture, ombres des photos scotchées */
+  --blanc: #fff;
+  --blanc-90: rgba(255, 255, 255, .9);
+  --voile-0: rgba(18, 28, 16, 0);
+  --voile-45: rgba(18, 28, 16, .45);
+  --voile-50: rgba(18, 28, 16, .5);
+  --voile-60: rgba(18, 28, 16, .6);
+  --voile-74: rgba(18, 28, 16, .74);
+  --voile-86: rgba(18, 28, 16, .86);
+  --voile-93: rgba(18, 28, 16, .93);
+  --ombre-texte: 0 1px 2px rgba(0, 0, 0, .55), 0 0 18px rgba(0, 0, 0, .45);
+  --ombre-feuille: rgba(0, 0, 0, .25);
+  --ombre-photo: 0 2px 6px rgba(38, 36, 30, .18), 0 12px 26px rgba(38, 36, 30, .12);
+  --ombre-portrait: 0 2px 6px rgba(38, 36, 30, .18);
+  --ombre-flyer: 0 2px 8px rgba(38, 36, 30, .2);
+  --ombre-etiq: 0 1px 4px rgba(38, 36, 30, .25);
 }
 /* points de rupture : 23em (petit mobile), 40em, 48em, 60em (menu desktop), 72em (pilule à pleine largeur) */
 @media (min-width: 60em) {

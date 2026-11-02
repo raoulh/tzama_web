@@ -1,0 +1,10 @@
+/* Soutenir l'école : fiche bordée au feutre vert, main du logo qui fait coucou de temps en temps */
+.soutien { max-width: var(--col); margin: 0 auto; padding: 0 var(--gutter) 3rem; }
+.soutien__in { position: relative; display: grid; gap: .75rem; max-width: 42rem; padding: 1.5rem 1.4rem; border: 2px dashed var(--vert); border-radius: var(--radius); background: color-mix(in srgb, var(--vert) 9%, var(--fond)); }
+.soutien__main { width: 3rem; height: 3.3rem; color: var(--vert); transform-origin: 50% 100%; }
+.soutien h2 { font-size: clamp(1.9rem, 1.5rem + 1.5vw, 2.6rem); }
+.soutien p { margin-bottom: 1.1em; }
+@media (min-width: 48em) {
+  .soutien__in { grid-template-columns: auto 1fr; align-items: start; gap: 1.5rem; padding: 1.75rem 2rem 1.75rem 1.75rem; }
+  .soutien__main { width: 3.6rem; height: 4rem; margin-top: .4rem; }
+}

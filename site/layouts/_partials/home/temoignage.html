@@ -1,0 +1,27 @@
+{{- /*
+  Premier témoignage réel (placeholder: false) par order. S'il n'y en a aucun, hors mode strict seulement,
+  le premier témoignage fictif, marqué comme exemple ; en mode strict, bloc masqué.
+*/ -}}
+{{- $strict := eq (printf "%v" site.Params.strict) "true" -}}
+{{- $all := slice -}}
+{{- with site.GetPage "/temoignages" }}{{ $all = sort .RegularPages "Params.order" }}{{ end -}}
+{{- $pick := false -}}
+{{- with where $all "Params.placeholder" "!=" true }}{{ $pick = index . 0 }}{{ else }}{{ if and $all (not $strict) }}{{ $pick = index $all 0 }}{{ end }}{{ end -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+{{- with $pick }}
+<section class="temoignage" aria-labelledby="temoignage-titre">
+  <h2 id="temoignage-titre" class="visually-hidden">{{ T "home.testimonialTitle" }}</h2>
+  <figure class="reveal">
+    <svg class="temoignage__feuille" data-idle="tournoyer" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-feuille-simple"/></svg>
+    <blockquote>
+      <p>{{ partial "home/text.html" .Params.text }}</p>
+    </blockquote>
+    <figcaption>
+      <span class="legende">{{ .Params.author }}{{ with .Params.relation }}, {{ lower (T (printf "testimonial.relation.%s" .)) }}{{ end }}</span>
+      {{- if .Params.placeholder }}
+      <span class="tag-exemple">{{ T "home.exampleTag" }}</span>
+      {{- end }}
+    </figcaption>
+  </figure>
+</section>
+{{- end }}
