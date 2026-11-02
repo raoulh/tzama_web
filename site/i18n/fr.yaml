@@ -24,3 +24,21 @@ notFound:
   title: Page introuvable
   text: Cette page n'existe pas ou a changé d'adresse.
   back: Revenir à l'accueil
+
+faq:
+  category:
+    ecole: L'école
+    vie-quotidienne: Vie quotidienne
+    inscription: Inscription et coût
+    association: Parents et association
+    extrascolaire: Extrascolaire
+
+team:
+  group:
+    equipe: L'équipe pédagogique
+    ca: Le conseil d'administration
+
+testimonial:
+  relation:
+    parent: Parent
+    former_pupil: Ancien élève

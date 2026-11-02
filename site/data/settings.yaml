@@ -9,3 +9,19 @@ social:
   - { id: facebook, url: "https://www.facebook.com/growtogetherTZAMA/" }
   - { id: instagram, url: "https://www.instagram.com/ecole_tzama" }
   - { id: youtube, url: "https://www.youtube.com/@associationtzama4492" }
+
+# Montants en euros, sans symbole : les gabarits mettent en forme.
+pricing:
+  school_year: 5700
+  monthly: { count: 12, amount: 475 }
+  sibling_discount_percent: { second: 20, third: 30 }
+  club_nature: { year: 360, card_10: 150 }
+  stage_week: 130
+
+donation_url: https://www.helloasso.com/associations/association-tzama/formulaires/5
+
+# Une entrée par langue déclarée dans hugo.yaml ; bandeau masqué si enabled est faux.
+banner:
+  enabled: false
+  text:
+    fr: Texte du bandeau de démonstration.

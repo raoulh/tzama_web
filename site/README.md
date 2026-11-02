@@ -14,4 +14,7 @@ hugo --gc --baseURL https://test.tzama.fr/pr-1/     # build d'une preview servie
 - Saison (couleur d'accent) : posée côté navigateur selon la date du jour (script en tête de `head.html`) ; sans JS, printemps.
 - Images : `partial "image.html" (dict "src" $res "alt" "…" "sizes" "…")`, qui produit le `srcset` WebP.
 - Icônes : `partial "icon.html" (dict "id" "d-coeur")`, symboles de `assets/img/sprite.svg`.
+- Modèle de contenu : actualités, équipe et CA, stages, postes, témoignages et FAQ sont des fichiers de `content/fr/<section>/` (un dossier par langue). Les modèles de départ sont dans `archetypes/` : `hugo new content equipe/prenom-nom`. Les tarifs ne sont que dans `data/settings.yaml`.
+- Validation : `layouts/_partials/validate.html` fait échouer le build, en nommant le fichier et le champ, si un champ obligatoire manque ou est invalide.
+- Mode strict : `HUGO_PARAMS_STRICT=true hugo --gc` refuse en plus les témoignages fictifs (`placeholder: true`). À poser pour le build de production seulement.
 - Ajouter une langue : la déclarer dans `hugo.yaml` avec son `contentDir`, créer `content/<lang>/` et `i18n/<lang>.yaml`.

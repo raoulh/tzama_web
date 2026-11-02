@@ -68,6 +68,8 @@ languages:
 params:
   # Retiré à la bascule sur tzama.fr (tâche 51).
   noindex: true
+  # Le build de production passe HUGO_PARAMS_STRICT=true : il refuse les témoignages fictifs.
+  strict: false
 
 markup:
   goldmark:
