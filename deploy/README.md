@@ -4,7 +4,7 @@ Une VM Debian derrière un HAProxy qui termine le TLS. Sur la VM, Docker compose
 
 | Domaine | Contenu |
 |---|---|
-| `v2.tzama.fr` | site de prod (`sites/prod`) ; maquettes (`sites/mockups`) tant que la CI n'a pas déployé la prod |
+| `v2.tzama.fr` | site de prod (`sites/prod`) ; maquettes sous `/maquettes/` |
 | `test.tzama.fr` | une preview par PR : `/pr-<N>/` (`sites/previews/pr-<N>`) ; maquettes sous `/maquettes/` |
 | `deploy.tzama.fr` | [deployd](deployd/README.md) : webhook de la CI, connexion du CMS ; le reste répond 404 |
 
