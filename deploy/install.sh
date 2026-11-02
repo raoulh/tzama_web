@@ -35,14 +35,6 @@ if [ ! -e "$DIR/.env" ]; then
 	chmod 0600 "$DIR/.env"
 fi
 
-if [ -e /etc/nftables.conf ] && ! cmp -s "$SRC/nftables.conf" /etc/nftables.conf; then
-	cp /etc/nftables.conf "/etc/nftables.conf.bak-$(date +%Y%m%d-%H%M%S)"
-fi
-install -m 0755 "$SRC/nftables.conf" /etc/nftables.conf
-nft -c -f /etc/nftables.conf
-systemctl enable nftables
-nft -f /etc/nftables.conf
-
 cd "$DIR"
 docker compose pull --quiet
 docker compose up -d --remove-orphans
