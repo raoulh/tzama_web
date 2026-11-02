@@ -36,9 +36,22 @@ L'interface s'affiche dans la langue du navigateur (Sveltia n'a pas d'option pou
 
 ## Images
 
-Les actualités, l'équipe et les témoignages sont des page bundles : l'image est enregistrée dans le dossier de la fiche, à côté de `index.md`. Le CMS accepte JPEG, PNG et WebP jusqu'à 15 Mo, réduit l'image à 2000 px et la convertit en WebP avant l'envoi. Le texte alternatif devient obligatoire dès qu'une image est posée ; le CMS ne sait pas exprimer cette condition, c'est la validation du build qui la fait respecter.
+Les actualités, l'équipe, les témoignages, les partenaires, les événements et les photos de section des pages sont des page bundles : l'image est enregistrée dans le dossier de la fiche, à côté de `index.md`. Le CMS accepte JPEG, PNG et WebP jusqu'à 15 Mo, réduit l'image à 2000 px et la convertit en WebP avant l'envoi. Le texte alternatif devient obligatoire dès qu'une image est posée ; le CMS ne sait pas exprimer cette condition, c'est la validation du build qui la fait respecter.
 
 L'insertion d'images dans le texte est désactivée : une image passe toujours par un champ dédié, avec son texte alternatif, et par `image.html`.
+
+## Collections et pages
+
+- **Contenu en fiches** : actualités, équipe et CA, stages, postes, témoignages, questions fréquentes, partenaires, événements, documents. Chaque fiche est un dossier `<slug>/index.md`.
+- **Pages** : L'école, Inscription, Extrascolaire, L'association, Contact et Accueil. Une page est une liste de sections ; chaque type de section (texte, équipe, chiffres, tarifs, étapes…) a ses propres champs. Les listes (équipe, questions, partenaires, stages…) ne se saisissent pas dans la page : la section les lit dans leur collection.
+- **Ancre d'une section** : le champ « Ancre » est la cible du menu et des liens internes. Ne pas la changer sur une section existante ; `validate.html` refuse deux sections de même ancre dans une page.
+- **Texte provisoire** : l'encadré n'apparaît qu'en prévisualisation et sur v2, jamais sur le site définitif.
+- **Accueil** : seuls les blocs déjà présents dans les gabarits sont déclarés ; les nouveaux blocs s'ajoutent à `config.yml` avec leur gabarit. Ses images vont dans `site/assets/img/accueil/`.
+- **Réglages** : coordonnées, tarifs (remise fratrie unique, dès le deuxième enfant) et bandeau, dans `site/data/settings.yaml`.
+
+## Documents PDF
+
+Un PDF est un fichier du dossier de sa fiche (collection « Documents »). Le champ n'accepte que `application/pdf`, 10 Mo au plus ; le CMS ne convertit ni ne réduit les PDF. Le build vérifie que le fichier existe et que c'est bien un PDF.
 
 ## Ajouter un champ
 
