@@ -1,0 +1,26 @@
+skipToContent: Aller au contenu
+logoAria: Tzama, grandir ensemble — accueil
+
+menu:
+  aria: Menu principal
+  open: Menu
+  close: Fermer
+
+cta:
+  visit: Venir nous rencontrer
+  donate: Faire un don
+
+footer:
+  about: École privée, laïque et associative, immatriculée auprès de l'Inspection académique. Label Eco-École niveau OR 2026.
+  write: Nous écrire
+  follow: Nous suivre
+  links: Liens utiles
+  social:
+    facebook: Facebook
+    instagram: Instagram
+    youtube: YouTube
+
+notFound:
+  title: Page introuvable
+  text: Cette page n'existe pas ou a changé d'adresse.
+  back: Revenir à l'accueil

@@ -1,0 +1,22 @@
+{{- $s := hugo.Data.settings -}}
+<footer class="footer">
+  <div class="footer__in">
+    <div class="footer__col">
+      <p><strong>{{ $s.name }}</strong><br>{{ $s.address.street }}<br>{{ $s.address.postalCode }} {{ $s.address.city }}</p>
+      <p><a href="mailto:{{ $s.email }}">{{ $s.email }}</a><br><a href="{{ (site.GetPage "/contact").RelPermalink }}">{{ T "footer.write" }}</a> · <a href="{{ (site.GetPage "/association/nous-soutenir").RelPermalink }}">{{ T "cta.donate" }}</a></p>
+    </div>
+    <div class="footer__col">
+      <p>{{ T "footer.about" }}</p>
+      <ul class="footer__social" aria-label="{{ T "footer.follow" }}">
+        {{- range $s.social }}
+        <li><a href="{{ .url }}">{{ partial "icon.html" (dict "id" (printf "s-%s" .id)) }}<span>{{ T (printf "footer.social.%s" .id) }}</span></a></li>
+        {{- end }}
+      </ul>
+    </div>
+    <ul class="footer__links" aria-label="{{ T "footer.links" }}">
+      {{- range site.Menus.footer }}
+      <li><a href="{{ .URL }}{{ with .Params.anchor }}#{{ . }}{{ end }}">{{ .Name }}</a></li>
+      {{- end }}
+    </ul>
+  </div>
+</footer>

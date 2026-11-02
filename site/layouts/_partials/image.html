@@ -1,0 +1,34 @@
+{{- /*
+  Image responsive. Paramètres :
+    src      ressource image (page bundle ou assets), obligatoire
+    alt      texte alternatif ; obligatoire sauf decorative=true
+    sizes    attribut sizes (défaut 100vw)
+    widths   largeurs candidates (défaut 480 720 1080 1440 1920), plafonnées à la largeur source
+    eager    true pour l'image principale au-dessus de la ligne de flottaison
+    class
+  Les GIF et SVG passent tels quels.
+*/ -}}
+{{- $img := .src -}}
+{{- if not $img }}{{ errorf "image.html : paramètre src manquant" }}{{ end -}}
+{{- if and (not .decorative) (not .alt) }}{{ errorf "image.html : alt manquant pour %s" $img.Name }}{{ end -}}
+{{- $alt := cond (.decorative | default false) "" (.alt | default "") -}}
+{{- $loading := cond (.eager | default false) "eager" "lazy" -}}
+{{- if in (slice "svg" "gif") $img.MediaType.SubType -}}
+<img src="{{ $img.RelPermalink }}" alt="{{ $alt }}"{{ with .class }} class="{{ . }}"{{ end }} loading="{{ $loading }}" decoding="async">
+{{- else -}}
+{{- $widths := .widths | default (slice 480 720 1080 1440 1920) -}}
+{{- $set := slice -}}
+{{- $largest := false -}}
+{{- range $widths -}}
+  {{- if le . $img.Width -}}
+    {{- $r := $img.Process (printf "resize %dx webp" .) -}}
+    {{- $set = $set | append (printf "%s %dw" $r.RelPermalink .) -}}
+    {{- $largest = $r -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $largest -}}
+  {{- $largest = $img.Process "webp" -}}
+  {{- $set = slice (printf "%s %dw" $largest.RelPermalink $largest.Width) -}}
+{{- end -}}
+<img src="{{ $largest.RelPermalink }}" srcset="{{ delimit $set ", " }}" sizes="{{ .sizes | default "100vw" }}" width="{{ $largest.Width }}" height="{{ $largest.Height }}" alt="{{ $alt }}"{{ with .class }} class="{{ . }}"{{ end }} loading="{{ $loading }}" decoding="async"{{ if .eager }} fetchpriority="high"{{ end }}>
+{{- end -}}

@@ -1,0 +1,11 @@
+# Coordonnées et liens communs à toutes les langues : seule source pour les gabarits.
+name: Association Tzama
+address:
+  street: 10a Allée des Marroniers
+  postalCode: "68680"
+  city: Kembs
+email: contact.tzama@gmail.com
+social:
+  - { id: facebook, url: "https://www.facebook.com/growtogetherTZAMA/" }
+  - { id: instagram, url: "https://www.instagram.com/ecole_tzama" }
+  - { id: youtube, url: "https://www.youtube.com/@associationtzama4492" }

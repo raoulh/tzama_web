@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 24" preserveAspectRatio="none" fill="none">
+  <!-- Trait de surligneur -->
+  <path stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-opacity=".9" d="M8,14 C50,8 110,16 192,10"/>
+</svg>

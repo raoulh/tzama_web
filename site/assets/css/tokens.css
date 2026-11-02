@@ -1,0 +1,47 @@
+:root {
+  --encre: #26241e;
+  --encre-2: #57544a;
+  --cadre: #fff;
+  --fond: #fdfbf7;
+  --ligne: #e3ddd1;
+  --vert: #669900;
+  --sapin: #1f4d2e;
+  --sapin-fonce: #163a22;
+  --footer-texte: #d6dccf;
+
+  /* saison : accent (bloc d'invitation, dates), teinte (blocs pâles), feuilles f1 (foncée) et f2 (claire) ; printemps par défaut */
+  --accent: #3f7320;
+  --accent-fonce: #315a18;
+  --teinte: #e6eddb;
+  --f1: #669900;
+  --f2: #b5d64a;
+
+  --font-body: "Baloo 2", "Segoe UI", Arial, sans-serif;
+  --font-display: "Gochi Hand", "Comic Sans MS", cursive;
+
+  --gutter: 1.25rem;
+  --col: 70rem;
+  --measure: 42rem;
+  --cta-h: 44px;
+  --pill-top: .6rem;
+  --header-h: 3.5rem;
+  --header-c: 3.5rem;
+  --logo-h: 40px;
+  --logo-c: 40px;
+  --thumb-h: 4.6rem;
+  --trans-h: clamp(2.6rem, 5.5vw, 5rem);
+
+  --radius: 1.25rem;
+  --radius-sm: 1rem;
+  --ombre-pilule: 0 6px 22px rgba(38, 36, 30, .16);
+  --ombre-pilule-c: 0 4px 14px rgba(38, 36, 30, .18);
+  --ombre-menu: 0 12px 30px rgba(38, 36, 30, .16);
+}
+/* points de rupture : 23em (petit mobile), 40em, 48em, 60em (menu desktop), 72em (pilule à pleine largeur) */
+@media (min-width: 60em) {
+  :root { --header-h: 4.25rem; --header-c: 3.5rem; --logo-h: 52px; --logo-c: 40px; --thumb-h: 0rem; }
+}
+
+html[data-season="hiver"]   { --accent: #2e5f7a; --accent-fonce: #234a60; --teinte: #e3ebf0; --f1: #5b93b8; --f2: #b4cfe0; }
+html[data-season="automne"] { --accent: #9a4318; --accent-fonce: #7a3410; --teinte: #f3e6db; --f1: #c8552b; --f2: #e8a33a; }
+html[data-season="ete"]     { --accent: #8a5a05; --accent-fonce: #6e4704; --teinte: #f4ead3; --f1: #7fa83a; --f2: #f2c436; }

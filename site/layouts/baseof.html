@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="{{ site.Language.Locale }}" data-season="{{ partial "season.html" . }}"{{ if not .IsHome }} class="hero-cta-away"{{ end }}>
+<head>
+{{ partial "head.html" . }}
+</head>
+<body{{ if partial "show-thumb-bar.html" . }} class="has-thumb-bar"{{ end }}>
+<a class="skip" href="#contenu">{{ T "skipToContent" }}</a>
+<div class="scroll-sentinel" aria-hidden="true"></div>
+{{ partial "header.html" . }}
+<main id="contenu">
+{{ block "main" . }}{{ end }}
+</main>
+{{ partial "footer.html" . }}
+{{ if partial "show-thumb-bar.html" . }}{{ partial "thumb-bar.html" . }}{{ end }}
+{{ with resources.Get "js/site.js" | js.Build (dict "minify" true "target" "es2017") | fingerprint }}
+<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>
+{{ end }}
+</body>
+</html>

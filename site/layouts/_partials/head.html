@@ -1,0 +1,16 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} · {{ site.Title }}{{ end }}</title>
+<meta name="description" content="{{ .Description | default site.Params.description }}">
+{{ if site.Params.noindex }}<meta name="robots" content="noindex, nofollow">{{ end }}
+<link rel="canonical" href="{{ .Permalink }}">
+{{ range slice "fonts/gochi-hand-400-normal.woff2" "fonts/baloo-2-400-800-normal.woff2" }}
+<link rel="preload" href="{{ (resources.Get . | fingerprint).RelPermalink }}" as="font" type="font/woff2" crossorigin>
+{{ end }}
+{{ $fonts := resources.Get "css/fonts.css" | resources.ExecuteAsTemplate "css/fonts.css" . }}
+{{ $css := slice $fonts }}
+{{ range slice "tokens" "base" "header" "footer" "page" }}{{ $css = $css | append (resources.Get (printf "css/%s.css" .)) }}{{ end }}
+{{ with $css | resources.Concat "css/site.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">
+{{ end }}
+<script>document.documentElement.classList.add('js');</script>

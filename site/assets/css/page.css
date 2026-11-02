@@ -1,0 +1,8 @@
+/* Gabarit par défaut, en attendant les gabarits maquettés (tâche 12) */
+body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
+main { display: block; flex: 1 0 auto; }
+.page { max-width: var(--col); margin: 0 auto; padding: calc(var(--header-h) + var(--pill-top) + 2rem) var(--gutter) 3rem; }
+.page__head, .page__body { max-width: var(--measure); }
+.page__list { padding-left: 1.2rem; }
+.page__list li { margin: .2rem 0; }
+.page__list a { display: inline-flex; align-items: center; min-height: 44px; }

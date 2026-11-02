@@ -1,0 +1,4 @@
+{{- /* Usage : partial "icon.html" (dict "id" "d-coeur" "class" "don__ico") ; décoratif, masqué aux lecteurs d'écran. */ -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+<svg class="{{ .class }}" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ .id }}"/></svg>
+{{- /**/ -}}

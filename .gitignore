@@ -9,3 +9,4 @@ node_modules/
 mockups/captures/
 ressources
 mockups
+.playwright-mcp/

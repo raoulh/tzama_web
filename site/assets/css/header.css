@@ -1,0 +1,92 @@
+/* Pilule flottante : détachée des bords, se compacte au défilement.
+   La marge intérieure droite vaut la marge haut/bas des boutons : pilule et boutons restent concentriques dans les deux états. */
+.header { --pill-pad: calc((var(--header-h) - var(--cta-h)) / 2); position: fixed; top: var(--pill-top); left: 0; right: 0; z-index: 40; padding: 0 .6rem; }
+.header.is-compact { --pill-pad: calc((var(--header-c) - var(--cta-h)) / 2); }
+.header__in { --pill-left: calc(var(--pill-pad) + .5rem); max-width: calc(var(--col) - 24px + 2 * var(--pill-pad)); height: var(--header-h); margin: 0 auto; padding: 0 var(--pill-pad) 0 var(--pill-left); display: flex; align-items: center; gap: .5rem; background: var(--fond); border: 1px solid var(--ligne); border-radius: 999px; box-shadow: var(--ombre-pilule); transition: height .25s, padding .25s, max-width .25s; }
+.header.is-compact .header__in { height: var(--header-c); box-shadow: var(--ombre-pilule-c); }
+
+.logo { position: relative; z-index: 41; display: flex; align-items: center; min-height: 44px; flex-shrink: 0; }
+.logo img { height: var(--logo-h); width: auto; transition: height .25s; }
+.header.is-compact .logo img { height: var(--logo-c); }
+
+.actions { position: relative; z-index: 41; display: flex; align-items: center; margin-left: auto; flex-shrink: 0; }
+.menu-btn { display: inline-flex; align-items: center; gap: .5rem; height: var(--cta-h); min-width: 44px; margin-left: .4rem; padding: .3rem .8rem; background: transparent; border: 2px solid var(--encre); border-radius: 999px; font-family: var(--font-body); font-weight: 700; font-size: 1rem; color: var(--encre); cursor: pointer; }
+.menu-btn svg { width: 24px; height: 24px; }
+.menu-btn .ico-close { display: none; }
+.menu-btn[aria-expanded="true"] .ico-open { display: none; }
+.menu-btn[aria-expanded="true"] .ico-close { display: block; }
+
+/* « Faire un don » : cœur seul sur mobile (le nom reste lu par les lecteurs d'écran) */
+.don { display: inline-flex; align-items: center; height: var(--cta-h); min-width: var(--cta-h); padding: 0 calc((var(--cta-h) - 1.5rem) / 2 - 2px); border: 2px solid var(--sapin); border-radius: 999px; color: var(--sapin); text-decoration: none; font-weight: 700; font-size: 1.02rem; line-height: 1; white-space: nowrap; transition: background-color .2s, color .2s; }
+.don:hover { background: var(--teinte); color: var(--sapin-fonce); }
+.don__ico { width: 1.5rem; height: 1.5rem; color: var(--vert); flex-shrink: 0; }
+.don__label { display: grid; grid-template-columns: 1fr; opacity: 1; transition: grid-template-columns .35s, opacity .25s; }
+.don__label > span { min-width: 0; overflow: hidden; padding: 0 .35rem 0 .45rem; transition: padding .35s; }
+.visit { display: none; grid-template-columns: 1fr; margin-left: .4rem; opacity: 1; visibility: visible; transition: grid-template-columns .4s, opacity .3s, margin .4s, visibility 0s; }
+.visit > .btn { min-width: 0; overflow: hidden; white-space: nowrap; height: var(--cta-h); min-height: 0; padding: 0 1.1rem; font-size: 1.02rem; transition: padding .4s, transform .2s, box-shadow .2s, background-color .2s; }
+
+/* Menu mobile plein écran : items au marqueur, sous-items en Baloo */
+.nav { display: none; }
+.nav.is-open { display: block; position: fixed; inset: 0; z-index: 39; overflow-y: auto; background: var(--fond); padding: calc(var(--header-h) + var(--pill-top) + 1.5rem) var(--gutter) 3rem; }
+.nav__list, .nav__list ul { list-style: none; margin: 0; padding: 0; }
+.nav__list > li { border-bottom: 2px solid var(--ligne); }
+.nav__list a { display: flex; align-items: center; min-height: 52px; text-decoration: none; color: var(--encre); font-family: var(--font-display); font-size: 1.6rem; letter-spacing: .01em; }
+.nav__list li ul { padding-bottom: .5rem; }
+.nav__list li ul a { padding-left: 1.5rem; min-height: 44px; font-family: var(--font-body); font-weight: 600; font-size: 1.1rem; }
+.nav__list a[aria-current="page"] { text-decoration: underline; text-decoration-color: var(--vert); }
+.nav__ico { width: 1.15em; height: 1.15em; margin-right: .45em; color: var(--vert); flex-shrink: 0; }
+.nav__cta { border: 0 !important; padding-top: 1.25rem; }
+.nav__cta .btn { color: #fff; width: 100%; font-family: var(--font-body); font-size: 1.08rem; }
+
+@media (max-width: 23em) {
+  .header__in { --pill-left: .6rem; }
+  .logo img, .header.is-compact .logo img { height: 36px; }
+}
+@media (max-width: 59.99em) {
+  .don .don__label, .don .don__label > span { grid-template-columns: 0fr; opacity: 0; padding: 0; }
+}
+
+@media (min-width: 60em) {
+  .menu-btn, .nav__cta { display: none; }
+  .nav { display: block; flex: 1; min-width: 0; }
+  .nav__list { display: flex; align-items: center; gap: .1rem; }
+  .nav__list > li { border: 0; position: relative; }
+  .nav__list > li > a { position: relative; z-index: 0; min-height: 44px; white-space: nowrap; padding: 0 .55rem; font-size: 1.2rem; }
+  .nav__list > li > a[aria-current="page"] { text-decoration: none; }
+  .nav__ico { width: 1.1em; height: 1.1em; margin-right: .4em; }
+  .nav__list > li.has-sub > a::after { content: ""; width: .38em; height: .38em; margin-left: .4em; border: solid currentColor; border-width: 0 2px 2px 0; transform: translateY(-.2em) rotate(45deg); flex-shrink: 0; }
+  /* survol et rubrique courante : trait de marqueur derrière l'item */
+  .nav__list > li > a::before { content: ""; position: absolute; left: 2.1rem; right: .5rem; bottom: 6px; height: .5em; z-index: -1; background: var(--vert); opacity: .45; -webkit-mask: var(--trait-marqueur) no-repeat center / 100% 100%; mask: var(--trait-marqueur) no-repeat center / 100% 100%; transform: scaleX(0); transform-origin: left; transition: transform .2s; }
+  .nav__list > li > a:hover::before, .nav__list > li > a:focus-visible::before, .nav__list > li:focus-within > a::before, .nav__list > li > a.is-current::before { transform: scaleX(1); }
+  .nav__list li ul { position: absolute; top: calc(100% + .6rem); left: 0; min-width: 16rem; display: none; padding: .6rem 0; background: var(--cadre); border: 1px solid var(--ligne); border-radius: var(--radius-sm); box-shadow: var(--ombre-menu); }
+  /* pont invisible au-dessus du sous-menu : le survol ne se perd pas dans l'écart */
+  .nav__list li ul::before { content: ""; position: absolute; left: 0; right: 0; top: -.7rem; height: .7rem; }
+  .nav__list li:hover > ul, .nav__list li:focus-within > ul { display: block; }
+  .nav__list li ul a { padding: .25rem 1.1rem; font-size: 1.05rem; }
+  .nav__list li ul a:hover, .nav__list li ul a:focus-visible { background: var(--teinte); }
+  .nav__list li ul .nav__ico { display: none; }
+  .visit { display: grid; }
+  /* un seul bouton plein à la fois : tant que le bouton de l'ouverture est visible, « Venir nous rencontrer » est replié
+     (hors tabulation après la transition) ; sinon « Faire un don » se replie sur son cœur */
+  html.js:not(.hero-cta-away) .visit { grid-template-columns: 0fr; opacity: 0; margin-left: 0; visibility: hidden; transition-delay: 0s, 0s, 0s, .4s; }
+  html.js:not(.hero-cta-away) .visit > .btn { padding: 0; }
+  html.js.hero-cta-away .don__label, html.js.hero-cta-away .don__label > span { grid-template-columns: 0fr; opacity: 0; padding: 0; }
+}
+/* entre 960 et 1150 px la pilule n'a pas sa largeur maximale : menu plus petit, sans pictos */
+@media (min-width: 60em) and (max-width: 71.99em) {
+  .nav__list > li > a { padding: 0 .45rem; font-size: 1.1rem; }
+  .nav__list > li > a > .nav__ico { display: none; }
+  .nav__list > li > a::before { left: .4rem; }
+}
+
+/* Barre pouce (mobile) : rangée tant que le bouton de l'ouverture est à l'écran */
+.thumb-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; padding: .6rem var(--gutter) calc(.6rem + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--fond) 94%, transparent); border-top: 1px solid var(--ligne); backdrop-filter: blur(6px); transition: transform .25s; }
+.thumb-bar .btn { width: 100%; }
+html.hero-cta-visible .thumb-bar { transform: translateY(110%); }
+html.menu-open .thumb-bar { display: none; }
+body.has-thumb-bar main { padding-bottom: 5rem; }
+@media (min-width: 60em) { .thumb-bar { display: none; } body.has-thumb-bar main { padding-bottom: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .header__in, .logo img, .thumb-bar, .don, .don__label, .don__label > span, .visit, .visit > .btn, .nav__list > li > a::before { transition: none; }
+}
