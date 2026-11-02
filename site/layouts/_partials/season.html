@@ -1,8 +1,0 @@
-{{- /* Saison de la date de build : la CI doit reconstruire au moins à chaque changement de saison. */ -}}
-{{- $m := now.Month | int -}}
-{{- $s := "printemps" -}}
-{{- if or (eq $m 12) (le $m 2) }}{{ $s = "hiver" }}
-{{- else if ge $m 9 }}{{ $s = "automne" }}
-{{- else if ge $m 6 }}{{ $s = "ete" }}
-{{- end -}}
-{{- return $s -}}

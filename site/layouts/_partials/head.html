@@ -13,4 +13,8 @@
 {{ with $css | resources.Concat "css/site.css" | minify | fingerprint }}
 <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">
 {{ end }}
-<script>document.documentElement.classList.add('js');</script>
+<link rel="icon" href="{{ "favicon.ico" | relURL }}" sizes="32x32">
+<link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{ "apple-touch-icon.png" | relURL }}">
+{{- /* Saison selon la date du visiteur, posée avant le premier rendu ; sans JS, le printemps de tokens.css. */}}
+<script>(function(d,m){d.classList.add('js');d.dataset.season=m<2||m>10?'hiver':m<5?'printemps':m<8?'ete':'automne';})(document.documentElement,new Date().getMonth());</script>

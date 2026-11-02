@@ -11,7 +11,7 @@ hugo --gc --baseURL https://test.tzama.fr/pr-1/     # build d'une preview servie
 - Contenu : `content/fr/` ; libellés d'interface : `i18n/fr.yaml` ; coordonnées et réseaux : `data/settings.yaml`.
 - Menus : `hugo.yaml`, par langue (`languages.fr.menus`).
 - CSS : `assets/css/`, concaténé et minifié par Hugo Pipes ; `tokens.css` porte les couleurs, polices et dimensions.
-- Saison (couleur d'accent) : tirée de la date du build.
+- Saison (couleur d'accent) : posée côté navigateur selon la date du jour (script en tête de `head.html`) ; sans JS, printemps.
 - Images : `partial "image.html" (dict "src" $res "alt" "…" "sizes" "…")`, qui produit le `srcset` WebP.
 - Icônes : `partial "icon.html" (dict "id" "d-coeur")`, symboles de `assets/img/sprite.svg`.
 - Ajouter une langue : la déclarer dans `hugo.yaml` avec son `contentDir`, créer `content/<lang>/` et `i18n/<lang>.yaml`.
