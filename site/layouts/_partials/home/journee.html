@@ -13,7 +13,7 @@
       </li>
       {{- end }}
     </ol>
-    <p><a class="link" href="{{ (site.GetPage "/ecole/une-journee").RelPermalink }}">{{ T "home.dayAll" }}</a> {{ T "home.dayOr" }} <a class="link" href="{{ (site.GetPage "/ecole/philosophie").RelPermalink }}">{{ T "home.philosophyLink" }}</a>.</p>
+    <p><a class="link" href="{{ (site.GetPage "/ecole").RelPermalink }}#semaine-type">{{ T "home.dayAll" }}</a> {{ T "home.dayOr" }} <a class="link" href="{{ (site.GetPage "/ecole").RelPermalink }}#vision">{{ T "home.philosophyLink" }}</a>.</p>
   </div>
   <figure class="photo photo--journee reveal" data-idle="balancer">
     {{ partial "image.html" (dict "src" (resources.Get $d.photo) "alt" $d.photo_alt "widths" (slice 320 533) "sizes" "(min-width: 60em) 19rem, 17rem") }}
