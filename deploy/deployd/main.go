@@ -93,6 +93,7 @@ func newMux(cfg config, logger *slog.Logger, store *sites.Store, limiter *contac
 		Secret:     cfg.HookSecret,
 		MaxBytes:   cfg.HookMaxBytes,
 		TempDir:    filepath.Join(cfg.SitesDir, ".tmp"),
+		StatePath:  filepath.Join(cfg.StateDir, "hook-last.json"),
 		UploadTime: cfg.HookUploadTimeout,
 		TrustProxy: cfg.TrustProxy,
 		Logger:     logger.With("component", "hook"),
@@ -102,7 +103,7 @@ func newMux(cfg config, logger *slog.Logger, store *sites.Store, limiter *contac
 		ClientSecret:   cfg.GitHubClientSecret,
 		GitHubURL:      cfg.GitHubURL,
 		RedirectURL:    cfg.OAuthRedirectURL,
-		AllowedOrigins: cfg.AllowedOrigins,
+		AllowedOrigins: cfg.OAuthOrigins,
 		Logger:         logger.With("component", "oauth"),
 	})
 	var mailer contact.Mailer
@@ -110,7 +111,7 @@ func newMux(cfg config, logger *slog.Logger, store *sites.Store, limiter *contac
 		mailer = contact.NewSMTPMailer(cfg.SMTP)
 	}
 	ct := contact.New(contact.Config{
-		AllowedOrigins: cfg.AllowedOrigins,
+		AllowedOrigins: cfg.ContactOrigins,
 		OKPath:         cfg.ContactOK,
 		ErrorPath:      cfg.ContactError,
 		TrustProxy:     cfg.TrustProxy,
@@ -150,8 +151,8 @@ func serve(cfg config, logger *slog.Logger) int {
 		logger.Warn("SMTP_TLS_SKIP_VERIFY=true : certificat du serveur SMTP non vérifié (chiffré, mais sans protection contre l'usurpation)",
 			"smtp_host", cfg.SMTP.Host)
 	}
-	if len(cfg.AllowedOrigins) == 0 {
-		logger.Error("ALLOWED_ORIGINS vide : connexion du CMS impossible")
+	if len(cfg.OAuthOrigins) == 0 {
+		logger.Error("OAUTH_ALLOWED_ORIGINS vide : connexion du CMS impossible")
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)

@@ -35,7 +35,9 @@ Une archive est extraite dans un dossier temporaire, vérifiée (chemins, liens,
 | `X-Tzama-SHA` | sha du commit, 40 caractères hexadécimaux en minuscules |
 | `X-Tzama-Tag` | tag d'image, `^[A-Za-z0-9._-]{1,128}$` |
 | `X-Tzama-Timestamp` | heure Unix en secondes, à ±300 s de l'horloge de la VM |
+| `X-Tzama-Body-SHA256` | SHA-256 du corps, 64 caractères hexadécimaux en minuscules (corps vide : `e3b0c442…b855`) |
 | `X-Tzama-Signature` | `sha256=<hex>` |
+| `Content-Length` | obligatoire (pas d'envoi `chunked`) ; 0 sans corps |
 
 Combinaisons acceptées (tout autre en-tête présent est refusé) :
 
@@ -50,15 +52,26 @@ L'archive contient le *contenu* de `public/` (`tar czf site.tar.gz -C public .`)
 
 ### Signature
 
-HMAC-SHA256 avec `HOOK_SECRET`, sur la chaîne suivante suivie du corps brut, en hexadécimal minuscule :
+HMAC-SHA256 avec `HOOK_SECRET`, en hexadécimal minuscule, sur la chaîne :
 
 ```
-<timestamp>\n<MÉTHODE>\n<cible>\n<pr>\n<sha>\n<tag>\n
+<timestamp>\n<MÉTHODE>\n<cible>\n<pr>\n<sha>\n<tag>\n<content-length>\n<body-sha256>\n
 ```
 
-Les champs absents sont des chaînes vides (leur `\n` reste). Exemple de référence (testé dans `internal/hook`) : secret `secret-de-test`, chaîne `1700000000\nPOST\npreview\n12\n` + 40 × `a` + `\n\n`, corps `corps` → `6f96e336e45115e20c15cee6ee6696eb133144a63065fd6cfa0f13b1e06efe2d`.
+Les champs absents sont des chaînes vides (leur `\n` reste). Le corps n'est pas signé directement mais par son empreinte : la signature se vérifie sur les seuls en-têtes, avant de lire un octet du corps, et un client sans le secret ne peut ni occuper le service ni remplir le disque. L'empreinte est vérifiée pendant la réception, avant toute extraction.
 
-Une requête déjà reçue (même signature, dans la fenêtre) est refusée : la CI doit signer à nouveau pour réessayer.
+Exemple de référence (testé dans `internal/hook`) : secret `secret-de-test`, horodatage `1700000000`, `POST preview`, PR `12`, SHA 40 × `a`, tag vide, corps `corps` (5 octets, SHA-256 `6c1ff7eccfdbfaec611433e77916f6e16a408e7f85084d5ad7e14b8cdc619344`) → `c3cdc9882c9fd1bb24e35ff72b3322f8708e579f65e858ac60a9488909a13de9`.
+
+Rejeu :
+
+- une signature déjà reçue est refusée tant que son horodatage peut encore passer la fenêtre ;
+- par cible (`prod`, `preview:<pr>`, `service`), deployd garde le dernier horodatage accepté dans `/state/hook-last.json` et refuse tout horodatage inférieur ou égal, même après un redémarrage. Deux requêtes vers la même cible dans la même seconde : la seconde est refusée (409) et doit être signée à nouveau.
+
+Envoi :
+
+- un seul envoi d'archive à la fois (429 avec `Retry-After` sinon) ; les suppressions et la cible `service` n'attendent pas ;
+- l'envoi doit être terminé 300 s après l'horodatage signé (et dans `HOOK_UPLOAD_TIMEOUT`), sinon 408 ;
+- débit minimal de 1 Mio par 30 s : un client plus lent est coupé.
 
 ### Réponses
 
@@ -67,13 +80,16 @@ JSON, `{"ok":true,…}` en cas de succès, sinon `{"ok":false,"error":"…"}`.
 | Statut | Cas |
 |---|---|
 | 200 | effectué ; pour la prod, `previous` (sha remplacé) et `reused` (sha déjà présent, archive non réextraite) |
-| 400 | en-tête invalide, combinaison non prévue, corps manquant ou inattendu, archive refusée |
+| 400 | en-tête invalide, combinaison non prévue, corps manquant ou inattendu, empreinte du corps fausse, archive refusée |
 | 401 | signature absente ou fausse, horodatage hors fenêtre |
 | 404 | `DELETE` d'une preview inexistante |
-| 409 | rejeu |
+| 408 | envoi trop lent ou terminé hors fenêtre |
+| 409 | rejeu, ou horodatage pas plus récent que le dernier accepté pour cette cible |
+| 411 | `Content-Length` absent |
 | 413 | corps ou archive décompressée trop gros |
+| 429 | un autre envoi d'archive est en cours (`Retry-After`) |
 | 503 | `HOOK_SECRET` absent |
-| 500 | erreur d'écriture sur la VM (voir les journaux) |
+| 500 | erreur interne ; le client ne reçoit qu'un message générique, le détail est dans les journaux |
 
 ### Client
 
@@ -87,7 +103,7 @@ deploy-hook.sh delete-preview <pr>
 deploy-hook.sh service <tag>
 ```
 
-Le code de sortie est non nul si le service refuse. `DEPLOY_TIMEOUT` (secondes, défaut 1800) borne la requête. Le secret passe dans les arguments d'`openssl` : visible des autres processus du même runner, acceptable sur un runner GitHub éphémère, pas sur une machine partagée.
+Le code de sortie est non nul si le service refuse. `DEPLOY_TIMEOUT` (secondes par tentative, défaut 600) borne la requête. Sur 429 (autre envoi en cours) et 409 (même seconde qu'une requête acceptée), le script signe à nouveau et réessaie, `DEPLOY_RETRIES` fois au plus (défaut 20). Le HMAC est calculé dans le script (`od`, `awk`, `openssl dgst` sans clé) : le secret n'apparaît dans les arguments d'aucun processus.
 
 ## Configuration
 
@@ -98,7 +114,8 @@ Variables lues au démarrage ; `deploy/deployd.env.example` est le modèle de `/
 | `HOOK_SECRET` | | secret du webhook, 32 caractères au moins |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | | application OAuth GitHub du CMS |
 | `OAUTH_REDIRECT_URL` | | callback envoyée à GitHub ; vide : celle de l'application |
-| `ALLOWED_ORIGINS` | | origines autorisées pour le CMS et le formulaire, séparées par des virgules |
+| `OAUTH_ALLOWED_ORIGINS` | `https://v2.tzama.fr` | origines qui reçoivent le jeton GitHub du CMS, séparées par des virgules |
+| `CONTACT_ALLOWED_ORIGINS` | `https://v2.tzama.fr,https://test.tzama.fr` | origines autorisées pour le formulaire |
 | `SMTP_HOST`, `SMTP_PORT` | , 587 | serveur d'envoi ; `SMTP_HOST` vide : formulaire en 503 |
 | `SMTP_TLS` | `starttls` (`tls` si port 465) | `starttls`, `tls` ou `none` |
 | `SMTP_TLS_SKIP_VERIFY` | `false` | voir ci-dessous |
@@ -111,10 +128,12 @@ Variables lues au démarrage ; `deploy/deployd.env.example` est le modèle de `/
 | `RELEASES_KEEP` | 5 | releases gardées (la prod l'est toujours) |
 | `HOOK_MAX_BYTES` | 536870912 | taille maximale du corps |
 | `HOOK_MAX_FILES`, `HOOK_MAX_UNPACKED_BYTES` | 50000, 2147483648 | limites de l'archive décompressée |
-| `HOOK_UPLOAD_TIMEOUT` | `30m` | durée maximale d'un envoi |
+| `HOOK_UPLOAD_TIMEOUT` | `5m` | durée maximale d'un envoi, bornée de toute façon par la fenêtre de 300 s après l'horodatage |
 | `SITES_DIR`, `STATE_DIR`, `PORT`, `TRUST_PROXY` | posées par `compose.yml` | |
 
 `TRUST_PROXY=true` : l'IP du visiteur est lue dans `X-Real-IP`, posé par Caddy. Sans proxy devant, laisser à `false`.
+
+`ALLOWED_ORIGINS` (ancienne variable commune) est refusée au démarrage : les deux listes sont séparées parce que `test.tzama.fr` sert les previews, c'est-à-dire le code de n'importe quelle PR. Si ce domaine pouvait recevoir le jeton GitHub, une PR malveillante récupérerait celui d'un éditeur connecté. La page de callback ne transmet le jeton qu'à la fenêtre qui l'a ouverte (`event.source === window.opener`) et sur une origine de `OAUTH_ALLOWED_ORIGINS` ; la portée demandée à GitHub est toujours `public_repo`, quel que soit le `scope` envoyé par le CMS.
 
 ### Expéditeur et `SMTP_TLS_SKIP_VERIFY`
 
@@ -124,9 +143,9 @@ Le serveur SMTP utilisé est sur le réseau interne et présente un certificat a
 
 ## Formulaire de contact
 
-`POST /api/contact`, `application/x-www-form-urlencoded` (formulaire HTML : redirection 303 vers `CONTACT_OK_PATH`, ou vers `CONTACT_ERROR_PATH?erreur=<code>&champs=…`) ou `application/json` (réponse JSON). L'origine doit être dans `ALLOWED_ORIGINS`.
+`POST /api/contact`, `application/x-www-form-urlencoded` (formulaire HTML : redirection 303 vers `CONTACT_OK_PATH`, ou vers `CONTACT_ERROR_PATH?erreur=<code>&champs=…`) ou `application/json` (réponse JSON). L'origine doit être dans `CONTACT_ALLOWED_ORIGINS`.
 
-Champs : `name`, `email`, `phone` (facultatif), `child_age`, `school_year`, `subject` (`visite`, `question`, `autre`), `message`. Un champ caché `website` rempli (robot) est accepté sans envoi.
+Champs : `name`, `email`, `phone` (facultatif), `child_age`, `school_year`, `subject` (`visite`, `question`, `autre`), `message`. Un champ caché `website` rempli (robot) est accepté sans envoi et ne compte pas dans la limite d'envois. Au-delà de 100 000 clients suivis, le limiteur oublie ceux restés inactifs le plus longtemps.
 
 | Statut | Code | Cas |
 |---|---|---|

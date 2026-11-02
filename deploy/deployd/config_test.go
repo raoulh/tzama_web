@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -29,6 +30,11 @@ func TestConfigDefaults(t *testing.T) {
 	}
 	if c.ContactOK != "/contact/merci/" || c.ContactError != "/contact/" || c.listenAddr() != ":8080" {
 		t.Fatalf("chemins %q %q", c.ContactOK, c.ContactError)
+	}
+	// Les previews partagent l'origine test.tzama.fr : jamais destinataires du jeton du CMS.
+	if !slices.Equal(c.OAuthOrigins, []string{"https://v2.tzama.fr"}) ||
+		!slices.Equal(c.ContactOrigins, []string{"https://v2.tzama.fr", "https://test.tzama.fr"}) {
+		t.Fatalf("origines %v %v", c.OAuthOrigins, c.ContactOrigins)
 	}
 }
 
@@ -67,8 +73,9 @@ func TestConfigErrors(t *testing.T) {
 		{"port", map[string]string{"PORT": "70000"}, "PORT"},
 		{"port texte", map[string]string{"PORT": "abc"}, "PORT"},
 		{"secret court", map[string]string{"HOOK_SECRET": "court"}, "HOOK_SECRET"},
-		{"origine avec chemin", map[string]string{"ALLOWED_ORIGINS": "https://v2.tzama.fr/admin"}, "ALLOWED_ORIGINS"},
-		{"origine sans schéma", map[string]string{"ALLOWED_ORIGINS": "v2.tzama.fr"}, "ALLOWED_ORIGINS"},
+		{"origine avec chemin", map[string]string{"OAUTH_ALLOWED_ORIGINS": "https://v2.tzama.fr/admin"}, "OAUTH_ALLOWED_ORIGINS"},
+		{"origine sans schéma", map[string]string{"CONTACT_ALLOWED_ORIGINS": "v2.tzama.fr"}, "CONTACT_ALLOWED_ORIGINS"},
+		{"ancienne variable", map[string]string{"ALLOWED_ORIGINS": "https://v2.tzama.fr"}, "OAUTH_ALLOWED_ORIGINS"},
 		{"redirection ouverte", map[string]string{"CONTACT_OK_PATH": "//evil.example/"}, "CONTACT_OK_PATH"},
 		{"redirection absolue", map[string]string{"CONTACT_ERROR_PATH": "https://evil.example/"}, "CONTACT_ERROR_PATH"},
 		{"durée", map[string]string{"CONTACT_RATE_WINDOW": "dix"}, "CONTACT_RATE_WINDOW"},

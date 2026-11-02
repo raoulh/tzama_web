@@ -29,7 +29,8 @@ type config struct {
 	GitHubClientSecret string
 	GitHubURL          string
 	OAuthRedirectURL   string
-	AllowedOrigins     []string
+	OAuthOrigins       []string
+	ContactOrigins     []string
 
 	SMTP          contact.SMTPConfig
 	SMTPEnabled   bool
@@ -94,7 +95,7 @@ func loadConfig(getenv envFunc) (config, error) {
 		HookMaxFiles:      int(num("HOOK_MAX_FILES", 50_000, 1)),
 		HookMaxUnpacked:   num("HOOK_MAX_UNPACKED_BYTES", 2<<30, 1),
 		ReleasesKeep:      int(num("RELEASES_KEEP", 5, 1)),
-		HookUploadTimeout: dur("HOOK_UPLOAD_TIMEOUT", 30*time.Minute),
+		HookUploadTimeout: dur("HOOK_UPLOAD_TIMEOUT", 5*time.Minute),
 
 		GitHubClientID:     get("GITHUB_CLIENT_ID", ""),
 		GitHubClientSecret: getenv("GITHUB_CLIENT_SECRET"),
@@ -112,18 +113,29 @@ func loadConfig(getenv envFunc) (config, error) {
 	if n := len(c.HookSecret); n > 0 && n < 32 {
 		errs = append(errs, errors.New("HOOK_SECRET : 32 caractères minimum (openssl rand -hex 32)"))
 	}
-	for o := range strings.SplitSeq(get("ALLOWED_ORIGINS", ""), ",") {
-		o = strings.TrimSpace(o)
-		if o == "" {
-			continue
-		}
-		u, err := url.Parse(o)
-		if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.Path != "" || u.RawQuery != "" {
-			errs = append(errs, fmt.Errorf("ALLOWED_ORIGINS : origine invalide %q (forme https://hote)", o))
-			continue
-		}
-		c.AllowedOrigins = append(c.AllowedOrigins, o)
+	// Deux listes : test.tzama.fr sert toutes les PR sur une seule origine, une preview ne doit
+	// donc jamais pouvoir recevoir le jeton GitHub du CMS.
+	if getenv("ALLOWED_ORIGINS") != "" {
+		errs = append(errs, errors.New("ALLOWED_ORIGINS remplacée par OAUTH_ALLOWED_ORIGINS et CONTACT_ALLOWED_ORIGINS"))
 	}
+	origins := func(k, def string) []string {
+		var out []string
+		for o := range strings.SplitSeq(get(k, def), ",") {
+			o = strings.TrimSpace(o)
+			if o == "" {
+				continue
+			}
+			u, err := url.Parse(o)
+			if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.Path != "" || u.RawQuery != "" {
+				errs = append(errs, fmt.Errorf("%s : origine invalide %q (forme https://hote)", k, o))
+				continue
+			}
+			out = append(out, o)
+		}
+		return out
+	}
+	c.OAuthOrigins = origins("OAUTH_ALLOWED_ORIGINS", "https://v2.tzama.fr")
+	c.ContactOrigins = origins("CONTACT_ALLOWED_ORIGINS", "https://v2.tzama.fr,https://test.tzama.fr")
 	for k, p := range map[string]string{"CONTACT_OK_PATH": c.ContactOK, "CONTACT_ERROR_PATH": c.ContactError} {
 		// Chemin local uniquement : « //hote » ou « /\hote » seraient des redirections ouvertes.
 		if !strings.HasPrefix(p, "/") || strings.HasPrefix(p, "//") || strings.ContainsAny(p, "\\\r\n") {

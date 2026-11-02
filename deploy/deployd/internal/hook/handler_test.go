@@ -2,6 +2,7 @@ package hook
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -64,10 +65,11 @@ type req struct {
 	tamper                             func(r *http.Request)
 }
 
-func sign(key []byte, f Fields, body string) string {
-	m := NewMAC(key, f)
-	m.Write([]byte(body))
-	return "sha256=" + hex.EncodeToString(m.Sum(nil))
+func sign(key []byte, f Fields) string { return "sha256=" + hex.EncodeToString(Sign(key, f)) }
+
+func bodyHash(body string) string {
+	s := sha256.Sum256([]byte(body))
+	return hex.EncodeToString(s[:])
 }
 
 func (q req) build() *http.Request {
@@ -81,7 +83,7 @@ func (q req) build() *http.Request {
 		q.key = secret
 	}
 	f := Fields{Timestamp: strconv.FormatInt(q.ts.Unix(), 10), Method: q.method, Target: q.target,
-		PR: q.pr, SHA: q.sha, Tag: q.tag}
+		PR: q.pr, SHA: q.sha, Tag: q.tag, Length: strconv.Itoa(len(q.body)), BodySHA256: bodyHash(q.body)}
 	r := httptest.NewRequest(q.method, "/hooks/deploy", strings.NewReader(q.body))
 	set := func(k, v string) {
 		if v != "" {
@@ -93,9 +95,10 @@ func (q req) build() *http.Request {
 	set("X-Tzama-PR", q.pr)
 	set("X-Tzama-SHA", q.sha)
 	set("X-Tzama-Tag", q.tag)
+	set("X-Tzama-Body-SHA256", f.BodySHA256)
 	sig := q.sig
 	if sig == "" {
-		sig = sign(q.key, f, q.body)
+		sig = sign(q.key, f)
 	}
 	r.Header.Set("X-Tzama-Signature", sig)
 	if q.tamper != nil {
@@ -122,18 +125,20 @@ func do(t *testing.T, h http.Handler, r *http.Request) (int, map[string]any) {
 }
 
 func TestCanonical(t *testing.T) {
-	f := Fields{Timestamp: "1700000000", Method: "POST", Target: "preview", PR: "12", SHA: shaA}
-	if got, want := f.Canonical(), "1700000000\nPOST\npreview\n12\n"+shaA+"\n\n"; got != want {
+	f := Fields{Timestamp: "1700000000", Method: "POST", Target: "preview", PR: "12", SHA: shaA,
+		Length: "5", BodySHA256: bodyHash("corps")}
+	want := "1700000000\nPOST\npreview\n12\n" + shaA + "\n\n5\n" + bodyHash("corps") + "\n"
+	if got := f.Canonical(); got != want {
 		t.Fatalf("chaîne canonique %q, attendu %q", got, want)
 	}
 	// Vecteur fixe partagé avec le script client et la doc.
-	if got := sign([]byte("secret-de-test"), f, "corps"); got != "sha256="+knownVector {
+	if got := sign([]byte("secret-de-test"), f); got != "sha256="+knownVector {
 		t.Fatalf("signature %s", got)
 	}
 }
 
 // Calculé avec openssl (voir README) : la Go et le script client signent la même chaîne.
-const knownVector = "6f96e336e45115e20c15cee6ee6696eb133144a63065fd6cfa0f13b1e06efe2d"
+const knownVector = "c3cdc9882c9fd1bb24e35ff72b3322f8708e579f65e858ac60a9488909a13de9"
 
 func TestValidRequests(t *testing.T) {
 	cases := []struct {
@@ -195,7 +200,23 @@ func TestRejectedRequests(t *testing.T) {
 		{"horodatage futur", with(func(q *req) { q.ts = now.Add(301 * time.Second) }), 401},
 		{"corps modifié", with(func(q *req) {
 			q.tamper = func(r *http.Request) { r.Body = io.NopCloser(strings.NewReader("archivf")) }
+		}), 400},
+		{"empreinte modifiée après signature", with(func(q *req) {
+			q.tamper = func(r *http.Request) { r.Header.Set("X-Tzama-Body-SHA256", bodyHash("autre")) }
 		}), 401},
+		{"empreinte absente", with(func(q *req) {
+			q.tamper = func(r *http.Request) { r.Header.Del("X-Tzama-Body-SHA256") }
+		}), 400},
+		{"empreinte en majuscules", with(func(q *req) {
+			q.tamper = func(r *http.Request) {
+				r.Header.Set("X-Tzama-Body-SHA256", strings.ToUpper(bodyHash(q.body)))
+			}
+		}), 400},
+		{"longueur modifiée après signature", with(func(q *req) {
+			q.tamper = func(r *http.Request) { r.ContentLength = 3; r.Body = io.NopCloser(strings.NewReader("arc")) }
+		}), 401},
+		{"suppression avec empreinte non vide", req{method: http.MethodDelete, target: "preview", pr: "3",
+			tamper: func(r *http.Request) { r.Header.Set("X-Tzama-Body-SHA256", bodyHash("x")) }}, 400},
 		{"sha modifié après signature", with(func(q *req) {
 			q.tamper = func(r *http.Request) { r.Header.Set("X-Tzama-SHA", strings.Repeat("b", 40)) }
 		}), 401},
@@ -224,10 +245,9 @@ func TestRejectedRequests(t *testing.T) {
 			q.tamper = func(r *http.Request) { r.Header.Set("X-Tzama-Timestamp", "demain") }
 		}), 400},
 		{"corps trop gros", with(func(q *req) { q.body = strings.Repeat("x", 2<<10) }), 413},
-		{"corps trop gros sans longueur", with(func(q *req) {
-			q.body = strings.Repeat("x", 2<<10)
+		{"envoi sans longueur (chunked)", with(func(q *req) {
 			q.tamper = func(r *http.Request) { r.ContentLength = -1 }
-		}), 413},
+		}), 411},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

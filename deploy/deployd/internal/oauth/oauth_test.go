@@ -94,7 +94,7 @@ func TestAuthRedirect(t *testing.T) {
 	}
 	q := loc.Query()
 	state := stateFrom(t, w)
-	if q.Get("client_id") != "cid" || q.Get("scope") != "repo" || q.Get("state") != state || len(state) < 40 {
+	if q.Get("client_id") != "cid" || q.Get("scope") != "public_repo" || q.Get("state") != state || len(state) < 40 {
 		t.Fatalf("paramètres %v (state cookie %q)", q, state)
 	}
 	if q.Has("client_secret") {
@@ -107,11 +107,10 @@ func TestAuthRedirect(t *testing.T) {
 
 func TestAuthScope(t *testing.T) {
 	h := setup(t, &fakeGitHub{})
-	for in, want := range map[string]string{"public_repo": "public_repo", "repo,user": "repo,user",
-		"admin:org": "repo", "": "repo", "repo delete_repo": "repo"} {
+	for _, in := range []string{"public_repo", "repo", "repo,user", "admin:org", "", "repo delete_repo"} {
 		loc, _ := url.Parse(auth(t, h, url.Values{"scope": {in}}.Encode(), nil).Header().Get("Location"))
-		if got := loc.Query().Get("scope"); got != want {
-			t.Errorf("scope %q -> %q, attendu %q", in, got, want)
+		if got := loc.Query()["scope"]; len(got) != 1 || got[0] != "public_repo" {
+			t.Errorf("scope %q -> %q, attendu public_repo", in, got)
 		}
 	}
 }
@@ -225,8 +224,8 @@ func TestCallbackSuccess(t *testing.T) {
 	if strings.Contains(body, `"*"`) || strings.Contains(body, "'*'") {
 		t.Fatal("postMessage vers *")
 	}
-	if !strings.Contains(body, "allowed.indexOf(e.origin) === -1") {
-		t.Fatal("origine du message non vérifiée")
+	if !strings.Contains(body, "e.source !== window.opener || allowed.indexOf(e.origin) === -1") {
+		t.Fatal("source ou origine du message non vérifiée")
 	}
 	// Cookie effacé après usage.
 	cleared := false
