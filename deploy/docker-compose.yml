@@ -1,0 +1,33 @@
+name: tzama
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80"]
+    environment:
+      HAPROXY_IP: ${HAPROXY_IP:?HAPROXY_IP manquant dans .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites:/srv/sites:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: "5" }
+
+  # deployd:
+  #   image: ghcr.io/raoulh/tzama-deployd:${DEPLOYD_TAG:-latest}
+  #   restart: unless-stopped
+  #   user: "${TZAMA_UID}:${TZAMA_GID}"
+  #   env_file: deployd.env
+  #   volumes:
+  #     - ./sites:/srv/sites
+  #     - ./state:/state
+  #   logging:
+  #     driver: json-file
+  #     options: { max-size: 10m, max-file: "5" }
+
+volumes:
+  caddy_data:
+  caddy_config:
