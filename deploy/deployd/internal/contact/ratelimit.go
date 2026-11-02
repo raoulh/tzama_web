@@ -1,29 +1,40 @@
 package contact
 
 import (
+	"container/list"
 	"net"
 	"sync"
 	"time"
 )
 
-// maxTracked borne la mémoire du limiteur face à un flot d'adresses différentes.
-const maxTracked = 100_000
+// defaultMaxTracked borne la mémoire du limiteur face à un flot d'adresses différentes.
+const defaultMaxTracked = 100_000
 
 // Limiter : au plus N envois par fenêtre glissante et par client.
 type Limiter struct {
-	n      int
-	window time.Duration
-	now    func() time.Time
+	n          int
+	window     time.Duration
+	now        func() time.Time
+	maxTracked int
 
-	mu   sync.Mutex
-	hits map[string][]time.Time
+	mu sync.Mutex
+	// Clients rangés du moins au plus récemment actif : la tête est la première à évincer
+	// quand la table est pleine, et le nettoyage s'arrête au premier client encore actif.
+	order *list.List
+	byKey map[string]*list.Element
+}
+
+type client struct {
+	key  string
+	hits []time.Time
 }
 
 func NewLimiter(n int, window time.Duration, now func() time.Time) *Limiter {
 	if now == nil {
 		now = time.Now
 	}
-	return &Limiter{n: n, window: window, now: now, hits: map[string][]time.Time{}}
+	return &Limiter{n: n, window: window, now: now, maxTracked: defaultMaxTracked,
+		order: list.New(), byKey: map[string]*list.Element{}}
 }
 
 // key regroupe une IPv6 par /64 : un seul client en détient souvent un préfixe entier.
@@ -41,19 +52,29 @@ func (l *Limiter) Allow(ip string) (bool, time.Duration) {
 	now := l.now()
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	recent := l.prune(l.hits[k], now)
-	if len(recent) >= l.n {
-		l.hits[k] = recent
-		return false, recent[0].Add(l.window).Sub(now)
-	}
-	if _, ok := l.hits[k]; !ok && len(l.hits) >= maxTracked {
-		l.cleanupLocked(now)
-		if len(l.hits) >= maxTracked {
-			return false, l.window
+	e, ok := l.byKey[k]
+	if !ok {
+		// Table pleine : on oublie le client resté inactif le plus longtemps plutôt que de
+		// refuser tout le monde.
+		for l.order.Len() >= l.maxTracked {
+			l.remove(l.order.Front())
 		}
+		e = l.order.PushBack(&client{key: k})
+		l.byKey[k] = e
 	}
-	l.hits[k] = append(recent, now)
+	c := e.Value.(*client)
+	c.hits = l.prune(c.hits, now)
+	if len(c.hits) >= l.n {
+		return false, c.hits[0].Add(l.window).Sub(now)
+	}
+	c.hits = append(c.hits, now)
+	l.order.MoveToBack(e)
 	return true, 0
+}
+
+func (l *Limiter) remove(e *list.Element) {
+	l.order.Remove(e)
+	delete(l.byKey, e.Value.(*client).key)
 }
 
 func (l *Limiter) prune(ts []time.Time, now time.Time) []time.Time {
@@ -68,21 +89,18 @@ func (l *Limiter) prune(ts []time.Time, now time.Time) []time.Time {
 func (l *Limiter) Cleanup() {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.cleanupLocked(l.now())
-}
-
-func (l *Limiter) cleanupLocked(now time.Time) {
-	for k, ts := range l.hits {
-		if r := l.prune(ts, now); len(r) == 0 {
-			delete(l.hits, k)
-		} else {
-			l.hits[k] = r
+	now := l.now()
+	for e := l.order.Front(); e != nil; e = l.order.Front() {
+		c := e.Value.(*client)
+		if len(c.hits) > 0 && now.Sub(c.hits[len(c.hits)-1]) < l.window {
+			return
 		}
+		l.remove(e)
 	}
 }
 
 func (l *Limiter) size() int {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	return len(l.hits)
+	return l.order.Len()
 }

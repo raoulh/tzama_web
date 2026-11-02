@@ -210,6 +210,9 @@ func TestContactHoneypot(t *testing.T) {
 	if len(e.mailer.sent) != 0 {
 		t.Fatal("honeypot rempli mais message envoyé")
 	}
+	if n := e.limiter.size(); n != 0 {
+		t.Fatalf("honeypot rempli : %d entrées dans le limiteur", n)
+	}
 }
 
 func TestContactRateLimit(t *testing.T) {
@@ -382,5 +385,51 @@ func TestLimiter(t *testing.T) {
 	l.Cleanup()
 	if l.size() != 0 {
 		t.Fatalf("%d clients gardés après nettoyage", l.size())
+	}
+}
+
+func TestLimiterEvictsOldest(t *testing.T) {
+	now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	l := NewLimiter(1, time.Hour, func() time.Time { return now })
+	l.maxTracked = 3
+	for _, ip := range []string{"192.0.2.1", "192.0.2.2", "192.0.2.3"} {
+		if ok, _ := l.Allow(ip); !ok {
+			t.Fatalf("%s refusé", ip)
+		}
+		now = now.Add(time.Second)
+	}
+	// Table pleine : un nouveau client passe, au prix du plus ancien.
+	if ok, _ := l.Allow("192.0.2.4"); !ok {
+		t.Fatal("nouveau client refusé quand la table est pleine")
+	}
+	if n := l.size(); n != 3 {
+		t.Fatalf("%d clients suivis, attendu 3", n)
+	}
+	if ok, _ := l.Allow("192.0.2.1"); !ok {
+		t.Fatal("le plus ancien n'a pas été évincé")
+	}
+	for _, ip := range []string{"192.0.2.3", "192.0.2.4"} {
+		if ok, _ := l.Allow(ip); ok {
+			t.Fatalf("%s évincé à la place du plus ancien", ip)
+		}
+	}
+}
+
+// Le nettoyage s'arrête au premier client encore actif : l'ordre doit suivre la dernière
+// tentative acceptée, pas la création de l'entrée.
+func TestLimiterCleanupOrder(t *testing.T) {
+	now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	l := NewLimiter(5, time.Minute, func() time.Time { return now })
+	l.Allow("192.0.2.1")
+	l.Allow("192.0.2.2")
+	now = now.Add(50 * time.Second)
+	l.Allow("192.0.2.1")
+	now = now.Add(20 * time.Second)
+	l.Cleanup()
+	if n := l.size(); n != 1 {
+		t.Fatalf("%d clients gardés, attendu 1", n)
+	}
+	if ok, _ := l.Allow("192.0.2.2"); !ok {
+		t.Fatal("client expiré encore compté")
 	}
 }

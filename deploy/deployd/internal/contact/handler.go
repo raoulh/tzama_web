@@ -98,16 +98,17 @@ func (h *Handler) process(w http.ResponseWriter, r *http.Request, isJSON bool) r
 	if errs := f.Validate(); len(errs) > 0 {
 		return reply{status: http.StatusUnprocessableEntity, code: "validation", fields: errs}
 	}
+	// Avant le limiteur : un robot qui remplit le piège ne doit pas pouvoir y créer d'entrées.
+	if strings.TrimSpace(f.Website) != "" {
+		// Même réponse qu'un succès : le robot n'apprend rien.
+		log.Info("contact : honeypot rempli, message ignoré")
+		return reply{status: http.StatusOK}
+	}
 	// Compté après validation : seuls les messages qui partiraient consomment le quota.
 	if ok, retry := h.limiter.Allow(clientip.From(r, h.cfg.TrustProxy)); !ok {
 		w.Header().Set("Retry-After", strconv.Itoa(int(retry.Seconds())+1))
 		log.Warn("contact : limite d'envois atteinte")
 		return reply{status: http.StatusTooManyRequests, code: "rate_limited"}
-	}
-	if strings.TrimSpace(f.Website) != "" {
-		// Même réponse qu'un succès : le robot n'apprend rien.
-		log.Info("contact : honeypot rempli, message ignoré")
-		return reply{status: http.StatusOK}
 	}
 	if h.mailer == nil {
 		log.Error("contact : SMTP non configuré, message perdu")
