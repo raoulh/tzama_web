@@ -1,0 +1,16 @@
+{{- $w := .Params.words -}}
+{{- $icons := slice (dict "id" "d-feuille-chene") (dict "id" "d-soleil" "idle" "tourner") (dict "id" "d-main-droite") -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+<section class="mots" aria-labelledby="mots-titre">
+  <h2 id="mots-titre" class="titre" data-idle="souligner"><span class="marque">{{ partial "home/text.html" $w.title }}</span></h2>
+  <ul class="mots__list">
+    {{- range $i, $item := $w.items }}
+    {{- $ico := index $icons (mod $i (len $icons)) }}
+    <li class="reveal" style="--i:{{ $i }}">
+      <svg class="mot__ico"{{ with $ico.idle }} data-idle="{{ . }}"{{ end }} aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ $ico.id }}"/></svg>
+      <h3>{{ partial "home/text.html" $item.title }}</h3>
+      <p>{{ partial "home/text.html" $item.text }}</p>
+    </li>
+    {{- end }}
+  </ul>
+</section>

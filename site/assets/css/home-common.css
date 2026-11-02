@@ -1,0 +1,30 @@
+/* Accueil : éléments partagés par plusieurs blocs */
+.link { font-weight: 700; }
+.note { margin: 0; color: var(--encre-2); font-family: var(--font-display); font-size: 1.25rem; line-height: 1.2; }
+.legende { color: var(--encre-2); font-family: var(--font-display); font-size: 1.15rem; line-height: 1.2; }
+.hero a:focus-visible, .hero button:focus-visible, .visite a:focus-visible { outline-color: var(--blanc); }
+
+.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .25rem 1.5rem; margin-bottom: 1.25rem; }
+.section-head h2 { margin: 0; }
+.section-head .titre { flex: 1 1 auto; }
+.section-head .link { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Photos scotchées : la photo pend à son ruban, pivot au point de scotch (haut, centre) */
+.photo { margin: 0; position: relative; }
+.photo img { background: var(--cadre); padding: .45rem; box-shadow: var(--ombre-photo); transform: rotate(var(--rot, 0deg)); transform-origin: 50% 0; transition: transform .45s cubic-bezier(.3, 1.4, .5, 1); }
+.photo:hover img { transform: rotate(calc(var(--rot, 0deg) + 2.2deg)); }
+.photo::before { content: ""; position: absolute; top: -.75rem; left: 50%; width: 6.5rem; height: 1.7rem; z-index: 2; background: var(--f1); opacity: .65; transform: translateX(-50%) rotate(-4deg); -webkit-mask: var(--ruban) no-repeat center / 100% 100%; mask: var(--ruban) no-repeat center / 100% 100%; }
+/* légende : étiquette scotchée sous le cadre, dans le flux */
+.etiq { position: static; display: inline-block; max-width: calc(100% - .8rem); margin: -.35rem 0 0 .4rem; z-index: 2; padding: .15rem .7rem; background: var(--cadre); color: var(--encre); box-shadow: var(--ombre-etiq); transform: rotate(-2deg); transform-origin: 0 0; font-family: var(--font-display); font-size: 1.2rem; line-height: 1.25; }
+.sticker { position: absolute; pointer-events: none; z-index: 3; }
+
+/* Lisières de feuillage entre les blocs */
+.trans { position: absolute; left: 0; right: 0; height: var(--trans-h); overflow: hidden; pointer-events: none; }
+.trans--haut { bottom: calc(100% - 1px); }
+.trans--bas { top: calc(100% - 1px); transform: scaleY(-1); }
+.trans--hero { bottom: -1px; height: calc(var(--trans-h) + 1px); color: var(--fond); z-index: 4; }
+.trans svg { display: block; position: absolute; left: 0; bottom: 0; width: max(100%, 1920px); height: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .photo img { transition: none; }
+}

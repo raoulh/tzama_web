@@ -1,0 +1,6 @@
+{{- /* Un calque de feuillage de l'ouverture. Paramètres : layer (n, leaves), sprite (URL du sprite). */ -}}
+<div class="calque calque--{{ .layer.n }}" data-idle="frisson" aria-hidden="true">
+  {{- range .layer.leaves }}
+  <svg class="f {{ .c }}" data-idle="tomber tournoyer" style="{{ .s | safeCSS }}"{{ if .hide }} data-m="hide"{{ end }} aria-hidden="true" focusable="false"><use href="{{ $.sprite }}#{{ .id }}"/></svg>
+  {{- end }}
+</div>

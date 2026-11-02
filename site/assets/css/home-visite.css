@@ -1,0 +1,16 @@
+/* Invitation : bloc de la couleur de saison, photo scotchée avec deux feuilles claires */
+.visite { position: relative; background: var(--accent); color: var(--blanc); padding: 1.5rem var(--gutter) 3.5rem; margin-top: var(--trans-h); }
+.visite .trans { color: var(--accent); }
+.visite__text, .photo--visite { max-width: var(--col); margin-left: auto; margin-right: auto; }
+.visite h2 { color: var(--blanc); }
+.visite .btn { margin-top: .5rem; }
+.photo--visite { max-width: 26rem; margin-top: 2.5rem; --rot: -1.5deg; }
+.photo--visite::before { background: var(--blanc); opacity: .55; }
+.sticker--f1, .sticker--f2 { --r: var(--rs); transform: rotate(var(--rs)); }
+.sticker--f1 { --rs: -40deg; width: 4.6rem; height: 4.6rem; right: .2rem; top: -2rem; color: var(--f2); }
+.sticker--f2 { --rs: 25deg; width: 3.2rem; height: 3.2rem; right: .5rem; bottom: .6rem; color: var(--blanc-90); }
+@media (min-width: 60em) {
+  .visite { padding: 2.5rem var(--gutter) 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+  .visite__text { justify-self: end; width: 100%; max-width: 34rem; }
+  .photo--visite { margin-top: 0; justify-self: start; align-self: start; width: 100%; }
+}

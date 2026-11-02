@@ -1,0 +1,18 @@
+{{- $v := .Params.visit -}}
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+<section class="visite" aria-labelledby="visite-titre">
+  {{ partial "home/trans.html" "haut" }}
+  <div class="visite__text">
+    <h2 id="visite-titre">{{ partial "home/text.html" $v.title }}</h2>
+    {{- range $v.text }}
+    <p>{{ partial "home/text.html" . }}</p>
+    {{- end }}
+    <a class="btn btn--big btn--inverse" href="{{ (site.GetPage "/contact").RelPermalink }}">{{ T "cta.visit" }}</a>
+  </div>
+  <figure class="photo photo--visite reveal" data-idle="balancer">
+    {{ partial "image.html" (dict "src" (resources.Get $v.photo) "alt" $v.photo_alt "widths" (slice 480 720 1080) "sizes" "(min-width: 60em) 26rem, 92vw") }}
+    <figcaption class="etiq">{{ partial "home/text.html" $v.photo_caption }}</figcaption>
+    <svg class="sticker sticker--f1" data-idle="tournoyer" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-feuille-chene"/></svg>
+    <svg class="sticker sticker--f2" data-idle="tournoyer" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-feuille-simple"/></svg>
+  </figure>
+</section>

@@ -1,6 +1,10 @@
 {{ define "main" }}
-<article class="page">
-  <header class="page__head"><h1>{{ site.Title }}</h1></header>
-  <div class="page__body">{{ .Content }}</div>
-</article>
+{{ partial "home/hero.html" . }}
+{{ partial "home/mots.html" . }}
+{{ partial "home/actus.html" . }}
+{{ partial "home/equipe.html" . }}
+{{ partial "home/journee.html" . }}
+{{ partial "home/temoignage.html" . }}
+{{ partial "home/soutien.html" . }}
+{{ partial "home/visite.html" . }}
 {{ end }}
