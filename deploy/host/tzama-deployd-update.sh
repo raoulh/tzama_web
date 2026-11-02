@@ -5,10 +5,16 @@ set -eu
 
 DIR=${TZAMA_DIR:-/srv/tzama}
 cd "$DIR"
-tag=$(tr -d ' \t\r\n' < state/deployd.tag)
-# Le fichier est écrit par le conteneur : on n'en accepte qu'un nom de tag d'image.
+# Le fichier est écrit par le conteneur : ni lien (qui ferait lire un autre fichier en root), ni
+# contenu au-delà d'un nom de tag d'image, ni valeur refusée recopiée dans le journal.
+f=state/deployd.tag
+if [ ! -f "$f" ] || [ -L "$f" ]; then
+	echo "state/deployd.tag absent ou n'est pas un fichier ordinaire" >&2
+	exit 1
+fi
+tag=$(head -c 256 "$f" | tr -d ' \t\r\n')
 if ! printf '%s' "$tag" | grep -Eq '^[A-Za-z0-9_][A-Za-z0-9._-]{0,127}$'; then
-	echo "tag refusé : $tag" >&2
+	echo "tag refusé : contenu de state/deployd.tag invalide" >&2
 	exit 1
 fi
 old=$(sed -n 's/^DEPLOYD_TAG=//p' .env)
