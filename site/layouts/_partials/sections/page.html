@@ -3,31 +3,64 @@
   Champs communs : id (ancre), title, type, body (markdown), photo + photo_alt, draft_note.
   Les champs propres au type sont lus par sections/<type>.html ; validate.html les vérifie.
   draft_note s'affiche tant que le build n'est pas strict (previews et v2), jamais en production stricte.
+  Un bloc sur deux est teinté, bordé de feuillage ; les photos alternent à droite puis à gauche.
 */ -}}
 {{- $page := . -}}
 {{- $showDraft := ne (printf "%v" site.Params.strict) "true" -}}
+{{- $sections := .Params.sections -}}
 <article class="page page--sections">
-  <header class="page__head"><h1>{{ .Title }}</h1></header>
-  {{- range .Params.sections }}
-  {{- $sec := . }}
-  <section class="sec sec--{{ .type }}" id="{{ .id }}" aria-labelledby="{{ .id }}-titre">
-    <div class="sec__main{{ if .photo }} sec__main--photo{{ end }}">
-      <div class="sec__text">
-        <h2 id="{{ .id }}-titre">{{ .title }}</h2>
-        {{- if and $showDraft .draft_note }}
-        <p class="sec__draft"><strong>{{ T "sections.draft" }}.</strong> {{ .draft_note }}</p>
+  <header class="page__head">
+    <h1 class="titre"><span class="marque">{{ .Title }}</span></h1>
+    {{- with .Description }}
+    <p class="page__intro">{{ . }}</p>
+    {{- end }}
+    {{- if gt (len $sections) 1 }}
+    <nav class="sommaire" aria-label="{{ T "sections.summary" (dict "title" .Title) }}">
+      <ul>
+        {{- range $sections }}
+        <li><a href="#{{ .id }}">{{ .title }}</a></li>
         {{- end }}
-        {{- with .body }}
-        <div class="sec__body">{{ $page.RenderString (dict "display" "block") . }}</div>
+      </ul>
+    </nav>
+    {{- end }}
+    {{- partial "icon.html" (dict "id" "d-feuille-chene" "class" "page__feuille") }}
+  </header>
+  {{- $photos := 0 }}
+  {{- range $i, $sec := $sections }}
+  {{- $tinted := modBool $i 2 | not }}
+  <section class="sec sec--{{ .type }}{{ if $tinted }} sec--teinte{{ end }}" id="{{ .id }}" aria-labelledby="{{ .id }}-titre">
+    {{- if $tinted }}{{ partial "home/trans.html" "haut" }}{{ end }}
+    <div class="sec__in">
+      {{- $donate := eq .type "donate" }}
+      {{- if $donate }}
+      <div class="soutien__in reveal">
+        {{- partial "icon.html" (dict "id" "d-main-droite" "class" "soutien__main") }}
+        <div>
+      {{- end }}
+      <div class="sec__main{{ with .photo }} sec__main--photo{{ if modBool $photos 2 | not }} sec__main--gauche{{ end }}{{ end }}">
+        <div class="sec__text">
+          <h2 class="titre" id="{{ .id }}-titre"><span class="marque">{{ .title }}</span></h2>
+          {{- if and $showDraft .draft_note }}
+          <p class="brouillon"><strong>{{ T "sections.draft" }}</strong> {{ .draft_note }}</p>
+          {{- end }}
+          {{- with .body }}
+          <div class="sec__body">{{ $page.RenderString (dict "display" "block") . }}</div>
+          {{- end }}
+        </div>
+        {{- with .photo }}
+        <figure class="photo sec__photo reveal">
+          {{- partial "image.html" (dict "src" ($page.Resources.Get .) "alt" $sec.photo_alt "sizes" "(min-width: 48em) 24rem, 88vw" "widths" (slice 480 720 1080)) -}}
+        </figure>
+        {{- $photos = add $photos 1 }}
         {{- end }}
       </div>
-      {{- with .photo }}
-      <figure class="sec__photo">
-        {{- partial "image.html" (dict "src" ($page.Resources.Get .) "alt" $sec.photo_alt "sizes" "(min-width: 48em) 26rem, 100vw" "widths" (slice 480 720 1080)) -}}
-      </figure>
+      {{- partial (printf "sections/%s.html" .type) (dict "page" $page "s" .) }}
+      {{- if $donate }}
+        </div>
+      </div>
       {{- end }}
     </div>
-    {{- partial (printf "sections/%s.html" .type) (dict "page" $page "s" .) }}
+    {{- if $tinted }}{{ partial "home/trans.html" "bas" }}{{ end }}
   </section>
   {{- end }}
 </article>

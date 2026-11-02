@@ -45,12 +45,15 @@ testimonial:
 
 sections:
   draft: Texte provisoire
+  summary: "Dans la page {{ .title }}"
+  external: (site externe)
   video:
     play: "Lire la vidéo : {{ .title }}"
     notice: La vidéo se charge depuis YouTube quand vous la lancez.
     youtube: Voir sur YouTube
   team:
-    bio: Lire la présentation
+    bio: Lire sa présentation
+    close: Fermer la présentation
   figures:
     years: ans d'existence
     staff: personnes dans l'équipe
@@ -79,6 +82,8 @@ sections:
     email: E-mail
     phone: Téléphone
     map: Voir le plan d'accès
+    access: Venir à l'école
+    access_text: "Le plan s'ouvre sur OpenStreetMap, un site externe : rien n'est chargé tant que vous ne cliquez pas."
     form: Écrivez-nous
     name: Votre nom
     email_field: Votre adresse e-mail

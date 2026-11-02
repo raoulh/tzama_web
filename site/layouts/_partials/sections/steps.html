@@ -1,9 +1,13 @@
-{{- /* steps : { title, body } ; body en markdown. */ -}}
+{{- /* steps : { title, body } ; body en markdown. Numéros au marqueur, une flèche dessinée entre deux étapes. */ -}}
 <ol class="steps">
-  {{- range .s.steps }}
+  {{- range $i, $st := .s.steps }}
   <li class="steps__item">
-    <h3>{{ .title }}</h3>
-    {{- with .body }}{{ $.page.RenderString (dict "display" "block") . }}{{ end }}
+    <span class="steps__num" aria-hidden="true">{{ add $i 1 }}</span>
+    <div class="steps__body">
+      <h3>{{ .title }}</h3>
+      {{- with .body }}{{ $.page.RenderString (dict "display" "block") . }}{{ end }}
+    </div>
+    {{- if lt (add $i 1) (len $.s.steps) }}{{ partial "icon.html" (dict "id" "d-fleche-courbe" "class" "steps__fleche") }}{{ end }}
   </li>
   {{- end }}
 </ol>

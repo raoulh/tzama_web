@@ -5,12 +5,15 @@
   {{- range . }}
   {{- $f := .Resources.Get .Params.file }}
   <li class="documents__item">
-    <a href="{{ $f.RelPermalink }}">{{ .Title }}</a>
-    <span class="documents__meta">({{ T "sections.documents.pdf" (dict "size" (math.Ceil (div (float (len $f.Content)) 1024))) }})</span>
-    {{- with .Params.description }}<p>{{ . }}</p>{{ end }}
+    {{- partial "icon.html" (dict "id" "d-feuille-simple" "class" "documents__ico") }}
+    <div>
+      <a href="{{ $f.RelPermalink }}">{{ .Title }}</a>
+      <span class="documents__meta">{{ T "sections.documents.pdf" (dict "size" (math.Ceil (div (float (len $f.Content)) 1024))) }}</span>
+      {{- with .Params.description }}<p>{{ . }}</p>{{ end }}
+    </div>
   </li>
   {{- end }}
 </ul>
 {{- else }}
-<p>{{ T "sections.documents.none" }}</p>
+<p class="sec__vide">{{ T "sections.documents.none" }}</p>
 {{- end }}

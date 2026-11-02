@@ -1,16 +1,22 @@
 {{- /*
-  videos : { id, title } (id YouTube). Rien n'est chargé depuis YouTube avant le clic :
-  sections.js remplace le bouton par un lecteur youtube-nocookie ; sans JS, le lien seul.
+  videos : { id, title } (id YouTube). Rien n'est chargé depuis YouTube avant le clic, pas même
+  la miniature : l'affiche est dessinée ici. sections.js remplace le bouton par un lecteur
+  youtube-nocookie ; sans JS, le lien seul.
 */ -}}
-<div class="videos">
-  {{- range .s.videos }}
-  <figure class="video">
-    <button class="video__play" type="button" data-video="{{ .id }}" data-title="{{ .title }}">
-      <span class="video__icon" aria-hidden="true"></span>
-      <span>{{ T "sections.video.play" (dict "title" .title) }}</span>
-    </button>
-    <figcaption>{{ .title }}<br><a href="https://www.youtube.com/watch?v={{ .id }}">{{ T "sections.video.youtube" }}<span class="visually-hidden"> : {{ .title }}</span></a></figcaption>
-  </figure>
+{{- $sprite := resources.Get "img/sprite.svg" | minify | fingerprint -}}
+<ul class="videos">
+  {{- range $i, $v := .s.videos }}
+  <li class="video">
+    <span class="video__cadre">
+      <button class="video__play" type="button" data-video="{{ .id }}" data-title="{{ .title }}">
+        <svg class="video__deco" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ cond (modBool $i 2) "d-fougere" "d-feuille-chene" }}"/></svg>
+        <span class="video__icon" aria-hidden="true"></span>
+        <span class="visually-hidden">{{ T "sections.video.play" (dict "title" .title) }}</span>
+      </button>
+    </span>
+    <p class="video__titre">{{ .title }}</p>
+    <a class="video__yt" href="https://www.youtube.com/watch?v={{ .id }}" rel="external">{{ T "sections.video.youtube" }}<span class="visually-hidden"> : {{ .title }}</span></a>
+  </li>
   {{- end }}
-</div>
+</ul>
 <p class="videos__notice">{{ T "sections.video.notice" }}</p>
