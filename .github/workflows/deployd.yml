@@ -1,0 +1,120 @@
+name: deployd
+
+# Pas de filtre `paths:` : voir .github/scripts/changed.sh. Le job « deployd - checks »
+# existe toujours, ce qui permet de le rendre obligatoire sur main.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('deployd-pr-{0}', github.event.pull_request.number) || 'deployd-main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
+
+env:
+  IMAGE: ghcr.io/raoulh/tzama-deployd
+  DEPLOY_URL: https://deploy.tzama.fr/hooks/deploy
+
+jobs:
+  changes:
+    name: deployd - changements
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      deployd: ${{ steps.diff.outputs.changed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - id: diff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+        run: sh .github/scripts/changed.sh '^(deploy/|\.github/workflows/deployd\.yml$|\.github/scripts/)'
+
+  checks:
+    name: deployd - checks
+    needs: changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: deploy/deployd
+    steps:
+      - name: Rien à vérifier
+        if: needs.changes.outputs.deployd != 'true'
+        run: echo "Aucun fichier de deploy/ modifié."
+        working-directory: .
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: needs.changes.outputs.deployd == 'true'
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        if: needs.changes.outputs.deployd == 'true'
+        with:
+          go-version-file: deploy/deployd/go.mod
+      - name: gofmt
+        if: needs.changes.outputs.deployd == 'true'
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "::error::fichiers à formater avec gofmt :"
+            echo "$unformatted"
+            exit 1
+          fi
+      - name: go vet
+        if: needs.changes.outputs.deployd == 'true'
+        run: go vet ./...
+      - name: go test -race
+        if: needs.changes.outputs.deployd == 'true'
+        run: go test -race ./...
+      - name: Scripts shell
+        if: needs.changes.outputs.deployd == 'true'
+        run: shellcheck scripts/*.sh
+      - name: Build de l'image (sans publication)
+        if: needs.changes.outputs.deployd == 'true'
+        run: docker build -t "$IMAGE:ci" .
+
+  publish:
+    name: deployd - publication
+    needs: [changes, checks]
+    if: github.event_name == 'push' && needs.changes.outputs.deployd == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Vérifier le secret
+        env:
+          HOOK_SECRET: ${{ secrets.HOOK_SECRET }}
+        run: |
+          if [ -z "$HOOK_SECRET" ]; then
+            echo "::error::Secret HOOK_SECRET absent : le créer dans Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - name: Construire et pousser l'image
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker build \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            -t "$IMAGE:$GITHUB_SHA" -t "$IMAGE:latest" deploy/deployd
+          docker push "$IMAGE:$GITHUB_SHA"
+          docker push "$IMAGE:latest"
+      - name: Déployer le service
+        env:
+          HOOK_SECRET: ${{ secrets.HOOK_SECRET }}
+        run: sh deploy/deployd/scripts/deploy-hook.sh service "$GITHUB_SHA"
