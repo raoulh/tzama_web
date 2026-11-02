@@ -65,14 +65,21 @@ http://v2.tzama.fr {
 	import noindex
 	import umami
 	import api
-	# Maquettes servies à la racine jusqu'au premier déploiement de prod par la CI ; ensuite : root * /srv/sites/prod
-	handle {
-		redir / /home/
+	# Maquettes aussi servies ici tant que test.tzama.fr n'est pas joignable ; l'ancienne adresse /home/ y mène.
+	redir /home/* /maquettes{uri} permanent
+	handle /maquettes/* {
+		uri strip_prefix /maquettes
 		root * /srv/sites/mockups
 		import static
 	}
+	handle {
+		root * /srv/sites/prod
+		import static
+	}
 	handle_errors 404 {
-		respond "Page introuvable" 404
+		root * /srv/sites/prod
+		rewrite * /404.html
+		file_server
 	}
 }
 
