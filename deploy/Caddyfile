@@ -1,0 +1,114 @@
+# HAProxy termine le TLS et relaie en HTTP ; Caddy ne fait que du routage par nom de domaine.
+{
+	auto_https off
+	admin off
+	servers {
+		trusted_proxies static {$HAPROXY_IP}
+		client_ip_headers X-Forwarded-For
+	}
+}
+
+(security) {
+	log {
+		output stdout
+		format json
+	}
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		# frame-ancestors ne peut pas être posé par une balise meta : la CSP du site (sources de scripts, etc.) vient du site lui-même.
+		Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; object-src 'none'"
+		-Server
+	}
+}
+
+(noindex) {
+	header X-Robots-Tag "noindex, nofollow"
+}
+
+# Analytics Umami Cloud relayé depuis le domaine du site : pas de domaine tiers à autoriser, moins bloqué.
+(umami) {
+	handle_path /u/* {
+		reverse_proxy https://cloud.umami.is {
+			header_up Host cloud.umami.is
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+}
+
+(static) {
+	file_server
+	encode zstd gzip
+	@assets path_regexp \.[0-9a-f]{64}\.[a-z0-9]+$
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+}
+
+http://v2.tzama.fr {
+	import security
+	import noindex
+	import umami
+	handle /api/* {
+		# activé avec le service deployd
+		# reverse_proxy deployd:8080
+		respond 503
+	}
+	# Maquettes servies à la racine jusqu'au premier déploiement de prod par la CI ; ensuite : root * /srv/sites/prod
+	handle {
+		redir / /home/
+		root * /srv/sites/mockups
+		import static
+	}
+	handle_errors 404 {
+		respond "Page introuvable" 404
+	}
+}
+
+http://test.tzama.fr {
+	import security
+	import noindex
+	import umami
+	handle /api/* {
+		# reverse_proxy deployd:8080
+		respond 503
+	}
+	handle /maquettes/* {
+		uri strip_prefix /maquettes
+		root * /srv/sites/mockups
+		import static
+	}
+	handle {
+		root * /srv/sites/previews
+		import static
+	}
+	# chaque preview a sa propre 404.html
+	handle_errors 404 {
+		@pr path_regexp pr ^/(pr-[0-9]+)/
+		handle @pr {
+			root * /srv/sites/previews
+			rewrite * /{re.pr.1}/404.html
+			file_server
+		}
+		respond "Page introuvable" 404
+	}
+}
+
+http://deploy.tzama.fr {
+	import security
+	import noindex
+	# reverse_proxy deployd:8080
+	respond "deploy.tzama.fr : service à venir" 200
+}
+
+# Bascule (domaine principal) : pas encore servi ici.
+http://www.tzama.fr {
+	redir https://tzama.fr{uri} permanent
+}
+
+http://tzama.fr {
+	respond 404
+}
+
+:80 {
+	respond 404
+}
