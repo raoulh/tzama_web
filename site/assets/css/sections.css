@@ -38,7 +38,7 @@
   .toc { position: sticky; z-index: 2; top: var(--toc-top); max-height: calc(100vh - var(--toc-top) - var(--thumb-h, 0px) - 1rem); overflow-y: auto; max-width: none; margin: 2rem 0 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; transform: none; }
   .toc::before, .toc__n, .toc__dots, .toc__go { display: none; }
   .toc__t { padding-left: .75rem; font-size: 1.3rem; }
-  .toc a { align-items: center; padding: .25rem .75rem; border-left: 3px solid transparent; font-size: .95rem; }
+  .toc a { align-items: center; padding: .45rem .75rem; border-left: 3px solid transparent; font-size: .95rem; }
   .toc a:hover { background: color-mix(in srgb, var(--f2) 30%, transparent); }
   .toc a[aria-current] { border-left-color: var(--sapin); background: color-mix(in srgb, var(--f2) 38%, var(--fond)); color: var(--sapin-fonce); }
 }
