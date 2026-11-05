@@ -38,35 +38,48 @@ import { traits } from './trait.js';
   if (toc) sommaire(toc);
 })();
 
-// Section courante du sommaire : celle qui traverse la bande haute de l'écran.
-// Après un clic, le défilement doux traverse d'autres sections : on garde le lien cliqué.
+// Section courante du sommaire. La section visée par l'adresse (#ancre) l'emporte tant qu'elle
+// est en haut de l'écran : une section proche du bas de page n'atteint jamais la bande haute.
+// Pendant le défilement doux qui suit un clic sur une ancre, on ne recalcule pas.
 function sommaire(nav) {
-  if (!('IntersectionObserver' in window)) return;
   var links = [].slice.call(nav.querySelectorAll('a'));
-  var secs = links.map(function (a) { return document.getElementById(decodeURIComponent(a.hash.slice(1))); }).filter(Boolean);
+  var idOf = function (a) { return decodeURIComponent(a.hash.slice(1)); };
+  var secs = links.map(function (a) { return document.getElementById(idOf(a)); }).filter(Boolean);
   if (!secs.length) return;
-  var verrou = 0;
+  var verrou = 0, attente = false;
   function marquer(id) {
     links.forEach(function (a) {
-      if (decodeURIComponent(a.hash.slice(1)) === id) a.setAttribute('aria-current', 'location');
+      if (idOf(a) === id) a.setAttribute('aria-current', 'location');
       else a.removeAttribute('aria-current');
     });
   }
-  marquer(secs[0].id);
-  var spy = new IntersectionObserver(function (entries) {
-    if (Date.now() < verrou) return;
-    entries.forEach(function (e) { if (e.isIntersecting) marquer(e.target.id); });
-  }, { rootMargin: '-15% 0px -70% 0px' });
-  secs.forEach(function (s) { spy.observe(s); });
-  nav.addEventListener('click', function (e) {
-    var a = e.target.closest('a');
-    if (a) { verrou = Date.now() + 900; marquer(decodeURIComponent(a.hash.slice(1))); }
+  function courante() {
+    var vise = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (vise && secs.indexOf(vise) >= 0) {
+      var t = vise.getBoundingClientRect().top;
+      if (t > -40 && t < innerHeight * 0.5) return vise.id;
+    }
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) return secs[secs.length - 1].id;
+    var bande = innerHeight * 0.25, id = secs[0].id;
+    secs.forEach(function (s) { if (s.getBoundingClientRect().top <= bande) id = s.id; });
+    return id;
+  }
+  function maj() {
+    attente = false;
+    if (Date.now() >= verrou) marquer(courante());
+  }
+  function demander() { if (!attente) { attente = true; requestAnimationFrame(maj); } }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href*="#"]');
+    if (!a || a.pathname !== location.pathname) return;
+    var id = idOf(a);
+    if (secs.some(function (s) { return s.id === id; })) { verrou = Date.now() + 900; marquer(id); setTimeout(demander, 950); }
   });
-  // la dernière section, souvent courte, n'atteint jamais la bande haute
-  addEventListener('scroll', function () {
-    if (Date.now() < verrou) return;
-    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) marquer(secs[secs.length - 1].id);
-  }, { passive: true });
+  addEventListener('scroll', demander, { passive: true });
+  addEventListener('resize', demander);
+  addEventListener('hashchange', demander);
+  addEventListener('load', demander);
+  maj();
 }
 
 // Mini-bios : une seule fiche par liste, insérée après la dernière personne de la rangée
