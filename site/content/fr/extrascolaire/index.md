@@ -5,15 +5,18 @@ sections:
   - id: periscolaire
     title: "Accueil périscolaire"
     type: text
-    draft_note: "Horaires, inscription et lien vers l'accueil de loisirs 123 Soleil à fournir par l'école."
+    draft_note: "Lien vers l'accueil de loisirs 1, 2, 3 Soleil à fournir par l'école."
     body: |
-      Le périscolaire de Kembs se trouve sur le même terrain que l'école. Grâce à notre partenariat, vous pouvez y inscrire votre enfant le midi, avec repas à la cantine, et le soir après la classe.
+      L'accueil périscolaire de la commune de Kembs se trouve sur le même terrain que l'école. Les élèves de Tzama peuvent y être accueillis, même s'ils n'habitent pas à Kembs :
+
+      - le midi, avec le repas à la cantine du périscolaire ;
+      - le soir après la classe, de 16 h 30 à 18 h 30.
 
       Il n'y a pas d'accueil le matin avant la classe.
 
-      Les enfants qui restent à Tzama le midi mangent le repas tiré du sac qu'ils ont apporté, froid ou réchauffé.
+      L'inscription se fait directement auprès de la structure 1, 2, 3 Soleil.
 
-      Pour les horaires et l'inscription, renseignez-vous auprès de l'accueil de loisirs 123 Soleil.
+      Les enfants qui restent à Tzama le midi mangent le repas qu'ils ont apporté, froid ou réchauffé, sous la surveillance de l'équipe. Le forfait est indiqué avec [les frais de scolarité](/inscription/#tarifs).
 
   - id: club-nature
     title: "Club nature"

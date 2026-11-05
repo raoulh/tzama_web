@@ -57,10 +57,24 @@ sections:
   figures:
     years: ans d'existence
     staff: personnes dans l'équipe
+  schedule:
+    caption: "Emploi du temps de la semaine : {{ .name }}"
+    morning: Matin
+    noon: Midi
+    afternoon: Après-midi
+    out: Dehors
+    in: Dedans
   pricing:
     year: "{{ .amount }} € par an et par enfant"
     monthly: "soit {{ .count }} mensualités de {{ .amount }} €"
-    sibling: "Remise de {{ .percent }} % pour chaque enfant à partir du deuxième"
+    sibling: "−{{ .second }} % pour le deuxième enfant, −{{ .third }} % pour le troisième"
+    sibling_note: "Réduction sur les frais de scolarité des frères et sœurs inscrits à Tzama."
+    deposit: "{{ .amount }} € de caution"
+    deposit_note: "Restituée quand l'élève quitte l'école, une fois l'ensemble des frais de scolarité réglé."
+    september: "{{ .amount }} € de frais en septembre"
+    september_note: "{{ .membership }} € d'adhésion de l'enfant à l'association, {{ .supplies }} € de fournitures scolaires et {{ .snack }} € pour le goûter du matin."
+    lunch: "{{ .amount }} € par an pour la surveillance du midi"
+    lunch_note: "Si votre enfant déjeune à l'école avec son repas. Facturé en octobre."
     club_year: "{{ .amount }} € pour l'année"
     club_card: "{{ .amount }} € la carte de 10 séances"
     stage: "{{ .amount }} € la semaine de stage"

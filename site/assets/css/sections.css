@@ -33,6 +33,8 @@
   .sec__main--photo { grid-template-columns: minmax(0, 1fr) 24rem; align-items: center; gap: 3.5rem; }
   .sec__main--gauche { grid-template-columns: 24rem minmax(0, 1fr); }
   .sec__main--gauche .sec__photo { order: -1; }
+  /* texte long : la photo reste en vue au lieu de flotter au milieu de la colonne */
+  .sec__main--photo:has(.plis) .sec__photo { align-self: start; position: sticky; top: calc(var(--header-c) + var(--pill-top) + 2rem); }
 }
 
 /* texte provisoire : étiquette scotchée, pas un bandeau d'alerte */
@@ -110,10 +112,36 @@
 .schedule__cycle h3 { padding-right: 2.75rem; }
 .schedule__ages { margin: 0 0 .6rem; font-weight: 700; color: var(--encre-2); }
 .schedule__cycle > :last-child { margin-bottom: 0; }
-@media (min-width: 48em) { .schedule { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.5rem; } }
+@media (min-width: 48em) { .schedule:not(:has(.semaine)) { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.5rem; } }
+/* emploi du temps : jours en lignes ; sur grand écran, un cycle par ligne, nom à gauche du tableau */
+.semaine { width: calc(100% + 1rem); margin: .4rem -.5rem 0; border-collapse: separate; border-spacing: 3px; table-layout: fixed; font-size: .86rem; line-height: 1.25; }
+.semaine th, .semaine td { padding: .35rem .3rem; vertical-align: top; text-align: left; overflow-wrap: break-word; hyphens: auto; }
+.semaine thead th { padding-bottom: .15rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--encre-2); }
+.semaine thead td { width: 4.1rem; background: none; }
+.semaine thead th:nth-child(3) { width: 18%; }
+.semaine tbody th { font-weight: 700; }
+.semaine td { border-radius: 6px; background: color-mix(in srgb, var(--cadre) 70%, transparent); }
+.semaine td.semaine--dehors, .semaine__pastille.semaine--dehors { background: color-mix(in srgb, var(--vert) 38%, var(--fond)); }
+.semaine td.semaine--dedans, .semaine__pastille.semaine--dedans { background: color-mix(in srgb, var(--f1) 30%, var(--fond)); }
+.semaine__legende { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 1rem 0 0; font-size: .95rem; color: var(--encre-2); }
+.semaine__pastille { display: inline-block; width: 1.1rem; height: 1.1rem; border-radius: 4px; }
+.semaine__pastille:not(:first-child) { margin-left: .8rem; }
+@media (min-width: 48em) {
+  .schedule:has(.semaine) { max-width: 60rem; }
+  .semaine { width: 100%; margin: 0; }
+  .semaine th, .semaine td { padding: .4rem .35rem; }
+  .semaine thead th:nth-child(3) { width: 20%; }
+  .schedule__cycle:has(.semaine) { display: grid; grid-template-columns: 11rem minmax(0, 1fr); grid-template-rows: auto auto 1fr; column-gap: 1.5rem; align-items: start; padding-right: 1.25rem; }
+  .schedule__cycle:has(.semaine) > :not(.semaine) { grid-column: 1; }
+  .schedule__cycle:has(.semaine) .semaine { grid-column: 2; grid-row: 1 / span 3; margin: 0; font-size: .95rem; }
+  .schedule__cycle:has(.semaine) .schedule__ico { position: static; grid-row: 3; margin-top: .5rem; }
+  .schedule__cycle:has(.semaine) h3 { padding-right: 0; }
+  .semaine thead td { width: 6rem; }
+}
 
 /* tarifs : étiquettes de prix */
 .pricing { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: 1rem; max-width: var(--measure); }
+@media (min-width: 60em) { .pricing:has(> :nth-child(3)) { max-width: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem 1.5rem; } }
 .pricing__item { padding: .9rem 1.2rem; background: var(--cadre); box-shadow: var(--ombre-etiq); transform: rotate(-.5deg); }
 .pricing__item:nth-child(even) { transform: rotate(.4deg); }
 .pricing__item strong { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; line-height: 1.15; color: var(--encre); }
@@ -127,10 +155,11 @@
 .steps__body h3 { margin: .35rem 0 .3em; font-size: 1.5rem; }
 .steps__body > :last-child { margin-bottom: 0; }
 .steps__fleche { position: absolute; left: .4rem; bottom: .3rem; width: 2.4rem; height: 2.4rem; color: var(--f1); transform: rotate(70deg); }
+/* au-delà de trois étapes, les colonnes seraient trop étroites : la liste reste verticale */
 @media (min-width: 60em) {
-  .steps { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3rem; }
-  .steps__item { grid-template-columns: none; padding-bottom: 0; }
-  .steps__fleche { left: auto; right: -3rem; top: .4rem; bottom: auto; width: 2.6rem; height: 2.6rem; transform: none; }
+  .steps:not(:has(> :nth-child(4))) { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3rem; }
+  .steps:not(:has(> :nth-child(4))) .steps__item { grid-template-columns: none; padding-bottom: 0; }
+  .steps:not(:has(> :nth-child(4))) .steps__fleche { left: auto; right: -3rem; top: .4rem; bottom: auto; width: 2.6rem; height: 2.6rem; transform: none; }
 }
 
 /* questions fréquentes et offres : accordéons légers */
@@ -143,6 +172,10 @@
 .faq__answer, .plier__body { padding: 0 1rem 1rem; }
 .faq__answer > :last-child, .plier__body > :last-child { margin-bottom: 0; }
 .plier { margin-top: .75rem; }
+.plis { display: grid; gap: .6rem; margin-top: 1.5rem; }
+.plis .plier { margin-top: 0; }
+.plier__body h4 { margin: 1.2em 0 .3em; font-size: 1.15rem; }
+.sec__outro { max-width: var(--measure); margin-top: 1.75rem; }
 
 /* stages et offres d'emploi : fiches papier scotchées */
 .fiches { list-style: none; margin: 1.75rem 0 0; padding: 0; display: grid; gap: 1.75rem; }

@@ -5,7 +5,11 @@
   <li class="pricing__item"><strong>{{ T "sections.pricing.club_year" (dict "amount" $p.club_nature.year) }}</strong></li>
   <li class="pricing__item"><strong>{{ T "sections.pricing.club_card" (dict "amount" $p.club_nature.card_10) }}</strong></li>
   {{- else }}
+  {{- $f := $p.september_fees }}
   <li class="pricing__item"><strong>{{ T "sections.pricing.year" (dict "amount" (lang.FormatNumber 0 $p.school_year)) }}</strong><span>{{ T "sections.pricing.monthly" (dict "count" $p.monthly.count "amount" $p.monthly.amount) }}</span></li>
-  <li class="pricing__item"><strong>{{ T "sections.pricing.sibling" (dict "percent" $p.sibling_discount_percent) }}</strong></li>
+  <li class="pricing__item"><strong>{{ T "sections.pricing.sibling" (dict "second" $p.sibling_discount.second "third" $p.sibling_discount.third) }}</strong><span>{{ T "sections.pricing.sibling_note" }}</span></li>
+  <li class="pricing__item"><strong>{{ T "sections.pricing.deposit" (dict "amount" $p.deposit) }}</strong><span>{{ T "sections.pricing.deposit_note" }}</span></li>
+  <li class="pricing__item"><strong>{{ T "sections.pricing.september" (dict "amount" (add $f.membership $f.supplies $f.snack)) }}</strong><span>{{ T "sections.pricing.september_note" (dict "membership" $f.membership "supplies" $f.supplies "snack" $f.snack) }}</span></li>
+  <li class="pricing__item"><strong>{{ T "sections.pricing.lunch" (dict "amount" $p.lunch_supervision) }}</strong><span>{{ T "sections.pricing.lunch_note" }}</span></li>
   {{- end }}
 </ul>

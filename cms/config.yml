@@ -135,6 +135,26 @@ collections:
                     hint: >-
                       Obligatoire dès qu'une photo est ajoutée, sinon la preview échoue.
                       Décrire ce que montre la photo, en une phrase : ce texte est lu aux personnes aveugles.
+                  - &sec_parts
+                    name: parts
+                    label: Blocs dépliables
+                    label_singular: bloc
+                    widget: list
+                    required: false
+                    summary: "{{title}}"
+                    hint: >-
+                      Affichés fermés sous le texte : seul le titre est visible, le lecteur clique pour lire la suite.
+                      Pour les longs développements.
+                    fields:
+                      - { name: title, label: Titre du bloc }
+                      - { name: body, label: Texte du bloc, widget: markdown, editor_components: [] }
+                  - &sec_outro
+                    name: outro
+                    label: Texte de fin
+                    widget: markdown
+                    required: false
+                    editor_components: []
+                    hint: Affiché en bas de la section, après les blocs dépliables et le contenu propre au type.
                   - &sec_draft
                     name: draft_note
                     label: Texte provisoire
@@ -161,6 +181,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: faq
                 label: Questions fréquentes
@@ -183,6 +205,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: figures
                 label: Chiffres
@@ -217,6 +241,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: partners
                 label: Partenaires
@@ -237,6 +263,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: events
                 label: Événements
@@ -249,6 +277,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: documents
                 label: Documents à télécharger
@@ -261,6 +291,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: schedule
                 label: Semaine type par cycle
@@ -281,14 +313,30 @@ collections:
                         label: Âges
                         required: false
                         hint: Par exemple « de 3 à 6 ans ».
+                      - name: days
+                        label: Emploi du temps
+                        label_singular: jour
+                        widget: list
+                        required: false
+                        summary: "{{day}}"
+                        hint: >-
+                          Une case qui commence par « Forêt » ou « Extérieur » est colorée en vert (dehors),
+                          par « Intérieur » en rose (dedans).
+                        fields:
+                          - { name: day, label: Jour }
+                          - { name: morning, label: Matin }
+                          - { name: noon, label: Midi }
+                          - { name: afternoon, label: Après-midi }
                       - name: body
-                        label: Planning de la semaine
+                        label: Texte sous l'emploi du temps
                         widget: markdown
                         required: false
                         editor_components: []
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: pricing
                 label: Tarifs
@@ -309,6 +357,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: steps
                 label: Étapes
@@ -333,6 +383,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: stages
                 label: Stages à venir
@@ -345,6 +397,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: jobs
                 label: Postes ouverts
@@ -357,6 +411,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: donate
                 label: Don
@@ -369,6 +425,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: contact_form
                 label: Formulaire de contact
@@ -380,6 +438,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
               - name: video
                 label: Vidéos YouTube
@@ -403,6 +463,8 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_parts
+                  - *sec_outro
                   - *sec_draft
 
       - name: inscription
@@ -1133,13 +1195,21 @@ collections:
                 fields:
                   - { name: count, label: Nombre de mensualités, widget: number, value_type: int, min: 1 }
                   - { name: amount, label: Montant d'une mensualité (€), widget: number, value_type: int, min: 0 }
-              - name: sibling_discount_percent
+              - name: sibling_discount
                 label: Réduction fratrie (%)
-                widget: number
-                value_type: int
-                min: 0
-                max: 100
-                hint: Appliquée dès le deuxième enfant.
+                widget: object
+                fields:
+                  - { name: second, label: Deuxième enfant (%), widget: number, value_type: int, min: 0, max: 100 }
+                  - { name: third, label: Troisième enfant (%), widget: number, value_type: int, min: 0, max: 100 }
+              - { name: deposit, label: Caution (€), widget: number, value_type: int, min: 0, hint: Restituée au départ de l'élève. }
+              - name: september_fees
+                label: Frais facturés en septembre
+                widget: object
+                fields:
+                  - { name: membership, label: Adhésion de l'enfant à l'association (€), widget: number, value_type: int, min: 0 }
+                  - { name: supplies, label: Fournitures scolaires (€), widget: number, value_type: int, min: 0 }
+                  - { name: snack, label: Goûter du matin (€), widget: number, value_type: int, min: 0 }
+              - { name: lunch_supervision, label: "Surveillance du midi, par an (€)", widget: number, value_type: int, min: 0, hint: Pour les enfants qui déjeunent à l'école avec leur repas. }
               - name: club_nature
                 label: Club nature
                 widget: object
