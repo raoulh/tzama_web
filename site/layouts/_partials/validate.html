@@ -25,7 +25,10 @@
 {{- end -}}
 {{- if not (and $p.monthly.count $p.monthly.amount) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.monthly.count ou amount" }}{{ end -}}
 {{- if (try (time.AsTime $s.opening_date)).Err }}{{ errorf "data/settings.yaml : date invalide dans opening_date (attendu AAAA-MM-JJ)" }}{{ end -}}
-{{- if not (in (slice "int" "int64" "uint64") (printf "%T" $p.sibling_discount_percent)) }}{{ errorf "data/settings.yaml : champ obligatoire absent ou non entier : pricing.sibling_discount_percent" }}{{ end -}}
+{{- range slice "sibling_discount.second" "sibling_discount.third" "deposit" "september_fees.membership" "september_fees.supplies" "september_fees.snack" "lunch_supervision" -}}
+  {{- $v := $p -}}{{- range split . "." -}}{{- $v = index ($v | default dict) . -}}{{- end -}}
+  {{- if not (in (slice "int" "int64" "uint64") (printf "%T" $v)) }}{{ errorf "data/settings.yaml : champ obligatoire absent ou non entier : pricing.%s" . }}{{ end -}}
+{{- end -}}
 {{- if not (and $p.club_nature.year $p.club_nature.card_10) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.club_nature.year ou card_10" }}{{ end -}}
 {{- with $s.banner -}}
   {{- if and .enabled (not (index (.text | default dict) site.Language.Lang)) }}{{ errorf "data/settings.yaml : banner.text.%s absent alors que le bandeau est activé" site.Language.Lang }}{{ end -}}
@@ -130,6 +133,9 @@
       {{- if not .title }}{{ errorf "%s : section %s : title obligatoire" $file .id }}{{ end -}}
       {{- $r := index $types (.type | default "") | default (dict) -}}
       {{- if not (isset $types (.type | default "")) }}{{ errorf "%s : section %s : type inconnu %q (attendu : %s)" $file .id .type (delimit $typeNames ", ") }}{{ end -}}
+      {{- range .parts -}}
+        {{- if not (and .title .body) }}{{ errorf "%s : section %s : chaque bloc dépliable (parts) exige title et body" $file $sec.id }}{{ end -}}
+      {{- end -}}
       {{- range $r.required -}}
         {{- if not (index $sec .) }}{{ errorf "%s : section %s : champ obligatoire absent : %s" $file $sec.id . }}{{ end -}}
       {{- end -}}

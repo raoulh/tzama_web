@@ -4,4 +4,4 @@ category: inscription
 order: 1
 ---
 
-Oui, dans le cas de fratries inscrites à Tzama, nous accordons une remise de 20% à compter du deuxième enfant.
+Oui, dans le cas de fratries inscrites à Tzama, nous accordons une remise de 20 % pour le deuxième enfant et de 30 % pour le troisième.

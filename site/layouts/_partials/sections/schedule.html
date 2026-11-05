@@ -1,12 +1,37 @@
-{{- /* cycles : { name, ages, body } ; body en markdown (planning de la semaine du cycle). */ -}}
+{{- /*
+  cycles : { name, ages, days, body } ; days : { day, morning, noon, afternoon }, body en markdown.
+  Une case qui commence par « Forêt » ou « Extérieur » est teintée dehors, par « Intérieur » dedans.
+*/ -}}
 {{- $doodles := slice "d-feuille-simple" "d-fougere" "d-feuille-chene" -}}
+{{- $hasDays := false }}{{ range .s.cycles }}{{ if .days }}{{ $hasDays = true }}{{ end }}{{ end -}}
 <ul class="schedule">
   {{- range $i, $c := .s.cycles }}
   <li class="schedule__cycle">
     {{- partial "icon.html" (dict "id" (index $doodles (mod $i (len $doodles))) "class" "schedule__ico") }}
     <h3>{{ .name }}</h3>
     {{- with .ages }}<p class="schedule__ages">{{ . }}</p>{{ end }}
+    {{- with .days }}
+    <table class="semaine">
+      <caption class="visually-hidden">{{ T "sections.schedule.caption" (dict "name" $c.name) }}</caption>
+      <thead><tr><td></td><th scope="col">{{ T "sections.schedule.morning" }}</th><th scope="col">{{ T "sections.schedule.noon" }}</th><th scope="col">{{ T "sections.schedule.afternoon" }}</th></tr></thead>
+      <tbody>
+        {{- range . }}
+        <tr>
+          <th scope="row">{{ .day }}</th>
+          {{- range slice .morning .noon .afternoon }}
+          {{- $lieu := "" }}
+          {{- if findRE `^(?i)(forêt|extérieur)` . }}{{ $lieu = "dehors" }}{{ else if findRE `^(?i)intérieur` . }}{{ $lieu = "dedans" }}{{ end }}
+          <td{{ with $lieu }} class="semaine--{{ . }}"{{ end }}>{{ . }}</td>
+          {{- end }}
+        </tr>
+        {{- end }}
+      </tbody>
+    </table>
+    {{- end }}
     {{- with .body }}{{ $.page.RenderString (dict "display" "block") . }}{{ end }}
   </li>
   {{- end }}
 </ul>
+{{- if $hasDays }}
+<p class="semaine__legende"><span class="semaine__pastille semaine--dehors"></span>{{ T "sections.schedule.out" }} <span class="semaine__pastille semaine--dedans"></span>{{ T "sections.schedule.in" }}</p>
+{{- end }}

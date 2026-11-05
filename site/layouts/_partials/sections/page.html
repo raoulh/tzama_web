@@ -1,6 +1,7 @@
 {{- /*
   Page à sections : le front matter « sections » liste les blocs, rendus dans l'ordre.
-  Champs communs : id (ancre), title, type, body (markdown), photo + photo_alt, draft_note.
+  Champs communs : id (ancre), title, type, body (markdown), photo + photo_alt, draft_note,
+  parts { title, body } (blocs dépliables sous body), outro (markdown, après le contenu du type).
   Les champs propres au type sont lus par sections/<type>.html ; validate.html les vérifie.
   draft_note s'affiche tant que le build n'est pas strict (previews et v2), jamais en production stricte.
   Un bloc sur deux est teinté, bordé de feuillage ; les photos alternent à droite puis à gauche.
@@ -46,6 +47,16 @@
           {{- with .body }}
           <div class="sec__body">{{ $page.RenderString (dict "display" "block") . }}</div>
           {{- end }}
+          {{- with .parts }}
+          <div class="plis">
+            {{- range . }}
+            <details class="plier">
+              <summary>{{ .title }}</summary>
+              <div class="plier__body">{{ $page.RenderString (dict "display" "block") .body }}</div>
+            </details>
+            {{- end }}
+          </div>
+          {{- end }}
         </div>
         {{- with .photo }}
         <figure class="photo sec__photo reveal">
@@ -55,6 +66,9 @@
         {{- end }}
       </div>
       {{- partial (printf "sections/%s.html" .type) (dict "page" $page "s" .) }}
+      {{- with .outro }}
+      <div class="sec__body sec__outro">{{ $page.RenderString (dict "display" "block") . }}</div>
+      {{- end }}
       {{- if $donate }}
         </div>
       </div>

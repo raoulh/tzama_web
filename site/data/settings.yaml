@@ -18,8 +18,14 @@ social:
 pricing:
   school_year: 5700
   monthly: { count: 12, amount: 475 }
-  # Remise par enfant, dès le deuxième enfant inscrit.
-  sibling_discount_percent: 20
+  # Remise sur la scolarité du deuxième et du troisième enfant inscrits.
+  sibling_discount: { second: 20, third: 30 }
+  # Restituée au départ de l'élève.
+  deposit: 950
+  # Facturés en septembre, par enfant.
+  september_fees: { membership: 10, supplies: 45, snack: 75 }
+  # Surveillance du repas tiré du sac, par an et par enfant.
+  lunch_supervision: 440
   club_nature: { year: 360, card_10: 150 }
   stage_week: 130
 
