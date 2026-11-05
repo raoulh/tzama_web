@@ -32,7 +32,6 @@ words:
       text: "« Zamma » veut dire ensemble en alsacien. L'école est portée par une association de parents bénévoles, qui décide et gère avec l'équipe."
 why:
   title: "Pourquoi choisir Tzama"
-  draft_note: "Points provisoires, repris de la présentation de l'école ; à relire et compléter par le CA."
   items:
     - icon: d-main-droite
       title: "Un adulte pour dix enfants"
