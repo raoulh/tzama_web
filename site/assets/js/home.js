@@ -1,3 +1,7 @@
+import { traits } from './trait.js';
+
+traits();
+
 // Galerie et témoignage : hors des animations, actifs même sans IntersectionObserver.
 (function () {
   var reduce = matchMedia('(prefers-reduced-motion: reduce)');
@@ -45,7 +49,7 @@
     var rio = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('is-in'); rio.unobserve(e.target); } });
     }, { rootMargin: '0px 0px -12% 0px' });
-    document.querySelectorAll('.reveal, .titre').forEach(function (el) { rio.observe(el); });
+    document.querySelectorAll('.reveal').forEach(function (el) { rio.observe(el); });
   }
 
   // Brise à l'arrivée des photos scotchées, posée quand la photo est collée (55 % visible avec view(), fin de « coller » sinon).

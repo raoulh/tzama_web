@@ -1,4 +1,5 @@
 import { papier } from './papier.js';
+import { traits } from './trait.js';
 
 (function () {
   papier('.photo.reveal, .carte__img.reveal, .trombi li.reveal');
@@ -32,7 +33,41 @@ import { papier } from './papier.js';
   }
 
   document.querySelectorAll('[data-trombi]').forEach(trombi);
+  traits();
+  var toc = document.querySelector('.toc');
+  if (toc) sommaire(toc);
 })();
+
+// Section courante du sommaire : celle qui traverse la bande haute de l'écran.
+// Après un clic, le défilement doux traverse d'autres sections : on garde le lien cliqué.
+function sommaire(nav) {
+  if (!('IntersectionObserver' in window)) return;
+  var links = [].slice.call(nav.querySelectorAll('a'));
+  var secs = links.map(function (a) { return document.getElementById(decodeURIComponent(a.hash.slice(1))); }).filter(Boolean);
+  if (!secs.length) return;
+  var verrou = 0;
+  function marquer(id) {
+    links.forEach(function (a) {
+      if (decodeURIComponent(a.hash.slice(1)) === id) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    });
+  }
+  marquer(secs[0].id);
+  var spy = new IntersectionObserver(function (entries) {
+    if (Date.now() < verrou) return;
+    entries.forEach(function (e) { if (e.isIntersecting) marquer(e.target.id); });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  secs.forEach(function (s) { spy.observe(s); });
+  nav.addEventListener('click', function (e) {
+    var a = e.target.closest('a');
+    if (a) { verrou = Date.now() + 900; marquer(decodeURIComponent(a.hash.slice(1))); }
+  });
+  // la dernière section, souvent courte, n'atteint jamais la bande haute
+  addEventListener('scroll', function () {
+    if (Date.now() < verrou) return;
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) marquer(secs[secs.length - 1].id);
+  }, { passive: true });
+}
 
 // Mini-bios : une seule fiche par liste, insérée après la dernière personne de la rangée
 // (la grille garde sa forme). La fiche suit le bouton dans le DOM seulement à la fin de la
