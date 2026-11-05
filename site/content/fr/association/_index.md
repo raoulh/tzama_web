@@ -5,7 +5,6 @@ sections:
   - id: association
     title: "L'association"
     type: text
-    draft_note: "Présentation du fonctionnement de l'association à fournir par l'école."
     body: |
       Tzama est une association à but non lucratif, basée à Kembs. Elle porte l'école, le club nature et les stages de vacances.
 
@@ -22,12 +21,10 @@ sections:
     title: "Le conseil d'administration"
     type: team
     group: ca
-    draft_note: "Mini-biographies des membres du CA à fournir."
 
   - id: archipel
     title: "Au cœur de l'Archipel de Kembs"
     type: video
-    draft_note: "Texte à fournir par l'école."
     body: |
       L'Archipel de Kembs est un tiers-lieu pédagogique. Tzama le développe avec les associations Colibris 68, G'Rhin d'Sel et le groupement d'achat solidaire GASPR.
 
@@ -43,7 +40,6 @@ sections:
   - id: evenements
     title: "Les événements de l'année"
     type: events
-    draft_note: "Dates, description et photo de chaque événement à fournir."
     body: |
       Chaque année, l'association organise ou rejoint plusieurs rendez-vous ouverts aux familles et aux habitants.
 

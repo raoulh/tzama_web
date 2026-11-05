@@ -22,7 +22,6 @@ sections:
   - id: documents
     title: "Documents à télécharger"
     type: documents
-    draft_note: "Questionnaire destiné aux familles et dossier d'inscription en PDF à fournir par l'école."
 
   - id: tarifs
     title: "Frais de scolarité et caution"

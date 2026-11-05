@@ -8,4 +8,4 @@ flyer: flyer.jpg
 flyer_alt: "Flyer du Club Nature : ateliers en plein air le mercredi matin"
 ---
 
-Données de démonstration. Le Club Nature accueille les enfants de 3 à 7 ans le mercredi, de 9 h à 12 h.
+Le Club Nature accueille les enfants de 3 à 7 ans le mercredi, de 9 h à 12 h.
