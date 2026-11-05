@@ -10,20 +10,18 @@
       <ul class="nav__list">
         {{- range site.Menus.main }}
         {{- $current := or ($page.IsMenuCurrent "main" .) ($page.HasMenuCurrent "main" .) }}
-        <li{{ if .HasChildren }} class="has-sub"{{ end }}>
+        {{- /* Sous-entrées : les sections de la page visée, comme son sommaire. */}}
+        {{- $secs := slice }}{{ with .Page }}{{ $secs = .Params.sections | default slice }}{{ end }}
+        {{- $sub := gt (len $secs) 1 }}
+        <li{{ if $sub }} class="has-sub"{{ end }}>
           <a href="{{ .URL }}"{{ if $current }} class="is-current"{{ end }}{{ if $page.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>
             {{- with .Params.icon }}{{ partial "icon.html" (dict "id" . "class" "nav__ico") }}{{ end }}{{ .Name -}}
           </a>
-          {{- if .HasChildren }}
+          {{- if $sub }}
+          {{- $url := .URL }}
           <ul>
-            {{- range .Children }}
-            {{- /* Les sous-entrées à ancre visent toutes la page de leur parent : aucune n'est « la » page courante. */}}
-            {{- $e := . }}
-            {{- with .Params.anchor }}
-            <li><a href="{{ $e.URL }}#{{ . }}">{{ $e.Name }}</a></li>
-            {{- else }}
-            <li><a href="{{ .URL }}"{{ if $page.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a></li>
-            {{- end }}
+            {{- range $secs }}
+            <li><a href="{{ $url }}#{{ .id }}">{{ .title }}</a></li>
             {{- end }}
           </ul>
           {{- end }}
