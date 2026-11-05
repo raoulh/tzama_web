@@ -5,7 +5,6 @@ sections:
   - id: periscolaire
     title: "Accueil périscolaire"
     type: text
-    draft_note: "Lien vers l'accueil de loisirs 1, 2, 3 Soleil à fournir par l'école."
     body: |
       L'accueil périscolaire de la commune de Kembs se trouve sur le même terrain que l'école. Les élèves de Tzama peuvent y être accueillis, même s'ils n'habitent pas à Kembs :
 

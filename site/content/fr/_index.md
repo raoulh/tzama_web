@@ -30,6 +30,8 @@ words:
       text: "Chacun avance à son rythme, en manipulant : matériel Montessori, pratiques Freinet, et les programmes de l'Éducation nationale."
     - title: "Ensemble"
       text: "« Zamma » veut dire ensemble en alsacien. L'école est portée par une association de parents bénévoles, qui décide et gère avec l'équipe."
+news:
+  title: "Actualités et événements à venir"
 why:
   title: "Pourquoi choisir Tzama"
   items:
@@ -74,7 +76,6 @@ day:
       text: "De 11 h 30 à 13 h 30, le périscolaire de la ville de Kembs assure le repas. Il accueille aussi les enfants le soir."
 gallery:
   title: "Tzama en images"
-  draft_note: "Photo de groupe de l'équipe à fournir par l'école."
   items:
     - image: img/accueil/depart-yourtes.jpg
       alt: "Des enfants avec leur sac à dos se rassemblent devant les yourtes de l'école, sous les arbres."
@@ -101,6 +102,7 @@ gallery:
       alt: "Le toit d'une yourte vu d'en dessous : des perches de bois rayonnent autour du puits de lumière."
       caption: "Le toit de la yourte"
 support:
+  title: "Soutenir l'école"
   text: "Les dons servent à équiper les classes et à améliorer les yourtes et le jardin. L'association délivre un reçu fiscal, qui ouvre droit à une réduction d'impôt. Le paiement se fait en ligne, via HelloAsso."
 visit:
   title: "Venir voir, c'est le plus simple"

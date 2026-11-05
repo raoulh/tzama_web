@@ -116,7 +116,6 @@ sections:
 
 home:
   swapPhoto: Changer de photo
-  newsTitle: Actualités et événements à venir
   newsAll: Toutes les actualités
   teamTitle: Les visages de l'équipe
   teamNote: Celles et ceux que vous croiserez au portail
@@ -127,7 +126,6 @@ home:
   philosophyLink: notre philosophie
   testimonialTitle: Un témoignage
   exampleTag: Exemple de témoignage, texte fictif
-  supportTitle: Soutenir l'école
   galleryLabel: Photos de l'école, à faire défiler
   galleryPrev: Photos précédentes
   galleryNext: Photos suivantes

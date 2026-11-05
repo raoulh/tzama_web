@@ -6,4 +6,4 @@ ages: "3 à 10 ans"
 registration_url: "mailto:animation.tzama@gmail.com"
 ---
 
-Données de démonstration. Cinq matinées entièrement en extérieur.
+Cinq matinées entièrement en extérieur.

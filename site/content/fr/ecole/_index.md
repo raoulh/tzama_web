@@ -92,7 +92,6 @@ sections:
     type: video
     photo: pedagogie.jpg
     photo_alt: "Un groupe d'enfants observe quelque chose au creux de leurs mains, en forêt."
-    draft_note: "Pédagogies actives : l'école doit décider s'il faut les citer. Vidéos du parcours après Tzama à fournir."
     body: |
       **À l'école Tzama, nous ne faisons pas le choix entre apprendre et s'épanouir, entre acquérir des connaissances et développer des compétences humaines. Nous sommes convaincus que les deux sont indissociables pour préparer les enfants à construire leur avenir.**
 
@@ -283,14 +282,12 @@ sections:
     title: "L'équipe"
     type: team
     group: equipe
-    draft_note: "Photo de toute l'équipe et mot sur l'organisation de l'école à fournir."
     body: |
       L'équipe réunit des enseignantes et enseignants, une éducatrice nature et des assistants d'éducation. Le conseil d'administration de l'association est présenté sur la page [L'association](/association/#ca).
 
   - id: familles
     title: "Faire équipe avec les familles"
     type: text
-    draft_note: "Charte de l'école en PDF à fournir : le lien de téléchargement sera ajouté ici."
     body: |
       À Tzama, nous sommes convaincus que l'épanouissement et la progression de l'enfant reposent sur une relation de confiance et une coopération étroite entre sa famille et l'équipe pédagogique.
 
@@ -310,7 +307,6 @@ sections:
     title: "Une école en harmonie avec son territoire"
     type: partners
     category: territoire
-    draft_note: "Soutien de la mairie et partenariat avec l'EHPAD : textes à fournir par l'école."
     body: |
       L'école fait partie de l'Archipel de Kembs, un tiers-lieu pédagogique créé avec d'autres associations du territoire. Elle est soutenue par la commune de Kembs et travaille en partenariat avec un EHPAD.
 
@@ -324,7 +320,6 @@ sections:
     type: text
     photo: locaux.jpg
     photo_alt: "Les enfants assis en cercle sur l'herbe, devant les yourtes de l'école."
-    draft_note: "Description des yourtes à fournir par l'école."
     body: |
       Les classes ont lieu dans des yourtes, à Kembs, sur le terrain de l'Archipel. Autour, les enfants ont accès au jardin pédagogique et à la forêt.
 ---

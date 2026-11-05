@@ -570,6 +570,13 @@ collections:
                 fields:
                   - { name: title, label: Titre }
                   - { name: text, label: Texte, widget: text }
+          - name: news
+            i18n: true
+            label: Actualités (les trois dernières)
+            widget: object
+            hint: Les actualités elles-mêmes se gèrent dans la collection « Actualités ».
+            fields:
+              - { name: title, label: Titre }
           - name: why
             i18n: true
             label: « Pourquoi choisir Tzama »
@@ -664,6 +671,7 @@ collections:
             label: Soutenir l'école
             widget: object
             fields:
+              - { name: title, label: Titre }
               - { name: text, label: Texte, widget: text }
           - name: visit
             i18n: true

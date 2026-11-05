@@ -172,11 +172,12 @@
 {{- $hp := site.Home.Params -}}
 {{- $blocks := dict
   "hero" (slice "image" "image_alt" "tagline" "intro")
+  "news" (slice "title")
   "words" (slice "title")
   "why" (slice "title")
   "day" (slice "title")
   "gallery" (slice "title")
-  "support" (slice "text")
+  "support" (slice "title" "text")
   "visit" (slice "title" "photo" "photo_alt" "photo_caption")
 -}}
 {{- range $block, $fields := $blocks -}}

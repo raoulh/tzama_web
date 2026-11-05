@@ -5,4 +5,4 @@ summary: "Une actualité sans flyer ni date d'événement, pour tester les carte
 pinned: false
 ---
 
-Données de démonstration, sans image.
+Venez découvrir l'école, ses classes et ses yourtes, et poser vos questions à l'équipe.

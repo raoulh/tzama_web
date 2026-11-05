@@ -8,4 +8,4 @@ flyer: flyer.jpg
 flyer_alt: "Flyer du stage nature de l'été"
 ---
 
-Données de démonstration. Inscriptions auprès de l'équipe d'animation.
+Inscriptions auprès de l'équipe d'animation.

@@ -22,7 +22,7 @@
 <section class="actus" id="actualites" aria-labelledby="actus-titre">
   {{ partial "home/trans.html" "haut" }}
   <div class="section-head">
-    <h2 id="actus-titre" class="titre" data-idle="souligner"><span class="marque">{{ T "home.newsTitle" }}</span></h2>
+    <h2 id="actus-titre" class="titre" data-idle="souligner"><span class="marque">{{ site.Home.Params.news.title }}</span></h2>
     <a class="link" href="{{ $section.RelPermalink }}">{{ T "home.newsAll" }}</a>
   </div>
   <ul class="actus__list">
