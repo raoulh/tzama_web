@@ -46,7 +46,7 @@ L'insertion d'images dans le texte est désactivée : une image passe toujours p
 - **Pages** : L'école, Inscription, Extrascolaire, L'association, Contact et Accueil. Une page est une liste de sections ; chaque type de section (texte, équipe, chiffres, tarifs, étapes…) a ses propres champs. Les listes (équipe, questions, partenaires, stages…) ne se saisissent pas dans la page : la section les lit dans leur collection.
 - **Ancre d'une section** : le champ « Ancre » est la cible du menu et des liens internes. Ne pas la changer sur une section existante ; `validate.html` refuse deux sections de même ancre dans une page.
 - **Texte provisoire** : l'encadré n'apparaît qu'en prévisualisation et sur v2, jamais sur le site définitif.
-- **Accueil** : seuls les blocs déjà présents dans les gabarits sont déclarés ; les nouveaux blocs s'ajoutent à `config.yml` avec leur gabarit. Ses images vont dans `site/assets/img/accueil/`.
+- **Accueil** : chaque bloc du gabarit a ses champs dans `config.yml` ; un nouveau bloc s'y déclare en même temps que son gabarit et sa règle dans `validate.html`. Ses images vont dans `site/assets/img/accueil/`.
 - **Réglages** : coordonnées, tarifs (remise fratrie unique, dès le deuxième enfant) et bandeau, dans `site/data/settings.yaml`.
 
 ## Documents PDF

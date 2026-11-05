@@ -524,8 +524,7 @@ collections:
         public_folder: img/accueil
         preview_path: /
         fields:
-          # À ajouter après le merge de la PR de l'accueil : « Pourquoi choisir Tzama »,
-          # journée en quatre moments, carrousel (champs : voir validate.html).
+          - { name: title, label: Titre, widget: hidden }
           - name: hero
             i18n: true
             label: En-tête
@@ -571,20 +570,95 @@ collections:
                 fields:
                   - { name: title, label: Titre }
                   - { name: text, label: Texte, widget: text }
+          - name: why
+            i18n: true
+            label: « Pourquoi choisir Tzama »
+            widget: object
+            fields:
+              - { name: title, label: Titre }
+              - name: items
+                label: Points
+                label_singular: point
+                widget: list
+                min: 4
+                max: 6
+                summary: "{{title}}"
+                hint: De 4 à 6 points.
+                fields:
+                  - &home_icon
+                    name: icon
+                    label: Petit dessin
+                    widget: select
+                    options:
+                      - { label: Feuille de chêne, value: d-feuille-chene }
+                      - { label: Feuille, value: d-feuille-simple }
+                      - { label: Fougère, value: d-fougere }
+                      - { label: Soleil, value: d-soleil }
+                      - { label: Main, value: d-main-droite }
+                      - { label: Cœur, value: d-coeur }
+                      - { label: Étoile, value: d-etoile }
+                  - { name: title, label: Titre }
+                  - { name: text, label: Texte, widget: text }
+              - &home_draft
+                name: draft_note
+                label: Texte provisoire
+                widget: text
+                required: false
+                hint: >-
+                  Encadré « Texte provisoire » visible seulement en prévisualisation, jamais sur le site publié.
+                  Le vider quand le bloc est définitif.
           - name: day
             i18n: true
             label: « Une journée à Tzama »
             widget: object
             fields:
               - { name: title, label: Titre }
-              - *home_items
-              - name: photo
-                label: Photo
-                widget: image
-                accept: image/jpeg,image/png,image/webp
-                choose_url: false
-              - { name: photo_alt, label: Description de la photo }
-              - { name: photo_caption, label: Légende de la photo }
+              - name: items
+                label: Moments de la journée
+                label_singular: moment
+                widget: list
+                min: 1
+                summary: "{{title}}"
+                fields:
+                  - *home_icon
+                  - { name: title, label: Titre }
+                  - { name: text, label: Texte, widget: text }
+                  - name: photo
+                    label: Photo
+                    widget: image
+                    required: false
+                    accept: image/jpeg,image/png,image/webp
+                    choose_url: false
+                    hint: Facultative. Photo réelle de l'école.
+                  - name: photo_alt
+                    label: Description de la photo
+                    required: false
+                    hint: Obligatoire avec une photo. Décrire ce qu'elle montre, en une phrase.
+                  - name: photo_caption
+                    label: Légende de la photo
+                    required: false
+                    hint: Obligatoire avec une photo.
+          - name: gallery
+            i18n: true
+            label: Carrousel « Tzama en images »
+            widget: object
+            fields:
+              - { name: title, label: Titre }
+              - name: items
+                label: Photos
+                label_singular: photo
+                widget: list
+                min: 2
+                summary: "{{caption}}"
+                fields:
+                  - name: image
+                    label: Photo
+                    widget: image
+                    accept: image/jpeg,image/png,image/webp
+                    choose_url: false
+                  - { name: alt, label: Description de la photo, hint: "Ce que montre la photo, en une phrase : lu aux personnes aveugles." }
+                  - { name: caption, label: Légende }
+              - *home_draft
           - name: support
             i18n: true
             label: Soutenir l'école
