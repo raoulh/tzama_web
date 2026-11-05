@@ -2,6 +2,8 @@
   items : { value, label } ou { compute, label }. compute vaut years (rentrées de septembre
   depuis settings.opening_date, celle de l'année scolaire en cours comprise) ou staff (membres
   du groupe equipe) ; calculés au build. Chiffres posés tels quels, sans compteur animé.
+  Seul le nombre en tête de value est affiché en grand : un symbole (« % ») reste à côté en
+  petit, un mot (« adulte ») passe en tête de la légende.
 */ -}}
 {{- $s := hugo.Data.settings -}}
 <ul class="figures">
@@ -14,6 +16,15 @@
   {{- else if eq .compute "staff" }}
     {{- $v = len (where (site.GetPage "/equipe").RegularPages "Params.group" "equipe") }}
   {{- end }}
-  <li class="figures__item"><strong class="figures__value">{{ $v }}</strong> <span>{{ .label | default (T (printf "sections.figures.%s" .compute)) }}</span></li>
+  {{- $v = string $v }}
+  {{- $n := $v }}
+  {{- range findRE `^\d+(?:[.,]\d+)?` $v 1 }}{{ $n = . }}{{ end }}
+  {{- $unit := strings.TrimSpace (strings.TrimPrefix $n $v) }}
+  {{- $label := .label | default (T (printf "sections.figures.%s" .compute)) }}
+  {{- if findRE `^\pL` $unit }}
+    {{- $label = printf "%s %s" $unit $label }}
+    {{- $unit = "" }}
+  {{- end }}
+  <li class="figures__item"><strong class="figures__value">{{ $n }}{{ with $unit }}<small>&nbsp;{{ . }}</small>{{ end }}</strong> <span class="figures__label">{{ $label }}</span></li>
   {{- end }}
 </ul>

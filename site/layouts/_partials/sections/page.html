@@ -4,33 +4,39 @@
   parts { title, body } (blocs dépliables sous body), outro (markdown, après le contenu du type).
   Les champs propres au type sont lus par sections/<type>.html ; validate.html les vérifie.
   draft_note s'affiche tant que le build n'est pas strict (previews et v2), jamais en production stricte.
-  Un bloc sur deux est teinté, bordé de feuillage ; les photos alternent à droite puis à gauche.
+  Un bloc sur deux est teinté ; les photos alternent à droite puis à gauche.
+  Dès deux blocs, un sommaire les précède (carnet, puis colonne collante) ; les bandes teintées
+  perdent alors leur lisière de feuillage, que la colonne étroite couperait.
 */ -}}
 {{- $page := . -}}
 {{- $showDraft := ne (printf "%v" site.Params.strict) "true" -}}
 {{- $sections := .Params.sections -}}
+{{- $toc := gt (len $sections) 1 -}}
 <article class="page page--sections">
   <header class="page__head">
     <h1 class="titre"><span class="marque">{{ .Title }}</span></h1>
     {{- with .Description }}
     <p class="page__intro">{{ . }}</p>
     {{- end }}
-    {{- if gt (len $sections) 1 }}
-    <nav class="sommaire" aria-label="{{ T "sections.summary" (dict "title" .Title) }}">
-      <ul>
-        {{- range $sections }}
-        <li><a href="#{{ .id }}">{{ .title }}</a></li>
-        {{- end }}
-      </ul>
-    </nav>
-    {{- end }}
     {{- partial "icon.html" (dict "id" "d-feuille-chene" "class" "page__feuille") }}
   </header>
+  {{- if $toc }}
+  <div class="sec__in toc__lay">
+    <nav class="toc" aria-label="{{ T "sections.toc" }}">
+      <p class="toc__t">{{ T "sections.toc" }}</p>
+      <ol>
+        {{- range $i, $sec := $sections }}
+        <li><a href="#{{ .id }}"><span class="toc__n" aria-hidden="true">{{ add $i 1 }}</span><span>{{ .title }}</span><span class="toc__dots" aria-hidden="true"></span><span class="toc__go" aria-hidden="true">&darr;</span></a></li>
+        {{- end }}
+      </ol>
+    </nav>
+    <div class="toc__main">
+  {{- end }}
   {{- $photos := 0 }}
   {{- range $i, $sec := $sections }}
   {{- $tinted := modBool $i 2 | not }}
   <section class="sec sec--{{ .type }}{{ if $tinted }} sec--teinte{{ end }}" id="{{ .id }}" aria-labelledby="{{ .id }}-titre">
-    {{- if $tinted }}{{ partial "home/trans.html" "haut" }}{{ end }}
+    {{- if and $tinted (not $toc) }}{{ partial "home/trans.html" "haut" }}{{ end }}
     <div class="sec__in">
       {{- $donate := eq .type "donate" }}
       {{- if $donate }}
@@ -48,11 +54,11 @@
           <div class="sec__body">{{ $page.RenderString (dict "display" "block") . }}</div>
           {{- end }}
           {{- with .parts }}
-          <div class="plis">
+          <div class="acc-grp">
             {{- range . }}
-            <details class="plier">
+            <details class="acc">
               <summary>{{ .title }}</summary>
-              <div class="plier__body">{{ $page.RenderString (dict "display" "block") .body }}</div>
+              <div class="acc__body">{{ $page.RenderString (dict "display" "block") .body }}</div>
             </details>
             {{- end }}
           </div>
@@ -74,8 +80,12 @@
       </div>
       {{- end }}
     </div>
-    {{- if $tinted }}{{ partial "home/trans.html" "bas" }}{{ end }}
+    {{- if and $tinted (not $toc) }}{{ partial "home/trans.html" "bas" }}{{ end }}
   </section>
+  {{- end }}
+  {{- if $toc }}
+    </div>
+  </div>
   {{- end }}
 </article>
 {{- with resources.Get "js/sections.js" | js.Build (dict "minify" true "target" "es2017") | fingerprint }}

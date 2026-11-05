@@ -8,9 +8,9 @@
     <h3>{{ .Title }}</h3>
     <p>{{ .Params.summary }}</p>
     {{- with .Content }}
-    <details class="plier">
+    <details class="acc">
       <summary>{{ T "sections.jobs.details" }}</summary>
-      <div class="plier__body">{{ . }}</div>
+      <div class="acc__body">{{ . }}</div>
     </details>
     {{- end }}
   </li>

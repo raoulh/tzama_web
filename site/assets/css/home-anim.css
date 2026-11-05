@@ -14,18 +14,15 @@
   .hero__text .marque { animation: surligner .7s ease-out both; animation-delay: .7s; }
   .f--tombe { animation: tomber 1.8s cubic-bezier(.4,.1,.5,1) both; animation-delay: calc(.4s + var(--d, 0s)); }
 
-  /* au défilement : parallaxe des calques et de la photo (scroll()), surlignés et photos qui se collent (view()) */
+  /* au défilement : parallaxe des calques et de la photo (scroll()), photos qui se collent (view()) ; le trait des titres est dans trait.css */
   @supports (animation-timeline: scroll()) {
     .calque { animation: parallaxe linear both; animation-timeline: scroll(root); animation-range: 0 50rem; }
     .hero__img { animation: zoom-photo linear both; animation-timeline: scroll(root); animation-range: 0 50rem; }
     .reveal { animation: coller linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
-    .titre .marque { animation: surligner linear both; animation-timeline: view(); animation-range: entry 30% entry 110%; }
   }
   @supports not (animation-timeline: scroll()) {
     html.js .reveal:not(.is-in) { opacity: 0; }
     html.js .reveal.is-in { animation: coller .6s cubic-bezier(.2,.8,.3,1) both; animation-delay: calc(var(--i, 0) * .08s); }
-    html.js .titre:not(.is-in) .marque { background-size: 0% 100%; }
-    html.js .titre.is-in .marque { animation: surligner .6s ease-out both; }
   }
 }
 /* vie au repos : animations ponctuelles déclenchées par une classe idle-* posée par home.js */
@@ -54,7 +51,8 @@
   60% { transform: rotate(calc(var(--rot, 0deg) - 1.6deg)); }
   85% { transform: rotate(calc(var(--rot, 0deg) + .6deg)); }
 }
-@keyframes idle-souligner { 0% { background-size: 100% 100%; } 35% { background-size: 0% 100%; } 100% { background-size: 100% 100%; } }
+/* hauteur du trait de feutre des titres (trait.css) */
+@keyframes idle-souligner { 0% { background-size: 100% .55em; } 35% { background-size: 0% .55em; } 100% { background-size: 100% .55em; } }
 @keyframes idle-coucou { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(16deg); } 50% { transform: rotate(-10deg); } 75% { transform: rotate(12deg); } }
 @keyframes hover-fremir {
   0%, 100% { transform: rotate(var(--r, 0deg)) scale(var(--s, 1)); }
@@ -69,7 +67,7 @@
   .idle-tournoyer { animation: idle-tournoyer 2.4s ease-in-out both; }
   .mot__ico.idle-tourner { animation: idle-tourner 1.8s ease-in-out both; }
   .photo.idle-balancer img, .actu.idle-balancer img, .actu.idle-balancer .actu__vide { animation: idle-balancer 2.8s ease-in-out both; }
-  .titre.idle-souligner .marque { animation: idle-souligner 1.5s ease-in-out both; }
+  .titre.idle-souligner > .marque { animation: idle-souligner 1.5s ease-in-out both; }
   .idle-coucou { animation: idle-coucou 1.6s ease-in-out both; transform-origin: 50% 100%; }
   /* survol au pointeur fin : autocollants, feuille du témoignage, feuilles des calques */
   @media (hover: hover) {

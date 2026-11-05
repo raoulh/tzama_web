@@ -45,7 +45,7 @@ testimonial:
 
 sections:
   draft: Texte provisoire
-  summary: "Dans la page {{ .title }}"
+  toc: Dans cette page
   external: (site externe)
   video:
     play: "Lire la vidéo : {{ .title }}"

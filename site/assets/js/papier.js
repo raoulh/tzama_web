@@ -1,4 +1,4 @@
-// Arrivée des éléments scotchés (.reveal, .titre) et brise des photos, comme sur l'accueil.
+// Arrivée des éléments scotchés (.reveal) et brise des photos, comme sur l'accueil.
 // Décoratif : sans ce script la page reste complète et immobile ; prefers-reduced-motion est géré en CSS.
 export function papier(photoSelector) {
   if (!('IntersectionObserver' in window)) return;
@@ -10,7 +10,7 @@ export function papier(photoSelector) {
     var rio = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('is-in'); rio.unobserve(e.target); } });
     }, { rootMargin: '0px 0px -12% 0px' });
-    document.querySelectorAll('.reveal, .titre').forEach(function (el) { rio.observe(el); });
+    document.querySelectorAll('.reveal').forEach(function (el) { rio.observe(el); });
   }
 
   // Brise posée quand la photo est collée (55 % visible avec view(), fin de « coller » sinon) ;
