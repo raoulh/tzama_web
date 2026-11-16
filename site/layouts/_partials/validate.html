@@ -171,7 +171,7 @@
 {{- $file := printf "content/%s/_index.md" site.Language.Lang -}}
 {{- $hp := site.Home.Params -}}
 {{- $blocks := dict
-  "hero" (slice "image" "image_alt" "tagline" "intro")
+  "hero" (slice "image" "image_alt" "tagline")
   "news" (slice "title")
   "words" (slice "title")
   "why" (slice "title")
@@ -184,6 +184,13 @@
   {{- $b := index $hp $block | default dict -}}
   {{- range $fields -}}
     {{- if not (index $b .) }}{{ errorf "%s : champ obligatoire absent : %s.%s" $file $block . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- with $hp.hero -}}
+  {{- if not (or .intro .points) }}{{ errorf "%s : hero : renseigner intro ou points" $file }}{{ end -}}
+  {{- if gt (len (.points | default slice)) 4 }}{{ errorf "%s : hero.points : 4 points au plus" $file }}{{ end -}}
+  {{- range .points | default slice -}}
+    {{- if not (strings.TrimSpace (printf "%v" .)) }}{{ errorf "%s : hero.points : point vide" $file }}{{ end -}}
   {{- end -}}
 {{- end -}}
 {{- $images := slice ($hp.hero.image | default "") ($hp.visit.photo | default "") -}}
