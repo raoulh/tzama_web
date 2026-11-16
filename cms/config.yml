@@ -1318,3 +1318,127 @@ collections:
                     widget: text
                     required: false
                     hint: Obligatoire si le bandeau est affiché.
+
+  - name: questionnaire
+    label: Questionnaire aux familles
+    icon: assignment
+    files:
+      - name: questionnaire
+        label: Questions et mise en page du PDF
+        file: site/data/questionnaire.yaml
+        description: >-
+          Le PDF remplissable est refait à chaque publication à partir de ces questions :
+          la mise en page et le passage à la page suivante sont automatiques.
+        fields:
+          - name: title
+            label: Titre du questionnaire
+          - name: subtitle
+            label: Sous-titre
+            required: false
+          - name: intro
+            label: Texte d'accueil
+            widget: text
+            required: false
+            hint: Affiché dans un encadré sous le titre, par exemple pour dire où renvoyer le questionnaire.
+          - name: document
+            label: Lien sur le site
+            widget: object
+            fields:
+              - name: title
+                label: Titre du lien
+              - name: description
+                label: Description du lien
+                widget: text
+                required: false
+          - name: blocks
+            label: Blocs de questions
+            label_singular: bloc
+            widget: list
+            min: 1
+            summary: "{{title}}"
+            hint: Les blocs s'affichent dans cet ordre dans le PDF.
+            fields:
+              - name: title
+                label: Titre du bloc
+              - name: note
+                label: Phrase d'explication
+                widget: text
+                required: false
+                hint: Affichée en petit sous le titre du bloc.
+              - name: columns
+                label: Colonnes
+                label_singular: colonne
+                widget: list
+                required: false
+                max: 3
+                hint: >-
+                  Pour poser les mêmes questions côte à côte, par exemple « Parent 1 » et « Parent 2 ».
+                  Laisser vide pour une seule colonne.
+              - name: page_break
+                label: Commencer sur une nouvelle page
+                widget: boolean
+                required: false
+                default: false
+              - name: fields
+                label: Questions
+                label_singular: question
+                widget: list
+                min: 1
+                typeKey: type
+                summary: "{{label}}"
+                types:
+                  - name: text
+                    label: Réponse courte (une ligne)
+                    widget: object
+                    summary: "{{label}}"
+                    fields:
+                      - name: label
+                        label: Question
+                      - name: width
+                        label: Largeur
+                        widget: select
+                        default: full
+                        hint: Plusieurs réponses courtes à la suite se rangent sur la même ligne tant qu'elles tiennent.
+                        options:
+                          - { label: Toute la ligne, value: full }
+                          - { label: Deux tiers, value: two_thirds }
+                          - { label: Moitié, value: half }
+                          - { label: Un tiers, value: third }
+                          - { label: Un quart, value: quarter }
+                  - name: textarea
+                    label: Réponse longue (zone de texte)
+                    widget: object
+                    summary: "{{label}}"
+                    fields:
+                      - name: label
+                        label: Question
+                      - name: hint
+                        label: Précision sous la question
+                        required: false
+                      - name: size
+                        label: Hauteur de la zone
+                        widget: select
+                        default: medium
+                        hint: Si la toute dernière question est une grande zone, elle s'étire jusqu'en bas de la page.
+                        options:
+                          - { label: Petite (2 lignes), value: small }
+                          - { label: Moyenne (4 lignes), value: medium }
+                          - { label: Grande, value: large }
+                  - name: checkboxes
+                    label: Cases à cocher
+                    widget: object
+                    summary: "{{label}}"
+                    fields:
+                      - name: label
+                        label: Question
+                        required: false
+                        hint: Facultatif si le titre du bloc suffit.
+                      - name: options
+                        label: Cases
+                        label_singular: case
+                        widget: list
+                        min: 1
+                      - name: other
+                        label: Case « autre » avec ligne à compléter
+                        required: false
+                        hint: "Par exemple « Autre : ». Laisser vide pour ne pas proposer de case « autre »."

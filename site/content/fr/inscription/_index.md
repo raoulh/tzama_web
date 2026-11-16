@@ -9,7 +9,7 @@ sections:
       Vous souhaitez inscrire votre enfant à l'école Tzama ? Découvrez les différentes étapes de la procédure d'inscription, de votre première prise de contact jusqu'à la confirmation de son admission.
     steps:
       - title: "Remplissez le questionnaire destiné aux familles"
-        body: "Envoyez-le à [contact.tzama@gmail.com](mailto:contact.tzama@gmail.com) ou transmettez-le via notre [formulaire de contact](/contact/)."
+        body: "Téléchargez le [questionnaire (PDF)](/documents/questionnaire-familles.pdf), remplissez-le à l'écran ou à la main, puis envoyez-le à [contact.tzama@gmail.com](mailto:contact.tzama@gmail.com) ou transmettez-le via notre [formulaire de contact](/contact/)."
       - title: "Étude des demandes en janvier"
         body: "L'équipe de l'école examine l'ensemble des questionnaires reçus."
       - title: "Participez à la journée portes ouvertes en février"

@@ -1,15 +1,24 @@
-{{- /* Documents de content/<langue>/documents/ : un PDF par dossier, triés par order. */ -}}
-{{- $list := slice }}{{ with site.GetPage "/documents" }}{{ $list = sort .RegularPages "Params.order" }}{{ end -}}
-{{- with $list }}
+{{- /* Documents de content/<langue>/documents/ : un PDF par dossier, triés par order.
+       Le questionnaire aux familles vient en tête : son PDF est produit au build par tools/questionnaire. */ -}}
+{{- $items := slice }}
+{{- $q := hugo.Data.questionnaire.document }}
+{{- with resources.Get "documents/questionnaire-familles.pdf" }}
+  {{- $items = $items | append (dict "title" $q.title "file" . "description" $q.description) }}
+{{- end }}
+{{- with site.GetPage "/documents" }}
+  {{- range sort .RegularPages "Params.order" }}
+    {{- $items = $items | append (dict "title" .Title "file" (.Resources.Get .Params.file) "description" .Params.description) }}
+  {{- end }}
+{{- end }}
+{{- with $items }}
 <ul class="documents">
   {{- range . }}
-  {{- $f := .Resources.Get .Params.file }}
   <li class="documents__item">
     {{- partial "icon.html" (dict "id" "d-feuille-simple" "class" "documents__ico") }}
     <div>
-      <a href="{{ $f.RelPermalink }}">{{ .Title }}</a>
-      <span class="documents__meta">{{ T "sections.documents.pdf" (dict "size" (math.Ceil (div (float (len $f.Content)) 1024))) }}</span>
-      {{- with .Params.description }}<p>{{ . }}</p>{{ end }}
+      <a href="{{ .file.RelPermalink }}">{{ .title }}</a>
+      <span class="documents__meta">{{ T "sections.documents.pdf" (dict "size" (math.Ceil (div (float (len .file.Content)) 1024))) }}</span>
+      {{- with .description }}<p>{{ . }}</p>{{ end }}
     </div>
   </li>
   {{- end }}

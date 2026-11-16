@@ -41,7 +41,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BEFORE: ${{ github.event.before }}
-        run: sh .github/scripts/changed.sh '^(site/|cms/|\.github/workflows/site\.yml$|\.github/scripts/)'
+        run: sh .github/scripts/changed.sh '^(site/|cms/|tools/questionnaire/|\.github/workflows/site\.yml$|\.github/scripts/)'
 
   checks:
     name: Site - checks
@@ -70,6 +70,15 @@ jobs:
           mkdir -p "$RUNNER_TEMP/hugo"
           tar xzf "$dir/$tarball" -C "$RUNNER_TEMP/hugo" hugo
           echo "$RUNNER_TEMP/hugo" >>"$GITHUB_PATH"
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: needs.changes.outputs.site == 'true'
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: tools/questionnaire/requirements.txt
+      - name: Installer les dépendances du questionnaire PDF
+        if: needs.changes.outputs.site == 'true'
+        run: python3 -m pip install -r tools/questionnaire/requirements.txt
       - name: Build, checks et archive
         if: needs.changes.outputs.site == 'true'
         env:

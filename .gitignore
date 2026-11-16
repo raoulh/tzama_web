@@ -1,6 +1,8 @@
 ressources
 site/public/
 site/resources/_gen/
+# PDF produits par tools/questionnaire au build
+site/assets/documents/
 .hugo_build.lock
 node_modules/
 .env
