@@ -6,13 +6,18 @@
 {{- $generic := resources.Get "img/divers/portrait-generique.png" -}}
 {{- with site.GetPage "/equipe" }}
 {{- $list := sort (where .RegularPages "Params.group" $.s.group) "Params.order" }}
-<ul class="equipe__list trombi" style="--n:{{ len $list }}" data-trombi data-close="{{ T "sections.team.close" }}">
+{{- /* au-delà de 7, rangées équilibrées (13 donne 7 + 6) plutôt qu'une seule rangée trop serrée */}}
+{{- $cols := len $list }}
+{{- if gt $cols 7 }}{{ $cols = int (math.Ceil (div (float $cols) (math.Ceil (div (float $cols) 7)))) }}{{ end }}
+<ul class="equipe__list trombi" style="--n:{{ $cols }}" data-trombi data-close="{{ T "sections.team.close" }}">
   {{- range $i, $m := $list }}
   {{- $photo := or (and $m.Params.photo ($m.Resources.GetMatch $m.Params.photo)) $generic }}
   <li class="reveal" style="--i:{{ $i }}">
     <span class="portrait">{{ partial "image.html" (dict "src" $photo "decorative" true "widths" (slice 160 240 360) "sizes" "(min-width: 60em) 9rem, (min-width: 40em) 22vw, 45vw") }}</span>
     <strong>{{ index (split $m.Params.name " ") 0 }}</strong>
-    <span class="trombi__role">{{ $m.Params.role }}</span>
+    {{- with $m.Params.role }}
+    <span class="trombi__role">{{ . }}</span>
+    {{- end }}
     {{- with $m.Content }}
     <details class="trombi__bio" data-bio>
       <summary class="trombi__lien">{{ T "sections.team.bio" }}<span class="visually-hidden"> : {{ $m.Params.name }}</span></summary>

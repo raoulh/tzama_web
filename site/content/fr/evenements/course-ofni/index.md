@@ -1,5 +1,5 @@
 ---
 title: "La course OFNI"
-period: "Date précisée chaque année"
+period: "En août"
 order: 5
 ---
