@@ -54,7 +54,7 @@ why:
       title: "Un bagage pour la suite"
       text: "Des enfants autonomes et confiants, capables de coopérer, de réfléchir par eux-mêmes et de trouver leur place dans le monde."
     - icon: d-feuille-chene
-      title: "Label Éco-École niveau Or"
+      title: "Label Eco‑École niveau Or"
       text: "L'écocitoyenneté se vit au quotidien : respect de l'environnement, gestion de l'eau et des déchets, potager et alimentation."
 day:
   title: "Une journée à Tzama"
