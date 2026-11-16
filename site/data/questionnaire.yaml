@@ -1,0 +1,68 @@
+# Questionnaire aux familles : tools/questionnaire/generate.py en tire le PDF remplissable au build.
+title: Quelques questions pour mieux faire connaissance
+subtitle: Questionnaire destiné aux familles · École Tzama, Kembs
+intro: Remplissez-le à l'écran ou imprimez-le, puis envoyez-le à contact.tzama@gmail.com ou via le formulaire de contact du site.
+document:
+  title: Questionnaire destiné aux familles
+  description: "À remplir à l'écran ou à la main, puis à nous renvoyer : c'est la première étape de l'inscription."
+blocks:
+  - title: L'enfant
+    fields:
+      - { type: text, label: Nom, width: third }
+      - { type: text, label: Prénom, width: third }
+      - { type: text, label: Date de naissance, width: third }
+  - title: Situation familiale
+    fields:
+      - type: checkboxes
+        options: [Mariés / Pacsés, Divorcés / Séparés, Veuf / Veuve]
+        other: "Autre :"
+  - title: Les parents
+    columns: [Parent 1, Parent 2]
+    fields:
+      - { type: text, label: Nom, width: half }
+      - { type: text, label: Prénom, width: half }
+      - { type: text, label: Adresse e-mail }
+      - { type: text, label: Numéro de téléphone }
+      - { type: text, label: Profession }
+  - title: Lieu de résidence
+    fields:
+      - { type: text, label: Commune }
+  - title: Éventuel parcours particulier
+    fields:
+      - type: checkboxes
+        options: [Aucun depuis le début de la scolarité, Psychologue, Psychomotricité, Orthophonie]
+        other: "Autre :"
+  - title: Aménagements scolaires
+    note: Merci d'indiquer ici les aménagements scolaires mis en place par le passé.
+    fields:
+      - type: checkboxes
+        options:
+          - Pas d'aménagement scolaire spécifique (PAP, PAI…)
+        other: "Si aménagement, merci de préciser :"
+  - title: Pour mieux vous connaître
+    page_break: true
+    fields:
+      - type: textarea
+        label: "Comment avez-vous connu notre école ?"
+        size: medium
+      - type: textarea
+        label: "Pourriez-vous nous résumer l'éducation dont vous rêvez pour votre enfant ?"
+        size: medium
+      - type: textarea
+        label: "Comment imaginez-vous la co-éducation ?"
+        size: medium
+      - type: textarea
+        label: "Qu'aimeriez-vous vivre avec les autres parents de l'école ? (lectures, chantiers participatifs, café…)"
+        size: medium
+      - type: textarea
+        label: "Seriez-vous intéressés pour aider bénévolement au développement de l'établissement, au sein de l'association ou au sein du projet de l'Archipel de Kembs ?"
+        size: medium
+      - type: textarea
+        label: "Qu'aimez-vous partager en famille dans la nature ?"
+        size: medium
+  - title: Votre motivation
+    fields:
+      - type: textarea
+        label: Pour quelles raisons souhaitez-vous inscrire votre enfant à l'école Tzama ?
+        hint: Merci de développer en quelques lignes.
+        size: large
