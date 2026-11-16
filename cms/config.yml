@@ -714,6 +714,50 @@ collections:
               - { name: photo_alt, label: Description de la photo }
               - { name: photo_caption, label: Légende de la photo }
 
+      # Éditeur, direction de la publication et hébergeur : Réglages du site, rubrique « Mentions légales ».
+      - name: mentions-legales
+        label: Mentions légales
+        file: site/content/{{locale}}/mentions-legales.md
+        i18n: true
+        preview_path: mentions-legales/
+        fields:
+          - *page_title
+          - { name: layout, widget: hidden, default: mentions-legales }
+          - name: body
+            i18n: true
+            label: Texte de la page
+            widget: markdown
+            hint: Crédits, propriété intellectuelle, liens. Les coordonnées de l'éditeur et de l'hébergeur s'affichent au-dessus, depuis les réglages.
+
+      - name: confidentialite
+        label: Confidentialité
+        file: site/content/{{locale}}/confidentialite.md
+        i18n: true
+        preview_path: confidentialite/
+        fields:
+          - *page_title
+          - { name: layout, widget: hidden, default: confidentialite }
+          - name: body
+            i18n: true
+            label: Texte de la page
+            widget: markdown
+            hint: À mettre à jour si le site change (mesure d'audience, nouveau formulaire…). Le bloc « Nous contacter » est ajouté en fin de page depuis les réglages.
+
+      - name: plan-du-site
+        label: Plan du site
+        file: site/content/{{locale}}/plan-du-site.md
+        i18n: true
+        preview_path: plan-du-site/
+        fields:
+          - *page_title
+          - { name: layout, widget: hidden, default: plan-du-site }
+          - name: body
+            i18n: true
+            label: Introduction
+            widget: markdown
+            required: false
+            hint: Facultatif. La liste des pages se construit seule, à partir du menu et des pages publiées.
+
   - name: actualites
     label: Actualités
     label_singular: actualité
@@ -1287,6 +1331,42 @@ collections:
             label: Lien de don
             pattern: ['^https://', "Le lien doit commencer par https://"]
             hint: Adresse du formulaire HelloAsso, affiché dans la section de don de la page « L'association ».
+          - name: legal
+            label: Mentions légales
+            widget: object
+            comment: "Mentions légales : un champ vide n'est pas affiché."
+            fields:
+              - name: status
+                label: Statut
+                required: false
+                hint: Affiché après le nom, par exemple « association à but non lucratif ».
+              - name: registration
+                label: Numéro d'inscription
+                required: false
+                hint: Registre des associations ou RNA, s'il existe.
+              - { name: siret, label: SIRET, required: false }
+              - name: director
+                label: Direction de la publication
+                required: false
+                hint: En général la présidence, par exemple « Prénom Nom, président de l'association ».
+              - name: show_phone
+                label: Afficher le téléphone
+                widget: boolean
+                default: false
+                hint: À cocher une fois le vrai numéro saisi plus haut.
+              - name: host
+                label: Hébergement
+                widget: object
+                fields:
+                  - { name: text, label: Texte, widget: text, required: false }
+                  - name: address
+                    label: Adresse
+                    required: false
+                    hint: Vide, l'adresse du siège.
+                  - name: email
+                    label: E-mail de contact
+                    required: false
+                    hint: Vide, l'adresse de contact de l'association.
           - name: pricing
             label: Tarifs
             widget: object

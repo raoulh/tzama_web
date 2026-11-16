@@ -1,0 +1,35 @@
+{{- /*
+  Plan du site construit à chaque build : le menu principal (avec les sections de chaque page,
+  comme le sous-menu du header), puis les autres pages publiées à la racine, avec leurs pages filles.
+  Ignorées : les pages sans adresse (« build.render: never ») et celles hors sitemap (page « merci »).
+*/ -}}
+{{ define "main" }}
+{{- $listed := slice site.Home.RelPermalink .RelPermalink }}
+<article class="page page--legal">
+  {{ partial "page-head.html" . }}
+  {{- with .Content }}
+  <div class="page__body">{{ . }}</div>
+  {{- end }}
+  <nav class="plan" aria-label="{{ .Title }}">
+    <ul class="plan__list">
+      <li><a href="{{ site.Home.RelPermalink }}">{{ T "sitemap.home" }}</a></li>
+      {{- range site.Menus.main }}
+      {{- with .Page }}{{ $listed = $listed | append .RelPermalink }}{{ end }}
+      <li><a href="{{ .URL }}">{{ .Name }}</a>{{ with .Page }}{{ partial "plan-children.html" . }}{{ end }}</li>
+      {{- end }}
+    </ul>
+    {{- $others := slice }}
+    {{- range site.Home.Pages.ByTitle }}
+    {{- if and .RelPermalink (not .Sitemap.Disable) (not (in $listed .RelPermalink)) }}{{ $others = $others | append . }}{{ end }}
+    {{- end }}
+    {{- with $others }}
+    <h2 class="plan__t">{{ T "sitemap.more" }}</h2>
+    <ul class="plan__list">
+      {{- range . }}
+      <li><a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ partial "plan-children.html" . }}</li>
+      {{- end }}
+    </ul>
+    {{- end }}
+  </nav>
+</article>
+{{ end }}

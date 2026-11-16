@@ -1,0 +1,42 @@
+{{- /*
+  Éditeur, direction de la publication et hébergeur viennent de data/settings.yaml (legal) ; le reste
+  est le texte de la page, modifiable dans le CMS. Un champ manquant est signalé hors build strict.
+*/ -}}
+{{ define "main" }}
+{{- $s := hugo.Data.settings -}}
+{{- $l := $s.legal | default dict -}}
+{{- $host := $l.host | default dict -}}
+{{- $showDraft := ne (printf "%v" site.Params.strict) "true" -}}
+<article class="page page--legal">
+  {{ partial "page-head.html" . }}
+  <div class="page__body">
+    <h2>{{ T "legal.publisher" }}</h2>
+    <p>{{ $s.name }}{{ with $l.status }}, {{ . }}{{ end }}<br>
+      {{- $s.address.street }}<br>{{ $s.address.postalCode }} {{ $s.address.city }}
+      {{- with $l.registration }}<br>{{ T "legal.registration" }} {{ . }}{{ end }}
+      {{- with $l.siret }}<br>{{ T "legal.siret" }} {{ . }}{{ end }}</p>
+    <p>{{ T "legal.email" }} <a href="mailto:{{ $s.email }}">{{ $s.email }}</a>
+      {{- if $l.show_phone }}<br>{{ T "legal.phone" }} <a href="tel:{{ replace $s.phone " " "" }}">{{ $s.phone }}</a>{{ end }}</p>
+
+    <h2>{{ T "legal.director" }}</h2>
+    {{- with $l.director }}
+    <p>{{ . }}</p>
+    {{- else }}{{ if $showDraft }}
+    <p class="brouillon"><strong>{{ T "sections.draft" }}</strong> {{ T "legal.missing" (dict "what" (T "legal.director")) }}</p>
+    {{- end }}{{ end }}
+
+    {{- if $host.text }}
+    <h2>{{ T "legal.host" }}</h2>
+    <p>{{ $host.text }}<br>
+      {{- with $host.address }}{{ . }}{{ else }}{{ $s.address.street }}, {{ $s.address.postalCode }} {{ $s.address.city }}{{ end }}<br>
+      {{- $mail := $host.email | default $s.email }}
+      {{- T "legal.contact_label" }} <a href="mailto:{{ $mail }}">{{ $mail }}</a></p>
+    {{- else if $showDraft }}
+    <h2>{{ T "legal.host" }}</h2>
+    <p class="brouillon"><strong>{{ T "sections.draft" }}</strong> {{ T "legal.missing" (dict "what" (T "legal.host")) }}</p>
+    {{- end }}
+
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

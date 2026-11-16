@@ -113,6 +113,8 @@ sections:
     honeypot: Laissez ce champ vide
     submit: Envoyer ma demande
     error: "Votre message n'a pas pu être envoyé. Vérifiez les champs et réessayez, ou écrivez-nous à {{ .email }}."
+    privacy: Vos coordonnées servent uniquement à vous répondre.
+    privacy_link: Données personnelles
 
 home:
   swapPhoto: Changer de photo
@@ -129,3 +131,19 @@ home:
   galleryLabel: Photos de l'école, à faire défiler
   galleryPrev: Photos précédentes
   galleryNext: Photos suivantes
+
+sitemap:
+  home: Accueil
+  more: Autres pages
+
+legal:
+  publisher: Éditeur du site
+  director: Direction de la publication
+  host: Hébergement
+  email: "E-mail :"
+  phone: "Téléphone :"
+  registration: "Numéro d'inscription :"
+  siret: "SIRET :"
+  contact_label: "Contact :"
+  missing: "{{ .what }} à renseigner dans les réglages du site."
+  contact: Nous contacter

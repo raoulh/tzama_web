@@ -1,0 +1,20 @@
+{{- /* Sous-liste du plan du site : les sections de la page (dès deux, comme le header), sinon ses pages filles publiées. */ -}}
+{{- $page := . -}}
+{{- $secs := .Params.sections | default slice -}}
+{{- if gt (len $secs) 1 }}
+<ul>
+  {{- range $secs }}
+  <li><a href="{{ $page.RelPermalink }}#{{ .id }}">{{ .title }}</a></li>
+  {{- end }}
+</ul>
+{{- else }}
+{{- $kids := slice }}
+{{- range .RegularPages.ByDate.Reverse }}{{ if and .RelPermalink (not .Sitemap.Disable) }}{{ $kids = $kids | append . }}{{ end }}{{ end }}
+{{- with $kids }}
+<ul>
+  {{- range . }}
+  <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+  {{- end }}
+</ul>
+{{- end }}
+{{- end -}}

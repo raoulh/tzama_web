@@ -52,5 +52,7 @@
     <p class="contact__hp" aria-hidden="true"><label for="c-website">{{ T "sections.contact.honeypot" }}</label>
       <input id="c-website" name="website" type="text" tabindex="-1" autocomplete="off"></p>
     <p><button class="btn btn--big" type="submit">{{ T "sections.contact.submit" }}</button></p>
+    <p class="contact__note">{{ T "sections.contact.privacy" }}
+      {{- with site.GetPage "/confidentialite" }} <a href="{{ .RelPermalink }}">{{ T "sections.contact.privacy_link" }}</a>{{ end }}</p>
   </form>
 </div>

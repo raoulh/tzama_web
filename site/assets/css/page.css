@@ -7,3 +7,18 @@ main { display: block; flex: 1 0 auto; }
 .page__list li { margin: .2rem 0; }
 .page__list a { display: inline-flex; align-items: center; min-height: 44px; }
 
+
+/* Pages légales et plan du site : texte long, titres plus discrets que sur les pages à sections */
+.page--legal .page__head { position: relative; }
+.page--legal h1 { padding-right: 3.5rem; }
+.page--legal .page__feuille { right: 0; }
+.page--legal .page__body h2, .plan__t { margin-top: 1.6em; font-size: clamp(1.7rem, 1.4rem + 1.2vw, 2.2rem); }
+.page--legal .page__body h2:first-child { margin-top: .5em; }
+.page--legal .page__body li { margin: .3rem 0; }
+.plan__list, .plan__list ul { list-style: none; margin: 0; padding: 0; }
+.plan__list > li { margin: 0 0 .75rem; font-weight: 700; }
+.plan__list ul { margin: 0 0 .25rem .4rem; padding-left: 1rem; border-left: 2px dotted var(--ligne); font-weight: 400; }
+.plan__list a { display: inline-flex; align-items: center; min-height: 44px; }
+.plan__list ul a { color: var(--encre-2); }
+.plan { max-width: var(--measure); }
+@media (min-width: 48em) { .page--legal h1 { padding-right: 6rem; } }
