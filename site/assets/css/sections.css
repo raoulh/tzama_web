@@ -297,6 +297,7 @@
 .contact__form input:focus-visible, .contact__form select:focus-visible, .contact__form textarea:focus-visible { outline: 3px solid var(--encre); outline-offset: 1px; border-color: var(--sapin); }
 .contact__duo { display: grid; gap: 0 1rem; }
 .contact__hp { position: absolute; left: -100vw; width: 1px; height: 1px; overflow: hidden; }
+.contact__form .contact__note { font-size: .9rem; color: var(--encre-2); }
 .contact__error { padding: .75rem 1rem; border-left: 4px solid var(--accent-fonce); background: var(--teinte); font-weight: 700; }
 @media (min-width: 40em) { .contact__duo { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 48em) {

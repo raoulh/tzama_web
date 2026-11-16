@@ -1,0 +1,7 @@
+<header class="page__head">
+  <h1 class="titre"><span class="marque">{{ .Title }}</span></h1>
+  {{- with .Description }}
+  <p class="page__intro">{{ . }}</p>
+  {{- end }}
+  {{- partial "icon.html" (dict "id" "d-feuille-chene" "class" "page__feuille") }}
+</header>

@@ -12,8 +12,10 @@
       <dl>
         <dt>{{ T "sections.contact.address" }}</dt>
         <dd>{{ $s.address.street }}<br>{{ $s.address.postalCode }} {{ $s.address.city }}</dd>
+        {{- with $s.phone }}
         <dt>{{ T "sections.contact.phone" }}</dt>
-        <dd><a href="tel:{{ replace $s.phone " " "" }}">{{ $s.phone }}</a></dd>
+        <dd><a href="tel:{{ replace . " " "" }}">{{ . }}</a></dd>
+        {{- end }}
         <dt>{{ T "sections.contact.email" }}</dt>
         <dd><a href="mailto:{{ $s.email }}">{{ $s.email }}</a></dd>
       </dl>
@@ -52,5 +54,7 @@
     <p class="contact__hp" aria-hidden="true"><label for="c-website">{{ T "sections.contact.honeypot" }}</label>
       <input id="c-website" name="website" type="text" tabindex="-1" autocomplete="off"></p>
     <p><button class="btn btn--big" type="submit">{{ T "sections.contact.submit" }}</button></p>
+    <p class="contact__note">{{ T "sections.contact.privacy" }}
+      {{- with site.GetPage "/confidentialite" }} <a href="{{ .RelPermalink }}">{{ T "sections.contact.privacy_link" }}</a>{{ end }}</p>
   </form>
 </div>

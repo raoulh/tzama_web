@@ -10,7 +10,7 @@
 {{- /* Réglages */ -}}
 {{- $s := hugo.Data.settings -}}
 {{- if not $s }}{{ errorf "data/settings.yaml : fichier absent ou vide" }}{{ end -}}
-{{- range slice "name" "email" "phone" "donation_url" "opening_date" -}}
+{{- range slice "name" "email" "donation_url" "opening_date" -}}
   {{- if not (index $s .) }}{{ errorf "data/settings.yaml : champ obligatoire absent : %s" . }}{{ end -}}
 {{- end -}}
 {{- range slice "street" "postalCode" "city" -}}

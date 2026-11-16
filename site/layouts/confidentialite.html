@@ -1,0 +1,13 @@
+{{- /* Texte modifiable dans le CMS ; les coordonnées pour exercer ses droits viennent de data/settings.yaml. */ -}}
+{{ define "main" }}
+{{- $s := hugo.Data.settings -}}
+<article class="page page--legal">
+  {{ partial "page-head.html" . }}
+  <div class="page__body">
+    {{ .Content }}
+    <h2 id="nous-contacter">{{ T "legal.contact" }}</h2>
+    <p>{{ $s.name }}<br>{{ $s.address.street }}<br>{{ $s.address.postalCode }} {{ $s.address.city }}</p>
+    <p>{{ T "legal.email" }} <a href="mailto:{{ $s.email }}">{{ $s.email }}</a></p>
+  </div>
+</article>
+{{ end }}

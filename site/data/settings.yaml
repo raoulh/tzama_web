@@ -1,12 +1,12 @@
 # Coordonnées et liens communs à toutes les langues : seule source pour les gabarits.
 name: Association Tzama
 address:
-  street: 10a Allée des Marroniers
+  street: 10a Allée des Marronniers
   postalCode: "68680"
   city: Kembs
 email: contact.tzama@gmail.com
-# Numéro factice en attendant le vrai.
-phone: "03 89 00 00 00"
+# Vide : le téléphone n'est affiché nulle part.
+phone: ""
 # Sert au calcul des années d'existence (section « figures »).
 opening_date: 2020-09-01
 social:
@@ -30,6 +30,19 @@ pricing:
   stage_week: 130
 
 donation_url: https://www.helloasso.com/associations/association-tzama/formulaires/5
+
+# Mentions légales : un champ vide n'est pas affiché.
+legal:
+  status: association à but non lucratif
+  # Numéros d'inscription (registre des associations ou RNA) et SIRET, s'ils existent.
+  registration: ""
+  siret: ""
+  director: Cédric Leroy, président de l'association
+  host:
+    text: Le site est hébergé par l'Association Tzama, sur un serveur situé en France mis à disposition par un bénévole.
+    # Vides : l'adresse du siège et l'e-mail de l'association.
+    address: ""
+    email: ""
 
 # Une entrée par langue déclarée dans hugo.yaml ; bandeau masqué si enabled est faux.
 banner:
