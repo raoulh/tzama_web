@@ -102,7 +102,7 @@ traits();
   if (fig && data) (function () {
     var list = JSON.parse(data.textContent);
     var img = fig.querySelector('.paper__img'), cap = fig.querySelector('.etiq');
-    var cur = Number(fig.dataset.photoIndex) || 0, next = -1, ptimer = 0, posed = false;
+    var cur = Number(fig.dataset.photoIndex) || 0, next = -1, ptimer = 0, posed = false, bag = [];
     var shown = function () { return getComputedStyle(fig).display !== 'none'; };
     // l'animation du papier remonte jusqu'à la figure ; celle du ruban (::before) est émise par la figure
     function onEnd(name, cb) {
@@ -117,7 +117,9 @@ traits();
     }
     function preload() {
       if (next >= 0 || list.length < 2) return;
-      do { next = Math.floor(Math.random() * list.length); } while (next === cur);
+      // tirage sans remise : chaque photo passe une fois avant qu'une autre revienne
+      if (!bag.length) for (var k = 0; k < list.length; k++) if (k !== cur) bag.splice(Math.floor(Math.random() * (bag.length + 1)), 0, k);
+      next = bag.pop();
       var im = new Image(); im.sizes = img.sizes; im.srcset = list[next].srcset; im.src = list[next].src;
     }
     function firstPose() {
