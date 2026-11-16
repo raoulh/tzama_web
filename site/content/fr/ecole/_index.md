@@ -11,8 +11,8 @@ sections:
       - compute: staff
       - value: "1 adulte"
         label: "pour 10 enfants"
-      - value: "25 enfants"
-        label: "au plus par classe"
+      - value: "20 à 25"
+        label: "élèves par classe"
       - compute: years
       - value: "50 %"
         label: "du temps passé dehors"
@@ -308,7 +308,11 @@ sections:
     type: partners
     category: territoire
     body: |
-      L'école fait partie de l'Archipel de Kembs, un tiers-lieu pédagogique créé avec d'autres associations du territoire. Elle est soutenue par la commune de Kembs et travaille en partenariat avec un EHPAD.
+      À Tzama, nous sommes convaincus qu'une école grandit avec le territoire qui l'entoure. Apprendre, c'est aussi découvrir son environnement, créer des liens et participer à la vie locale. Notre projet s'enrichit ainsi de collaborations avec des acteurs engagés à nos côtés : l'Archipel de Kembs, la mairie de Kembs, l'EHPAD de Kembs, le magasin bio Satoriz ou encore la Petite Camargue Alsacienne.
+
+      Ces partenariats permettent aux enfants de sortir de l'école pour aller à la rencontre de leur territoire, de découvrir ses richesses naturelles et humaines, de créer des liens entre les générations et de donner du sens aux apprentissages à travers des expériences concrètes.
+
+      Parce qu'à Tzama, apprendre à trouver sa place dans le monde commence aussi par connaître, respecter et faire vivre le territoire qui nous entoure.
 
   - id: labels
     title: "Labels et partenaires pédagogiques"
