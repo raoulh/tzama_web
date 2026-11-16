@@ -1295,7 +1295,8 @@ collections:
             pattern: ['^[^@\s]+@[^@\s]+\.[^@\s]+$', "Adresse e-mail invalide"]
           - name: phone
             label: Téléphone
-            hint: Par exemple « 03 89 00 00 00 ».
+            required: false
+            hint: Laisser vide pour ne l'afficher nulle part. Par exemple « 03 89 00 00 00 ».
           - name: opening_date
             label: Date d'ouverture de l'école
             widget: datetime
@@ -1349,11 +1350,6 @@ collections:
                 label: Direction de la publication
                 required: false
                 hint: En général la présidence, par exemple « Prénom Nom, président de l'association ».
-              - name: show_phone
-                label: Afficher le téléphone
-                widget: boolean
-                default: false
-                hint: À cocher une fois le vrai numéro saisi plus haut.
               - name: host
                 label: Hébergement
                 widget: object

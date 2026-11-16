@@ -5,8 +5,8 @@ address:
   postalCode: "68680"
   city: Kembs
 email: contact.tzama@gmail.com
-# Numéro factice en attendant le vrai.
-phone: "03 89 00 00 00"
+# Vide : le téléphone n'est affiché nulle part.
+phone: ""
 # Sert au calcul des années d'existence (section « figures »).
 opening_date: 2020-09-01
 social:
@@ -38,8 +38,6 @@ legal:
   registration: ""
   siret: ""
   director: Cédric Leroy, président de l'association
-  # Le téléphone n'y figure qu'une fois le vrai numéro saisi.
-  show_phone: false
   host:
     text: Le site est hébergé par l'Association Tzama, sur un serveur situé en France mis à disposition par un bénévole.
     # Vides : l'adresse du siège et l'e-mail de l'association.

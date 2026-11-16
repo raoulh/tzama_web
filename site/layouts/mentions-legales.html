@@ -16,7 +16,7 @@
       {{- with $l.registration }}<br>{{ T "legal.registration" }} {{ . }}{{ end }}
       {{- with $l.siret }}<br>{{ T "legal.siret" }} {{ . }}{{ end }}</p>
     <p>{{ T "legal.email" }} <a href="mailto:{{ $s.email }}">{{ $s.email }}</a>
-      {{- if $l.show_phone }}<br>{{ T "legal.phone" }} <a href="tel:{{ replace $s.phone " " "" }}">{{ $s.phone }}</a>{{ end }}</p>
+      {{- with $s.phone }}<br>{{ T "legal.phone" }} <a href="tel:{{ replace . " " "" }}">{{ . }}</a>{{ end }}</p>
 
     <h2>{{ T "legal.director" }}</h2>
     {{- with $l.director }}

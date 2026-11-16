@@ -12,8 +12,10 @@
       <dl>
         <dt>{{ T "sections.contact.address" }}</dt>
         <dd>{{ $s.address.street }}<br>{{ $s.address.postalCode }} {{ $s.address.city }}</dd>
+        {{- with $s.phone }}
         <dt>{{ T "sections.contact.phone" }}</dt>
-        <dd><a href="tel:{{ replace $s.phone " " "" }}">{{ $s.phone }}</a></dd>
+        <dd><a href="tel:{{ replace . " " "" }}">{{ . }}</a></dd>
+        {{- end }}
         <dt>{{ T "sections.contact.email" }}</dt>
         <dd><a href="mailto:{{ $s.email }}">{{ $s.email }}</a></dd>
       </dl>
