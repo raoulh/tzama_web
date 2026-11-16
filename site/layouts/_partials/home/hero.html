@@ -41,7 +41,16 @@
   {{- end }}
   <div class="hero__text" data-idle-text>
     <h1>{{ partial "home/text.html" $p.tagline }}</h1>
-    <p>{{ partial "home/text.html" $p.intro }}</p>
+    {{- with $p.intro }}
+    <p>{{ partial "home/text.html" . }}</p>
+    {{- end }}
+    {{- with $p.points }}
+    <ul class="hero__points">
+      {{- range . }}
+      <li><svg aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-feuille-simple"/></svg>{{ partial "home/text.html" . }}</li>
+      {{- end }}
+    </ul>
+    {{- end }}
     <a class="btn btn--big" href="{{ $contact.RelPermalink }}" data-hero-cta>{{ T "cta.visit" }}</a>
   </div>
   {{- with $photos }}

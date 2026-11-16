@@ -8,12 +8,17 @@
 /* la boîte du texte laisse passer le survol vers les feuilles dessous, sauf sur le texte et le bouton */
 .hero__text { position: relative; z-index: 5; width: 100%; max-width: var(--col); margin: 0 auto; padding: calc(var(--header-h) + var(--pill-top) + 1.5rem) var(--gutter) calc(1.5rem + var(--trans-h)); color: var(--blanc); pointer-events: none; }
 .hero__text > * { pointer-events: auto; }
-.hero__text h1, .hero__text p { text-shadow: var(--ombre-texte); }
+.hero__text h1, .hero__text p, .hero__points { text-shadow: var(--ombre-texte); }
 .hero__text h1 { color: var(--blanc); max-width: 18ch; }
 /* sur la photo, le surligné devient un trait fin sous les mots, pour garder le texte blanc lisible */
 .hero__text .marque { --marque-c: var(--f2); background-image: linear-gradient(transparent 88%, var(--f2) 88%); }
 .hero__text p { font-size: 1.15rem; max-width: 46ch; }
 .hero__text .btn { margin-top: .25rem; }
+.hero__points { list-style: none; margin: 0 0 1.1rem; padding: 0; font-size: 1.1rem; line-height: 1.35; font-weight: 600; max-width: 42ch; }
+.hero__points li { position: relative; padding-left: 1.9rem; }
+.hero__points li + li { margin-top: .4rem; }
+/* puce en feuille dessinée : text-shadow ne touche pas le SVG, d'où le drop-shadow */
+.hero__points svg { position: absolute; left: 0; top: .1em; width: 1.3rem; height: 1.3rem; color: var(--f2); transform: rotate(-25deg); filter: drop-shadow(0 1px 2px var(--ombre-feuille)); }
 
 .calque { position: absolute; inset: 0; pointer-events: none; }
 .calque--3, .calque--2 { z-index: 1; }
@@ -38,7 +43,7 @@
 
 @media (min-width: 60em) {
   .hero__text { padding-bottom: calc(2.5rem + var(--trans-h)); }
-  .hero__text h1 { max-width: 17ch; }
+  .hero__text h1 { max-width: 21ch; }
   .hero__text p { max-width: 42ch; }
   .hero__polaroid { display: block; position: absolute; z-index: 4; right: max(var(--gutter), calc((100% - var(--col)) / 2 + var(--gutter) + 1rem)); bottom: calc(var(--trans-h) + 4.5rem); width: 15rem; margin: 0; --rot: 3.5deg; }
   .hero__polaroid::before { background: var(--f2); opacity: .8; }
