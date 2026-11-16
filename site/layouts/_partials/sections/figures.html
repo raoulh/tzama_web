@@ -3,7 +3,8 @@
   depuis settings.opening_date, celle de l'année scolaire en cours comprise) ou staff (membres
   du groupe equipe) ; calculés au build. Chiffres posés tels quels, sans compteur animé.
   Seul le nombre en tête de value est affiché en grand : un symbole (« % ») reste à côté en
-  petit, un mot (« adulte ») passe en tête de la légende.
+  petit, un mot (« adulte ») passe en tête de la légende ; la fin d'une fourchette (« 20 à 25 »)
+  reste à côté en petit, d'un bloc, et passe à la ligne si la carte est étroite.
 */ -}}
 {{- $s := hugo.Data.settings -}}
 <ul class="figures">
@@ -21,10 +22,10 @@
   {{- range findRE `^\d+(?:[.,]\d+)?` $v 1 }}{{ $n = . }}{{ end }}
   {{- $unit := strings.TrimSpace (strings.TrimPrefix $n $v) }}
   {{- $label := .label | default (T (printf "sections.figures.%s" .compute)) }}
-  {{- if findRE `^\pL` $unit }}
+  {{- if and (findRE `^\pL` $unit) (not (findRE `\d` $unit)) }}
     {{- $label = printf "%s %s" $unit $label }}
     {{- $unit = "" }}
   {{- end }}
-  <li class="figures__item"><strong class="figures__value">{{ $n }}{{ with $unit }}<small>&nbsp;{{ . }}</small>{{ end }}</strong> <span class="figures__label">{{ $label }}</span></li>
+  <li class="figures__item"><strong class="figures__value">{{ $n }}{{ with $unit }}{{ if findRE `\d` . }} {{ else }}&nbsp;{{ end }}<small>{{ . }}</small>{{ end }}</strong> <span class="figures__label">{{ $label }}</span></li>
   {{- end }}
 </ul>

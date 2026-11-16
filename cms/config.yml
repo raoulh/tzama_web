@@ -135,6 +135,18 @@ collections:
                     hint: >-
                       Obligatoire dès qu'une photo est ajoutée, sinon la preview échoue.
                       Décrire ce que montre la photo, en une phrase : ce texte est lu aux personnes aveugles.
+                  - &sec_gallery
+                    name: gallery
+                    label: Photos sous le texte
+                    label_singular: photo
+                    widget: list
+                    required: false
+                    summary: "{{alt}}"
+                    hint: Quelques photos alignées sous le texte, en plus de la photo d'à côté.
+                    fields:
+                      - { name: image, label: Photo, widget: image, accept: "image/jpeg,image/png,image/webp", choose_url: false, hint: "JPEG, PNG ou WebP, 15 Mo au plus." }
+                      - { name: alt, label: Description de la photo, hint: "Ce que montre la photo, en une phrase : ce texte est lu aux personnes aveugles." }
+                      - { name: caption, label: Légende, required: false, hint: "Quelques mots sur une étiquette, sous la photo. Facultatif." }
                   - &sec_parts
                     name: parts
                     label: Blocs dépliables
@@ -225,7 +237,7 @@ collections:
                       - name: value
                         label: Valeur
                         required: false
-                        hint: Par exemple « 25 ». À laisser vide si le chiffre est calculé.
+                        hint: Par exemple « 138 », « 50 % » ou « 20 à 25 ». À laisser vide si le chiffre est calculé.
                       - name: label
                         label: Légende
                         required: false
@@ -463,6 +475,7 @@ collections:
                   - *sec_body
                   - *sec_photo
                   - *sec_photo_alt
+                  - *sec_gallery
                   - *sec_parts
                   - *sec_outro
                   - *sec_draft
@@ -791,7 +804,9 @@ collections:
       - name: role
         i18n: true
         label: Rôle
-        hint: Par exemple « Enseignante, cycle 2 » ou « Trésorerie ».
+        required: false
+        hint: >-
+          Par exemple « Enseignante, cycle 2 » ou « Trésorerie ». Facultatif : sans rôle, seul le prénom s'affiche.
       - name: group
         i18n: duplicate
         label: Groupe

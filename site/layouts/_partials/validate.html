@@ -43,7 +43,7 @@
 */ -}}
 {{- $rules := dict
   "actualites" (dict "required" (slice "title" "summary") "date" (slice "date") "optdate" (slice "event_date") "bool" (slice "pinned") "image" (dict "flyer" "flyer_alt"))
-  "equipe" (dict "required" (slice "name" "role" "group") "int" (slice "order") "enum" (dict "group" (slice "equipe" "ca")) "image" (dict "photo" "photo_alt"))
+  "equipe" (dict "required" (slice "name" "group") "int" (slice "order") "enum" (dict "group" (slice "equipe" "ca")) "image" (dict "photo" "photo_alt"))
   "stages" (dict "required" (slice "title" "dates" "ages" "registration_url") "date" (slice "start_date"))
   "postes" (dict "required" (slice "title" "summary") "bool" (slice "open"))
   "temoignages" (dict "required" (slice "author" "text") "bool" (slice "placeholder") "int" (slice "order") "enum" (dict "relation" (slice "parent" "former_pupil")) "image" (dict "photo" "photo_alt"))
@@ -162,6 +162,10 @@
       {{- with .photo -}}
         {{- if not ($page.Resources.Get .) }}{{ errorf "%s : section %s : photo introuvable dans le dossier de la page : %s" $file $sec.id . }}{{ end -}}
         {{- if not $sec.photo_alt }}{{ errorf "%s : section %s : photo est renseignée, photo_alt est obligatoire" $file $sec.id }}{{ end -}}
+      {{- end -}}
+      {{- range .gallery -}}
+        {{- if not (and .image .alt) }}{{ errorf "%s : section %s : chaque photo de gallery exige image et alt" $file $sec.id }}{{ end -}}
+        {{- with .image }}{{ if not ($page.Resources.Get .) }}{{ errorf "%s : section %s : gallery : photo introuvable dans le dossier de la page : %s" $file $sec.id . }}{{ end }}{{ end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
