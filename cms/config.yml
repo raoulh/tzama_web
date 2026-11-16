@@ -552,7 +552,15 @@ collections:
               - name: tagline
                 label: Phrase d'accroche
                 widget: text
-              - { name: intro, label: Introduction, widget: text }
+              - name: points
+                label: Points forts
+                label_singular: point
+                widget: list
+                required: false
+                max: 4
+                hint: Courtes phrases affichées en liste sous la phrase d'accroche.
+                field: { name: point, label: Point }
+              - { name: intro, label: Introduction, widget: text, required: false, hint: Facultative si les points forts sont renseignés. }
               - name: photos
                 label: Photos « polaroid »
                 label_singular: photo

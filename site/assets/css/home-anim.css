@@ -9,7 +9,7 @@
 @media (prefers-reduced-motion: no-preference) {
   /* arrivée : le texte monte, le trait se dessine, trois feuilles tombent une fois */
   .hero__text > * { animation: apparaitre .6s ease-out both; }
-  .hero__text p { animation-delay: .2s; }
+  .hero__text p, .hero__points { animation-delay: .2s; }
   .hero__text .btn { animation-delay: .35s; }
   .hero__text .marque { animation: surligner .7s ease-out both; animation-delay: .7s; }
   .f--tombe { animation: tomber 1.8s cubic-bezier(.4,.1,.5,1) both; animation-delay: calc(.4s + var(--d, 0s)); }
