@@ -27,6 +27,24 @@ hero:
     - image: img/accueil/pyramide-polaroid.jpg
       alt: "Dix enfants forment une pyramide humaine sur une couverture posée dans l'herbe, devant une tour à colombages."
       caption: "La pyramide"
+    - image: img/accueil/grimpe-arbre-polaroid.jpg
+      alt: "Deux enfants grimpés dans un arbre sourient au milieu des feuilles."
+      caption: "Perchés dans l'arbre"
+    - image: img/accueil/cercle-parole-yourte-polaroid.jpg
+      alt: "Dans la yourte, une enseignante rit, assise par terre au milieu des enfants."
+      caption: "Dans la yourte"
+    - image: img/accueil/pousse-pot-polaroid.jpg
+      alt: "Une fillette en gilet jaune tient un petit pot où pousse une jeune plante."
+      caption: "Une pousse à planter"
+    - image: img/accueil/lecture-sous-bois-polaroid.jpg
+      alt: "Quatre enfants assis dans le sous-bois feuillettent des livres illustrés."
+      caption: "Lecture dans le sous-bois"
+    - image: img/accueil/carte-monde-mousse-polaroid.jpg
+      alt: "Une carte du monde dessinée sur un tissu, posée sur les feuilles mortes, les continents recouverts de mousse."
+      caption: "Le monde en mousse"
+    - image: img/accueil/insecte-main-rires-polaroid.jpg
+      alt: "Des fillettes en gilet jaune rient en regardant un petit insecte posé dans la main de l'une d'elles."
+      caption: "Un insecte dans la main"
 words:
   title: "Tzama en trois mots"
   items:
