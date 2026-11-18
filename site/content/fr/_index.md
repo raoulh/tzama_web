@@ -5,10 +5,9 @@ hero:
   image_alt: Un groupe d'enfants et une adulte observent le sol en forêt, accroupis dans les feuilles.
   tagline: Bienvenue chez Tzama, un écolieu pour *l'innovation pédagogique*
   points:
-    - Parmi les pionniers de l'école dehors en France
     - Une liberté pédagogique au service de nos élèves
+    - Parmi les pionniers de l'école dehors en France
     - Une grande place à l'intelligence émotionnelle
-    - Test point
   photos:
     - image: img/accueil/deux-enfants-arbre-polaroid.jpg
       alt: Deux enfants debout observent l'écorce d'un arbre en forêt.
