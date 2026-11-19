@@ -32,8 +32,9 @@ slug:
   clean_accents: true
   sanitize_replacement: "-"
 
-# Exigé par Sveltia, mais aucun champ ne s'en sert : les images vivent dans le dossier de leur fiche.
-media_folder: site/static/medias
+# Médiathèque partagée (onglet « Ressources globales ») : une image choisie ici est stockée
+# « /medias/x.jpg » et passe par le traitement d'image de Hugo (resolve-image.html).
+media_folder: /site/assets/medias
 public_folder: /medias
 
 media_libraries:
@@ -70,7 +71,11 @@ collections:
         label: L'école
         file: site/content/{{locale}}/ecole/_index.md
         i18n: true
-        media_folder: ""
+        # Chemin absolu, comme pour les autres pages : Sveltia ne remplace pas {{locale}} dans le
+        # dossier média d'un fichier de collection, et un chemin relatif n'y trouve rien.
+        # « fr » en dur tant que c'est la seule langue. public_folder vide : le front matter
+        # garde le nom de fichier seul, résolu par Hugo dans le dossier de la page.
+        media_folder: /site/content/fr/ecole
         public_folder: ""
         preview_path: ecole/
         fields:
@@ -484,7 +489,7 @@ collections:
         label: Inscription
         file: site/content/{{locale}}/inscription/_index.md
         i18n: true
-        media_folder: ""
+        media_folder: /site/content/fr/inscription
         public_folder: ""
         preview_path: inscription/
         fields:
@@ -496,7 +501,7 @@ collections:
         label: Extrascolaire
         file: site/content/{{locale}}/extrascolaire/index.md
         i18n: true
-        media_folder: ""
+        media_folder: /site/content/fr/extrascolaire
         public_folder: ""
         preview_path: extrascolaire/
         fields:
@@ -508,7 +513,7 @@ collections:
         label: L'association
         file: site/content/{{locale}}/association/_index.md
         i18n: true
-        media_folder: ""
+        media_folder: /site/content/fr/association
         public_folder: ""
         preview_path: association/
         fields:
@@ -520,7 +525,7 @@ collections:
         label: Contact
         file: site/content/{{locale}}/contact/_index.md
         i18n: true
-        media_folder: ""
+        media_folder: /site/content/fr/contact
         public_folder: ""
         preview_path: contact/
         fields:
@@ -533,7 +538,9 @@ collections:
         file: site/content/{{locale}}/_index.md
         i18n: true
         # Les images de l'accueil sont des ressources de assets/, pas du dossier de la page.
-        media_folder: site/assets/img/accueil
+        # Sans « / » initial, Sveltia lirait ce chemin sous le dossier de la page. Les choix
+        # faits dans le CMS peuvent être stockés « /img/accueil/x.jpg » : resolve-image.html l'accepte.
+        media_folder: /site/assets/img/accueil
         public_folder: img/accueil
         preview_path: /
         fields:
@@ -727,6 +734,7 @@ collections:
             i18n: true
             label: Texte de la page
             widget: markdown
+            editor_components: []
             hint: Crédits, propriété intellectuelle, liens. Les coordonnées de l'éditeur et de l'hébergeur s'affichent au-dessus, depuis les réglages.
 
       - name: confidentialite
@@ -741,6 +749,7 @@ collections:
             i18n: true
             label: Texte de la page
             widget: markdown
+            editor_components: []
             hint: À mettre à jour si le site change (mesure d'audience, nouveau formulaire…). Le bloc « Nous contacter » est ajouté en fin de page depuis les réglages.
 
       - name: plan-du-site
@@ -755,6 +764,7 @@ collections:
             i18n: true
             label: Introduction
             widget: markdown
+            editor_components: []
             required: false
             hint: Facultatif. La liste des pages se construit seule, à partir du menu et des pages publiées.
 

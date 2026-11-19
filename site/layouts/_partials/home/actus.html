@@ -31,7 +31,7 @@
     <li class="actu reveal" data-idle="balancer" style="--i:{{ $i }};--rot:{{ index $rots $i | safeCSS }}">
       <a href="{{ $n.RelPermalink }}">
         <span class="actu__img">
-          {{- with and $n.Params.flyer ($n.Resources.GetMatch $n.Params.flyer) }}
+          {{- with partial "resolve-image.html" (dict "page" $n "path" $n.Params.flyer) }}
           {{- partial "image.html" (dict "src" . "decorative" true "widths" (slice 240 480) "sizes" "(min-width: 48em) 15rem, 6rem") }}
           {{- else }}
           <span class="actu__vide"><svg aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#d-feuille-simple"/></svg></span>
