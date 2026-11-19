@@ -56,8 +56,25 @@
 (static) {
 	file_server
 	encode zstd gzip
-	@assets path_regexp \.[0-9a-f]{64}\.[a-z0-9]+$
+	# Empreinte (CSS, JS, polices) ou image traitée par Hugo (_hu_ : hash du fichier source et des réglages).
+	@assets path_regexp (\.[0-9a-f]{64}|_hu_[0-9a-f]{16})\.[a-z0-9]+$
 	header @assets Cache-Control "public, max-age=31536000, immutable"
+}
+
+# Anciennes adresses du WordPress de tzama.fr qui ont changé ; les autres (/ecole/, /contact/…) sont identiques.
+(wp_redirects) {
+	@wp_don path /faire-un-don /faire-un-don/
+	redir @wp_don /association/#soutenir permanent
+	@wp_postes path /postes-a-pourvoir /postes-a-pourvoir/
+	redir @wp_postes /association/#postes permanent
+	@wp_rgpd path /politique-de-confidentialite /politique-de-confidentialite/ /politique-de-cookies /politique-de-cookies/ /politique-de-cookies-ue /politique-de-cookies-ue/
+	redir @wp_rgpd /confidentialite/ permanent
+	@wp_actus path /bonjour-tout-le-monde /bonjour-tout-le-monde/ /category/* /feed /feed/ /comments/feed /comments/feed/
+	redir @wp_actus /actualites/ permanent
+	@wp_camps path_regexp ^/wp-content/uploads/.*camps-de-vacances.*\.docx?$
+	redir @wp_camps /extrascolaire/ permanent
+	@wp_docs path_regexp ^/wp-content/uploads/.+\.(pdf|docx?)$
+	redir @wp_docs /inscription/#documents permanent
 }
 
 http://v2.tzama.fr {
@@ -65,6 +82,7 @@ http://v2.tzama.fr {
 	import noindex
 	import umami
 	import api
+	import wp_redirects
 	# Maquettes aussi servies ici tant que test.tzama.fr n'est pas joignable ; l'ancienne adresse /home/ y mène.
 	redir /home/* /maquettes{uri} permanent
 	handle /maquettes/* {
@@ -133,6 +151,7 @@ http://www.tzama.fr {
 	redir https://tzama.fr{uri} permanent
 }
 
+# À la bascule : importer aussi wp_redirects ici.
 http://tzama.fr {
 	respond 404
 }
