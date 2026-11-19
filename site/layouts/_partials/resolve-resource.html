@@ -1,0 +1,14 @@
+{{- /*
+  Ressource d'un fichier (image, PDF) choisi dans le CMS, ou false. Ordre : dossier de la page,
+  puis assets/ (« /medias/x.jpg » de la médiathèque, « img/accueil/x.jpg » de l'accueil).
+  Sveltia peut stocker un chemin global avec ou sans « / » initial : les deux sont acceptés.
+*/ -}}
+{{- $path := .path -}}
+{{- $res := false -}}
+{{- if and $path (not (strings.HasPrefix $path "/")) .page -}}
+  {{- $res = or (.page.Resources.Get $path) (.page.Resources.GetMatch $path) -}}
+{{- end -}}
+{{- if and $path (not $res) -}}
+  {{- $res = resources.Get (strings.TrimPrefix "/" $path) -}}
+{{- end -}}
+{{- return (or $res false) -}}

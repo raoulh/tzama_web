@@ -14,7 +14,7 @@
       {{- range $i, $item := $g.items }}
       <li>
         <figure class="photo" style="--rot:{{ index (slice "-1.5" "1" "-.5" "1.5") (mod $i 4) }}deg">
-          {{ partial "image.html" (dict "src" (resources.Get $item.image) "alt" $item.alt "widths" (slice 360 540 720) "sizes" "(min-width: 40em) 22rem, 78vw") }}
+          {{ partial "image.html" (dict "src" (partial "resolve-resource.html" (dict "page" $ "path" $item.image)) "alt" $item.alt "widths" (slice 360 540 720) "sizes" "(min-width: 40em) 22rem, 78vw") }}
           <figcaption class="etiq">{{ partial "home/text.html" $item.caption }}</figcaption>
         </figure>
       </li>

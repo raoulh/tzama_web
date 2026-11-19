@@ -7,7 +7,7 @@
 {{- end }}
 {{- with site.GetPage "/documents" }}
   {{- range sort .RegularPages "Params.order" }}
-    {{- $items = $items | append (dict "title" .Title "file" (.Resources.Get .Params.file) "description" .Params.description) }}
+    {{- $items = $items | append (dict "title" .Title "file" (partial "resolve-resource.html" (dict "page" . "path" .Params.file)) "description" .Params.description) }}
   {{- end }}
 {{- end }}
 {{- with $items }}

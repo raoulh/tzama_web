@@ -27,14 +27,14 @@
 {{- $photos := slice -}}
 {{- range $p.photos -}}
   {{- $ph := . -}}
-  {{- with resources.Get $ph.image -}}
+  {{- with partial "resolve-resource.html" (dict "page" $ "path" $ph.image) -}}
     {{- $s := .Process "resize 360x webp" -}}
     {{- $l := .Process "resize 540x webp" -}}
     {{- $photos = $photos | append (dict "src" $l.RelPermalink "srcset" (printf "%s 360w, %s 540w" $s.RelPermalink $l.RelPermalink) "alt" $ph.alt "caption" $ph.caption) -}}
   {{- end -}}
 {{- end -}}
 <section class="hero">
-  {{ partial "image.html" (dict "src" (resources.Get $p.image) "alt" $p.image_alt "class" "hero__img" "eager" true "widths" (slice 480 720 1080 1280)) }}
+  {{ partial "image.html" (dict "src" (partial "resolve-resource.html" (dict "page" $ "path" $p.image)) "alt" $p.image_alt "class" "hero__img" "eager" true "widths" (slice 480 720 1080 1280)) }}
   <div class="hero__veil" aria-hidden="true"></div>
   {{- range $back }}
   {{ partial "home/calque.html" (dict "layer" . "sprite" $sprite.RelPermalink) }}

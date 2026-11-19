@@ -81,15 +81,15 @@
       {{- end -}}
       {{- range $field, $alt := $r.image -}}
         {{- with index $page.Params $field -}}
-          {{- if not ($page.Resources.GetMatch .) }}{{ errorf "%s : %s : image introuvable dans le dossier de la page : %s" $file $field . }}{{ end -}}
+          {{- if not (partial "resolve-resource.html" (dict "page" $page "path" .)) }}{{ errorf "%s : %s : image introuvable : %s" $file $field . }}{{ end -}}
           {{- if not (index $page.Params $alt) }}{{ errorf "%s : %s est renseigné, %s est obligatoire" $file $field $alt }}{{ end -}}
         {{- end -}}
       {{- end -}}
       {{- range $r.pdf -}}
         {{- $f := . -}}
         {{- with index $page.Params $f -}}
-          {{- $res := $page.Resources.Get . -}}
-          {{- if not $res }}{{ errorf "%s : %s : fichier introuvable dans le dossier de la page : %s" $file $f . }}{{ else if ne $res.MediaType.SubType "pdf" }}{{ errorf "%s : %s doit être un PDF (reçu : %s)" $file $f $res.MediaType.Type }}{{ end -}}
+          {{- $res := partial "resolve-resource.html" (dict "page" $page "path" .) -}}
+          {{- if not $res }}{{ errorf "%s : %s : fichier introuvable : %s" $file $f . }}{{ else if ne $res.MediaType.SubType "pdf" }}{{ errorf "%s : %s doit être un PDF (reçu : %s)" $file $f $res.MediaType.Type }}{{ end -}}
         {{- end -}}
       {{- end -}}
       {{- if and $strict (eq $section "temoignages") .Params.placeholder }}{{ errorf "%s : témoignage fictif (placeholder: true) interdit en build strict" $file }}{{ end -}}
@@ -160,18 +160,18 @@
         {{- range .videos }}{{ if not (findRE `^[A-Za-z0-9_-]{11}$` (printf "%v" .id)) }}{{ errorf "%s : section %s : identifiant YouTube invalide : %v" $file $sec.id .id }}{{ end }}{{ end -}}
       {{- end -}}
       {{- with .photo -}}
-        {{- if not ($page.Resources.Get .) }}{{ errorf "%s : section %s : photo introuvable dans le dossier de la page : %s" $file $sec.id . }}{{ end -}}
+        {{- if not (partial "resolve-resource.html" (dict "page" $page "path" .)) }}{{ errorf "%s : section %s : photo : image introuvable : %s" $file $sec.id . }}{{ end -}}
         {{- if not $sec.photo_alt }}{{ errorf "%s : section %s : photo est renseignée, photo_alt est obligatoire" $file $sec.id }}{{ end -}}
       {{- end -}}
       {{- range .gallery -}}
         {{- if not (and .image .alt) }}{{ errorf "%s : section %s : chaque photo de gallery exige image et alt" $file $sec.id }}{{ end -}}
-        {{- with .image }}{{ if not ($page.Resources.Get .) }}{{ errorf "%s : section %s : gallery : photo introuvable dans le dossier de la page : %s" $file $sec.id . }}{{ end }}{{ end -}}
+        {{- with .image }}{{ if not (partial "resolve-resource.html" (dict "page" $page "path" .)) }}{{ errorf "%s : section %s : gallery : image introuvable : %s" $file $sec.id . }}{{ end }}{{ end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
 
-{{- /* Page d'accueil : blocs du front matter ; les chemins d'image sont relatifs à assets/ */ -}}
+{{- /* Page d'accueil : blocs du front matter ; les chemins d'image sont relatifs à assets/ (img/accueil/ ou /medias/) */ -}}
 {{- $file := printf "content/%s/_index.md" site.Language.Lang -}}
 {{- $hp := site.Home.Params -}}
 {{- $blocks := dict
@@ -197,14 +197,14 @@
     {{- if not (strings.TrimSpace (printf "%v" .)) }}{{ errorf "%s : hero.points : point vide" $file }}{{ end -}}
   {{- end -}}
 {{- end -}}
-{{- $images := slice ($hp.hero.image | default "") ($hp.visit.photo | default "") -}}
+{{- $images := slice (dict "field" "hero.image" "path" $hp.hero.image) (dict "field" "visit.photo" "path" $hp.visit.photo) -}}
 {{- range ($hp.hero.photos | default slice) -}}
   {{- if not (and .image .alt .caption) }}{{ errorf "%s : hero.photos : chaque entrée exige image, alt et caption" $file }}{{ end -}}
-  {{- $images = $images | append (.image | default "") -}}
+  {{- $images = $images | append (dict "field" "hero.photos" "path" .image) -}}
 {{- end -}}
 {{- range ($hp.day.items | default slice) -}}
   {{- with .photo -}}
-    {{- $images = $images | append . -}}
+    {{- $images = $images | append (dict "field" "day.items" "path" .) -}}
   {{- end -}}
   {{- if and .photo (not (and .photo_alt .photo_caption)) }}{{ errorf "%s : day.items : une photo exige photo_alt et photo_caption" $file }}{{ end -}}
 {{- end -}}
@@ -212,10 +212,10 @@
 {{- if lt (len $gallery) 2 }}{{ errorf "%s : gallery.items : au moins deux photos" $file }}{{ end -}}
 {{- range $gallery -}}
   {{- if not (and .image .alt .caption) }}{{ errorf "%s : gallery.items : chaque entrée exige image, alt et caption" $file }}{{ end -}}
-  {{- $images = $images | append (.image | default "") -}}
+  {{- $images = $images | append (dict "field" "gallery.items" "path" .image) -}}
 {{- end -}}
 {{- range $images -}}
-  {{- if and . (not (resources.Get .)) }}{{ errorf "%s : image introuvable dans assets/ : %s" $file . }}{{ end -}}
+  {{- if and .path (not (partial "resolve-resource.html" (dict "page" site.Home "path" .path))) }}{{ errorf "%s : %s : image introuvable : %s" $file .field .path }}{{ end -}}
 {{- end -}}
 {{- range slice "words" "why" "day" -}}
   {{- $items := (index $hp . | default dict).items -}}

@@ -11,7 +11,7 @@
 {{- if gt $cols 7 }}{{ $cols = int (math.Ceil (div (float $cols) (math.Ceil (div (float $cols) 7)))) }}{{ end }}
 <ul class="equipe__list trombi" style="--n:{{ $cols }}" data-trombi data-close="{{ T "sections.team.close" }}">
   {{- range $i, $m := $list }}
-  {{- $photo := or (and $m.Params.photo ($m.Resources.GetMatch $m.Params.photo)) $generic }}
+  {{- $photo := or (partial "resolve-resource.html" (dict "page" $m "path" $m.Params.photo)) $generic }}
   <li class="reveal" style="--i:{{ $i }}">
     <span class="portrait">{{ partial "image.html" (dict "src" $photo "decorative" true "widths" (slice 160 240 360) "sizes" "(min-width: 60em) 9rem, (min-width: 40em) 22vw, 45vw") }}</span>
     <strong>{{ index (split $m.Params.name " ") 0 }}</strong>
