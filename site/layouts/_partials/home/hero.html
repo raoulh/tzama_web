@@ -34,7 +34,7 @@
   {{- end -}}
 {{- end -}}
 <section class="hero">
-  {{ partial "image.html" (dict "src" (partial "resolve-resource.html" (dict "page" $ "path" $p.image)) "alt" $p.image_alt "class" "hero__img" "eager" true "widths" (slice 480 720 1080 1280)) }}
+  {{ partial "image.html" (dict "src" (partial "resolve-resource.html" (dict "page" $ "path" $p.image)) "alt" $p.image_alt "class" "hero__img" "eager" true "widths" (slice 480 720 1080 1280) "quality" 50) }}
   <div class="hero__veil" aria-hidden="true"></div>
   {{- range $back }}
   {{ partial "home/calque.html" (dict "layer" . "sprite" $sprite.RelPermalink) }}

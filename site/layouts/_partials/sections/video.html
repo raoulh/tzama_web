@@ -18,9 +18,11 @@
           {{- end }}
         {{- end }}
         {{- with $thumb }}
+          {{- /* La copie range les variantes sous /img/videos/ ; l'original jpg n'est jamais publié. */}}
+          {{- $src := resources.Copy (printf "img/videos/%s.jpg" $v.id) . }}
           {{- /* hqdefault est en 4:3 avec des bandes noires : le recadrage 16:9 les retire. */}}
-          {{- $s := .Fill "480x270 Center webp q78" }}
-          {{- $l := .Fill "960x540 Center webp q78" }}
+          {{- $s := $src.Fill "480x270 Center webp q78" }}
+          {{- $l := $src.Fill "960x540 Center webp q78" }}
         <img class="video__thumb" src="{{ $l.RelPermalink }}" srcset="{{ $s.RelPermalink }} 480w, {{ $l.RelPermalink }} 960w" sizes="(min-width: 60em) 30rem, 92vw" width="960" height="540" alt="" loading="lazy" decoding="async">
         {{- else }}
         <svg class="video__deco" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ cond (modBool $i 2) "d-fougere" "d-feuille-chene" }}"/></svg>

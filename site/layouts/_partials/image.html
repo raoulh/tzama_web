@@ -4,6 +4,7 @@
     alt      texte alternatif ; obligatoire sauf decorative=true
     sizes    attribut sizes (défaut 100vw)
     widths   largeurs candidates (défaut 480 720 1080 1440 1920), plafonnées à la largeur source
+    quality  qualité webp des variantes (défaut : imaging.quality)
     eager    true pour l'image principale au-dessus de la ligne de flottaison
     class
   Les GIF et SVG passent tels quels.
@@ -19,15 +20,16 @@
 {{- $widths := .widths | default (slice 480 720 1080 1440 1920) -}}
 {{- $set := slice -}}
 {{- $largest := false -}}
+{{- $q := cond (not .quality) "" (printf " q%d" .quality) -}}
 {{- range $widths -}}
   {{- if le . $img.Width -}}
-    {{- $r := $img.Process (printf "resize %dx webp" .) -}}
+    {{- $r := $img.Process (printf "resize %dx webp%s" . $q) -}}
     {{- $set = $set | append (printf "%s %dw" $r.RelPermalink .) -}}
     {{- $largest = $r -}}
   {{- end -}}
 {{- end -}}
 {{- if not $largest -}}
-  {{- $largest = $img.Process "webp" -}}
+  {{- $largest = $img.Process (printf "webp%s" $q) -}}
   {{- $set = slice (printf "%s %dw" $largest.RelPermalink $largest.Width) -}}
 {{- end -}}
 <img src="{{ $largest.RelPermalink }}" srcset="{{ delimit $set ", " }}" sizes="{{ .sizes | default "100vw" }}" width="{{ $largest.Width }}" height="{{ $largest.Height }}" alt="{{ $alt }}"{{ with .class }} class="{{ . }}"{{ end }} loading="{{ $loading }}" decoding="async"{{ if .eager }} fetchpriority="high"{{ end }}>
