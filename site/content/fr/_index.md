@@ -1,4 +1,8 @@
 ---
+# Les originaux d'un bundle ne sont publiés que s'ils sont servis tels quels (PDF, flyers) ; les variantes traitées le sont toujours.
+cascade:
+  build:
+    publishResources: false
 title: Accueil
 hero:
   image: img/accueil/decouverte-foret.jpg
