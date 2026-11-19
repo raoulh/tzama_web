@@ -41,7 +41,7 @@ Le sélecteur d'images a deux onglets :
 - **Ressources de l'entrée** (fiches) ou **Ressources du fichier** (Pages) : les photos de cette fiche ou de cette page, enregistrées dans son dossier (`site/content/fr/<page>/`, ou à côté de `index.md` pour une fiche). Le front matter garde le nom de fichier seul. Pour l'Accueil, cet onglet montre `site/assets/img/accueil/`.
 - **Ressources globales** : la médiathèque partagée, `site/assets/medias/`, utilisable depuis n'importe quelle page ou fiche. Le front matter stocke `/medias/<nom>`.
 
-Une photo propre à une page ou à une fiche va dans son dossier ; une photo réutilisée à plusieurs endroits va dans la médiathèque. Les deux passent par le traitement d'image de Hugo : `site/layouts/_partials/resolve-image.html` cherche d'abord dans le dossier de la page, puis dans `site/assets/`. Une image introuvable fait échouer le build, avec le fichier, le champ et le chemin.
+Une photo propre à une page ou à une fiche va dans son dossier ; une photo réutilisée à plusieurs endroits va dans la médiathèque. Les deux passent par le traitement d'image de Hugo : `site/layouts/_partials/resolve-resource.html` cherche d'abord dans le dossier de la page, puis dans `site/assets/`. Une image introuvable fait échouer le build, avec le fichier, le champ et le chemin.
 
 Le CMS accepte JPEG, PNG et WebP jusqu'à 15 Mo, réduit l'image à 2000 px et la convertit en WebP avant l'envoi. Le texte alternatif devient obligatoire dès qu'une image est posée ; le CMS ne sait pas exprimer cette condition, c'est la validation du build qui la fait respecter.
 
@@ -58,7 +58,7 @@ L'insertion d'images dans le texte est désactivée : une image passe toujours p
 
 ## Documents PDF
 
-Un PDF est un fichier du dossier de sa fiche (collection « Documents »). Le champ n'accepte que `application/pdf`, 10 Mo au plus ; le CMS ne convertit ni ne réduit les PDF. Le build vérifie que le fichier existe et que c'est bien un PDF.
+Un PDF est un fichier du dossier de sa fiche (collection « Documents »), ou un PDF de la médiathèque (`/medias/<nom>.pdf`). Le champ n'accepte que `application/pdf`, 10 Mo au plus ; le CMS ne convertit ni ne réduit les PDF. Le build vérifie que le fichier existe et que c'est bien un PDF.
 
 ## Ajouter un champ
 

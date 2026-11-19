@@ -33,7 +33,7 @@ slug:
   sanitize_replacement: "-"
 
 # Médiathèque partagée (onglet « Ressources globales ») : une image choisie ici est stockée
-# « /medias/x.jpg » et passe par le traitement d'image de Hugo (resolve-image.html).
+# « /medias/x.jpg » et passe par le traitement d'image de Hugo (resolve-resource.html).
 media_folder: /site/assets/medias
 public_folder: /medias
 
@@ -539,7 +539,7 @@ collections:
         i18n: true
         # Les images de l'accueil sont des ressources de assets/, pas du dossier de la page.
         # Sans « / » initial, Sveltia lirait ce chemin sous le dossier de la page. Les choix
-        # faits dans le CMS peuvent être stockés « /img/accueil/x.jpg » : resolve-image.html l'accepte.
+        # faits dans le CMS peuvent être stockés « /img/accueil/x.jpg » : resolve-resource.html l'accepte.
         media_folder: /site/assets/img/accueil
         public_folder: img/accueil
         preview_path: /

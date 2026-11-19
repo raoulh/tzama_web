@@ -7,7 +7,7 @@
   {{- range $i, $e := . }}
   <li class="carte">
     <span class="carte__img reveal">
-      {{- with partial "resolve-image.html" (dict "page" $e "path" $e.Params.photo) }}
+      {{- with partial "resolve-resource.html" (dict "page" $e "path" $e.Params.photo) }}
       {{- partial "image.html" (dict "src" . "alt" $e.Params.photo_alt "sizes" "(min-width: 48em) 12rem, 6rem" "widths" (slice 240 480)) }}
       {{- else }}
       <span class="carte__vide"><svg aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#{{ index $doodles (mod $i (len $doodles)) }}"/></svg></span>

@@ -13,7 +13,7 @@
       <p>{{ partial "home/text.html" $item.text }}</p>
       {{- with $item.photo }}
       <figure class="photo photo--journee reveal" data-idle="balancer" style="--rot:{{ cond (modBool $i 2) "-1.5" "1.5" }}deg">
-        {{ partial "image.html" (dict "src" (partial "resolve-image.html" (dict "page" $ "path" .)) "alt" $item.photo_alt "widths" (slice 320 480 720) "sizes" "(min-width: 60em) 15rem, (min-width: 40em) 45vw, 90vw") }}
+        {{ partial "image.html" (dict "src" (partial "resolve-resource.html" (dict "page" $ "path" .)) "alt" $item.photo_alt "widths" (slice 320 480 720) "sizes" "(min-width: 60em) 15rem, (min-width: 40em) 45vw, 90vw") }}
         <figcaption class="etiq">{{ partial "home/text.html" $item.photo_caption }}</figcaption>
       </figure>
       {{- else }}
