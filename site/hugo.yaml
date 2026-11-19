@@ -71,6 +71,9 @@ params:
   ogImage: img/accueil/decouverte-foret.jpg
   # Le build de production passe HUGO_PARAMS_STRICT=true : il refuse les témoignages fictifs.
   strict: false
+  # Les aperçus de PR passent HUGO_PARAMS_PREVIEW=true : les erreurs de saisie s'affichent
+  # en bandeau au lieu d'arrêter le build. Jamais en production.
+  preview: false
 
 markup:
   goldmark:

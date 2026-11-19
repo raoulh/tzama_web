@@ -1,0 +1,8 @@
+{{- /*
+  Erreur de saisie dans le CMS. Hors prévisualisation elle bloque le build ; en prévisualisation
+  elle est seulement renvoyée, pour le bandeau du site et le commentaire de la PR.
+  Paramètres : file, where (la fiche en clair), msg, fix ; seen (pages où elle se voit, facultatif).
+*/ -}}
+{{- $text := printf "%s : %s : %s. %s" .file .where .msg .fix -}}
+{{- if not (partial "is-preview.html" .) }}{{ errorf "%s" $text }}{{ end -}}
+{{- return (merge (dict "seen" slice) . (dict "text" $text)) -}}

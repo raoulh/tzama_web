@@ -1,0 +1,53 @@
+{{- /*
+  Bandeau des erreurs de saisie, en prévisualisation seulement : toutes les erreurs du site sur
+  chaque page, celles de la page en tête. Styles en ligne pour ne rien ajouter à la feuille de prod.
+  Paramètres : page, errors (sortie de validate.html).
+*/ -}}
+{{- $page := .page -}}
+{{- $here := slice }}{{ $other := slice -}}
+{{- range .errors -}}
+  {{- $on := not .seen -}}
+  {{- range .seen }}{{ if eq .url $page.RelPermalink }}{{ $on = true }}{{ end }}{{ end -}}
+  {{- if $on }}{{ $here = $here | append . }}{{ else }}{{ $other = $other | append . }}{{ end -}}
+{{- end }}
+<style>
+.erreur-contenu { outline: 6px solid #b3261e !important; outline-offset: -6px; }
+.erreur-contenu--vide { display: flex; align-items: center; justify-content: center; min-height: 6rem; padding: 1rem; background: #fdecea; color: #8c1d18; font-weight: 700; text-align: center; }
+.erreurs { position: relative; z-index: 30; padding: calc(var(--header-h) + var(--pill-top) + 1rem) var(--gutter) 1.25rem; background: #b3261e; color: #fff; font-size: 1rem; line-height: 1.45; }
+.erreurs__in { max-width: var(--col); margin: 0 auto; }
+.erreurs__titre { margin: 0 0 .35rem; font-size: 1.3rem; font-weight: 800; }
+.erreurs p { margin: 0 0 .75rem; }
+.erreurs h2, .erreurs summary { margin: .75rem 0 .4rem; font-size: 1.05rem; font-weight: 800; }
+.erreurs summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.erreurs ol { margin: 0; padding-left: 1.4rem; }
+.erreurs li { margin: 0 0 .7rem; padding: .6rem .8rem; background: #fff; color: #26241e; border-radius: .5rem; }
+.erreurs li strong { color: #8c1d18; }
+.erreurs__fix { display: block; margin-top: .2rem; font-weight: 700; }
+.erreurs small { display: block; margin-top: .25rem; color: #57544a; overflow-wrap: anywhere; }
+.erreurs a { color: inherit; }
+</style>
+{{- with .errors }}
+<aside class="erreurs" aria-labelledby="erreurs-titre">
+  <div class="erreurs__in">
+    <p class="erreurs__titre" id="erreurs-titre">{{ T "contentErrors.title" (len .) }}</p>
+    <p>{{ T "contentErrors.lead" }}</p>
+    {{- with $here }}
+    <h2>{{ T "contentErrors.here" }}</h2>
+    <ol>{{ range . }}{{ template "content-error-item" . }}{{ end }}</ol>
+    {{- end }}
+    {{- with $other }}
+    <details{{ if not $here }} open{{ end }}>
+      <summary>{{ T "contentErrors.elsewhere" (len .) }}</summary>
+      <ol>{{ range . }}{{ template "content-error-item" . }}{{ end }}</ol>
+    </details>
+    {{- end }}
+  </div>
+</aside>
+{{- end }}
+
+{{- define "content-error-item" }}
+<li><strong>{{ .where }}</strong> : {{ .msg }}.
+  <span class="erreurs__fix">{{ .fix }}</span>
+  <small>{{ T "contentErrors.file" }} {{ .file }}{{ with .seen }} · {{ T "contentErrors.seen" }} {{ range $i, $s := . }}{{ if $i }}, {{ end }}<a href="{{ $s.url }}">{{ $s.title }}</a>{{ end }}{{ end }}</small>
+</li>
+{{- end }}

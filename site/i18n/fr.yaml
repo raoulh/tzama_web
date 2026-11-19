@@ -20,6 +20,20 @@ footer:
     instagram: Instagram
     youtube: YouTube
 
+# Bandeau des aperçus de PR seulement : jamais affiché sur le site publié.
+contentErrors:
+  title:
+    one: "Aperçu : {{ .Count }} erreur à corriger avant publication"
+    other: "Aperçu : {{ .Count }} erreurs à corriger avant publication"
+  lead: Cette version n'est pas publiée. Corrigez les points ci-dessous dans le CMS, l'aperçu se mettra à jour tout seul.
+  here: Sur cette page
+  elsewhere:
+    one: "Ailleurs sur le site ({{ .Count }})"
+    other: "Ailleurs sur le site ({{ .Count }})"
+  file: Fichier
+  seen: visible sur
+  missingImage: Photo introuvable
+
 notFound:
   title: Page introuvable
   text: Cette page n'existe pas ou a changé d'adresse.

@@ -9,12 +9,19 @@
   Les GIF et SVG passent tels quels.
 */ -}}
 {{- $img := .src -}}
-{{- if not $img }}{{ errorf "image.html : paramètre src manquant" }}{{ end -}}
-{{- if and (not .decorative) (not .alt) }}{{ errorf "image.html : alt manquant pour %s" $img.Name }}{{ end -}}
+{{- $class := .class -}}
+{{- /* En prévisualisation, validate.html a déjà listé l'erreur : on la marque sur la page sans arrêter le build. */ -}}
+{{- if not $img }}{{ if not (partial "is-preview.html" .) }}{{ errorf "image.html : paramètre src manquant" }}{{ end }}{{ end -}}
+{{- if and $img (not .decorative) (not .alt) -}}
+  {{- $_ := partial "content-error.html" (dict "file" "image.html" "where" (printf "photo %s" $img.Name) "msg" "alt manquant, la photo n'a pas de description" "fix" "Ajoutez une description de la photo dans le CMS.") -}}
+  {{- $class = trim (printf "%s erreur-contenu" ($class | default "")) " " -}}
+{{- end -}}
 {{- $alt := cond (.decorative | default false) "" (.alt | default "") -}}
 {{- $loading := cond (.eager | default false) "eager" "lazy" -}}
-{{- if in (slice "svg" "gif") $img.MediaType.SubType -}}
-<img src="{{ $img.RelPermalink }}" alt="{{ $alt }}"{{ with .class }} class="{{ . }}"{{ end }} loading="{{ $loading }}" decoding="async">
+{{- if not $img -}}
+<span class="erreur-contenu erreur-contenu--vide">{{ T "contentErrors.missingImage" }}</span>
+{{- else if in (slice "svg" "gif") $img.MediaType.SubType -}}
+<img src="{{ $img.RelPermalink }}" alt="{{ $alt }}"{{ with $class }} class="{{ . }}"{{ end }} loading="{{ $loading }}" decoding="async">
 {{- else -}}
 {{- $widths := .widths | default (slice 480 720 1080 1440 1920) -}}
 {{- $set := slice -}}
@@ -30,5 +37,5 @@
   {{- $largest = $img.Process "webp" -}}
   {{- $set = slice (printf "%s %dw" $largest.RelPermalink $largest.Width) -}}
 {{- end -}}
-<img src="{{ $largest.RelPermalink }}" srcset="{{ delimit $set ", " }}" sizes="{{ .sizes | default "100vw" }}" width="{{ $largest.Width }}" height="{{ $largest.Height }}" alt="{{ $alt }}"{{ with .class }} class="{{ . }}"{{ end }} loading="{{ $loading }}" decoding="async"{{ if .eager }} fetchpriority="high"{{ end }}>
+<img src="{{ $largest.RelPermalink }}" srcset="{{ delimit $set ", " }}" sizes="{{ .sizes | default "100vw" }}" width="{{ $largest.Width }}" height="{{ $largest.Height }}" alt="{{ $alt }}"{{ with $class }} class="{{ . }}"{{ end }} loading="{{ $loading }}" decoding="async"{{ if .eager }} fetchpriority="high"{{ end }}>
 {{- end -}}

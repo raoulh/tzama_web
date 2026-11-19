@@ -5,9 +5,17 @@
 </head>
 <body{{ if partial "show-thumb-bar.html" . }} class="has-thumb-bar"{{ end }}>
 <a class="skip" href="#contenu">{{ T "skipToContent" }}</a>
+{{- $preview := partial "is-preview.html" . }}
+{{- if or .IsHome $preview }}
+{{- $errors := partialCached "validate.html" site.Home site.Language.Lang }}
+{{- if $preview }}
+{{- partial "content-errors.html" (dict "page" . "errors" $errors) }}
+{{- /* Lu par la CI pour commenter la PR ; retiré de l'archive publiée. */}}
+{{- if .IsHome }}{{ (resources.FromString "preview-errors.json" (jsonify (dict "errors" $errors))).Publish }}{{ end }}
+{{- end }}
+{{- end }}
 <div class="scroll-sentinel" aria-hidden="true"></div>
 {{ partial "header.html" . }}
-{{- if .IsHome }}{{ partial "validate.html" . }}{{ end }}
 <main id="contenu">
 {{ block "main" . }}{{ end }}
 </main>
