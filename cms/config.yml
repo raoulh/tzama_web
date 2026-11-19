@@ -722,6 +722,7 @@ collections:
         preview_path: mentions-legales/
         fields:
           - *page_title
+          - *page_description
           - { name: layout, widget: hidden, default: mentions-legales }
           - name: body
             i18n: true
@@ -736,6 +737,7 @@ collections:
         preview_path: confidentialite/
         fields:
           - *page_title
+          - *page_description
           - { name: layout, widget: hidden, default: confidentialite }
           - name: body
             i18n: true
@@ -750,6 +752,7 @@ collections:
         preview_path: plan-du-site/
         fields:
           - *page_title
+          - *page_description
           - { name: layout, widget: hidden, default: plan-du-site }
           - name: body
             i18n: true

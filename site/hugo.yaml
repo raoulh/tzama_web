@@ -25,6 +25,9 @@ languages:
     title: École Tzama
     params:
       description: École associative à Kembs (68) pour les enfants de 3 à 11 ans, la moitié du temps dehors.
+      # Complète le titre de l'accueil dans les résultats de recherche.
+      tagline: école alternative à Kembs (Haut-Rhin)
+      ogImageAlt: Un groupe d'enfants et une adulte observent le sol en forêt, accroupis dans les feuilles.
     menus:
       # Une page par entrée ; ses sous-entrées sont les sections de la page (front matter « sections »).
       main:
@@ -60,8 +63,12 @@ languages:
         - { name: Confidentialité, pageRef: /confidentialite, weight: 4 }
 
 params:
-  # Retiré à la bascule sur tzama.fr (tâche 51).
+  # À retirer à la bascule, en même temps que baseURL (ici et dans la CI) passe à https://tzama.fr/.
   noindex: true
+  # Seul domaine indexable : tout build vers un autre domaine (aperçus de PR, v2) reste en noindex.
+  prodHost: tzama.fr
+  # Image de partage (Open Graph) des pages qui n'en ont pas, recadrée en 1200×630.
+  ogImage: img/accueil/decouverte-foret.jpg
   # Le build de production passe HUGO_PARAMS_STRICT=true : il refuse les témoignages fictifs.
   strict: false
 
