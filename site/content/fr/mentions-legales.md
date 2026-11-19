@@ -1,5 +1,6 @@
 ---
 title: "Mentions légales"
+description: "Éditeur, hébergeur et crédits du site de l'école Tzama, école associative à Kembs (Haut-Rhin)."
 layout: mentions-legales
 ---
 ## Crédits

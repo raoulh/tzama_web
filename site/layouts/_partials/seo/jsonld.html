@@ -1,0 +1,66 @@
+{{- /*
+  Données structurées schema.org : l'école et le site sur l'accueil, le fil d'Ariane ailleurs,
+  et une FAQPage sur les pages qui ont une section FAQ.
+  Pas d'Event : les actualités n'ont pas toutes un lieu et des horaires fiables, et Google pénalise les événements approximatifs.
+*/ -}}
+{{- $s := hugo.Data.settings -}}
+{{- $home := site.Home.Permalink -}}
+{{- $graph := slice -}}
+{{- if .IsHome -}}
+  {{- $school := dict
+    "@type" "School"
+    "@id" (print $home "#ecole")
+    "name" site.Title
+    "alternateName" "Tzama"
+    "url" $home
+    "description" site.Params.description
+    "email" $s.email
+    "address" (dict
+      "@type" "PostalAddress"
+      "streetAddress" $s.address.street
+      "postalCode" $s.address.postalCode
+      "addressLocality" $s.address.city
+      "addressCountry" "FR")
+    "parentOrganization" (dict "@type" "Organization" "name" $s.name)
+  -}}
+  {{- with $s.phone }}{{ $school = merge $school (dict "telephone" .) }}{{ end -}}
+  {{- with $s.opening_date }}{{ $school = merge $school (dict "foundingDate" ((time.AsTime .).Format "2006-01-02")) }}{{ end -}}
+  {{- with resources.Get "img/logo/logo-tzama.png" }}{{ $school = merge $school (dict "logo" .Permalink) }}{{ end -}}
+  {{- with resources.Get site.Params.ogImage }}{{ $school = merge $school (dict "image" (.Fill "1200x630 Center jpg q80").Permalink) }}{{ end -}}
+  {{- $same := slice }}{{ range $s.social }}{{ $same = $same | append .url }}{{ end -}}
+  {{- with $same }}{{ $school = merge $school (dict "sameAs" .) }}{{ end -}}
+  {{- $graph = $graph | append $school -}}
+  {{- $graph = $graph | append (dict
+    "@type" "WebSite"
+    "@id" (print $home "#site")
+    "url" $home
+    "name" site.Title
+    "inLanguage" site.Language.Locale
+    "publisher" (dict "@id" (print $home "#ecole"))) -}}
+{{- else if ne .Kind "404" -}}
+  {{- $crumbs := slice (dict "@type" "ListItem" "position" 1 "name" (T "sitemap.home") "item" $home) -}}
+  {{- range .Ancestors.Reverse -}}
+    {{- if and (not .IsHome) .Permalink -}}
+      {{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" (add (len $crumbs) 1) "name" .Title "item" .Permalink) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" (add (len $crumbs) 1) "name" .Title "item" .Permalink) -}}
+  {{- $graph = $graph | append (dict "@type" "BreadcrumbList" "itemListElement" $crumbs) -}}
+{{- end -}}
+{{- $cats := slice -}}
+{{- range .Params.sections }}{{ if eq .type "faq" }}{{ $cats = $cats | append .category }}{{ end }}{{ end -}}
+{{- with $cats -}}
+  {{- $qa := slice -}}
+  {{- with site.GetPage "/faq" -}}
+    {{- range sort (where .RegularPages "Params.category" "in" $cats) "Params.order" -}}
+      {{- $qa = $qa | append (dict
+        "@type" "Question"
+        "name" .Title
+        "acceptedAnswer" (dict "@type" "Answer" "text" (.Content | plainify | htmlUnescape | strings.TrimSpace))) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- with $qa }}{{ $graph = $graph | append (dict "@type" "FAQPage" "mainEntity" .) }}{{ end -}}
+{{- end -}}
+{{- with $graph }}
+<script type="application/ld+json">{{ dict "@context" "https://schema.org" "@graph" . | jsonify | safeJS }}</script>
+{{- end }}
