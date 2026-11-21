@@ -138,7 +138,7 @@ collections:
                     label: Description de la photo
                     required: false
                     hint: >-
-                      Obligatoire dès qu'une photo est ajoutée, sinon la preview échoue.
+                      Obligatoire dès qu'une photo est ajoutée, sinon la publication est bloquée (la preview affiche un bandeau rouge).
                       Décrire ce que montre la photo, en une phrase : ce texte est lu aux personnes aveugles.
                   - &sec_gallery
                     name: gallery
@@ -832,7 +832,7 @@ collections:
         label: Description de l'image
         required: false
         hint: >-
-          **Obligatoire dès qu'une image est ajoutée**, sinon la preview échoue.
+          **Obligatoire dès qu'une image est ajoutée**, sinon la publication est bloquée (la preview affiche un bandeau rouge).
           Décrire ce que montre l'image, en une phrase : ce texte est lu aux personnes aveugles
           et s'affiche si l'image ne charge pas.
       - name: body
@@ -901,7 +901,7 @@ collections:
         label: Description de la photo
         required: false
         hint: >-
-          **Obligatoire dès qu'une photo est ajoutée**, sinon la preview échoue.
+          **Obligatoire dès qu'une photo est ajoutée**, sinon la publication est bloquée (la preview affiche un bandeau rouge).
           Par exemple « Portrait de Claire, souriante, dans le jardin » : ce texte est lu aux
           personnes aveugles.
       # Hugo lit `title` ; il reprend le nom pour ne pas le saisir deux fois.
@@ -969,7 +969,7 @@ collections:
         label: Description du logo
         required: false
         hint: >-
-          Obligatoire dès qu'un logo est ajouté, sinon la preview échoue.
+          Obligatoire dès qu'un logo est ajouté, sinon la publication est bloquée (la preview affiche un bandeau rouge).
           Par exemple « Logo de l'Archipel de Kembs ».
       - name: body
         i18n: true
@@ -1029,7 +1029,7 @@ collections:
         label: Description de la photo
         required: false
         hint: >-
-          Obligatoire dès qu'une photo est ajoutée, sinon la preview échoue.
+          Obligatoire dès qu'une photo est ajoutée, sinon la publication est bloquée (la preview affiche un bandeau rouge).
           Décrire ce que montre la photo, en une phrase.
       - name: body
         i18n: true
@@ -1237,7 +1237,7 @@ collections:
         label: Description de la photo
         required: false
         hint: >-
-          **Obligatoire dès qu'une photo est ajoutée**, sinon la preview échoue.
+          **Obligatoire dès qu'une photo est ajoutée**, sinon la publication est bloquée (la preview affiche un bandeau rouge).
           Décrire la photo en une phrase : ce texte est lu aux personnes aveugles.
       # Hugo lit `title` ; il reprend l'auteur pour ne pas le saisir deux fois.
       - name: title

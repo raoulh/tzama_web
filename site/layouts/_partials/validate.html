@@ -1,37 +1,55 @@
 {{- /*
-  Vérifie au build les données du modèle de contenu ; appelé depuis baseof pour la page d'accueil
-  (une fois par langue). Toute erreur nomme le fichier et le champ. Ne produit aucun HTML.
+  Vérifie au build les données du modèle de contenu et renvoie la liste des erreurs de saisie,
+  chacune passée par content-error.html (bloquante hors prévisualisation). Appelé depuis baseof
+  (une fois par langue). Toute erreur nomme le fichier, la fiche en clair, le champ et quoi faire.
   Mode strict (params.strict, posé par HUGO_PARAMS_STRICT=true) : refuse aussi les témoignages fictifs.
 */ -}}
 {{- $strict := eq (printf "%v" site.Params.strict) "true" -}}
+{{- $errs := slice -}}
+{{- $fill := "Remplissez ce champ dans le CMS, puis enregistrez." -}}
+{{- $fixAlt := "Ajoutez une description de la photo dans le CMS : une phrase qui dit ce qu'on voit, lue aux personnes aveugles." -}}
+{{- $fixImg := "Choisissez à nouveau la photo dans le CMS." -}}
+{{- $fixList := "Choisissez une valeur dans la liste proposée par le CMS." -}}
+{{- $fixInt := "Indiquez un nombre entier dans le CMS." -}}
+{{- $fixDate := "Choisissez la date avec le calendrier du CMS." -}}
+{{- $home := slice (dict "title" site.Home.Title "url" site.Home.RelPermalink) -}}
 
 {{- if not (resources.Get "img/divers/portrait-generique.png") }}{{ errorf "assets/img/divers/portrait-generique.png : portrait générique absent" }}{{ end -}}
 
 {{- /* Réglages */ -}}
 {{- $s := hugo.Data.settings -}}
 {{- if not $s }}{{ errorf "data/settings.yaml : fichier absent ou vide" }}{{ end -}}
+{{- $se := dict "file" "data/settings.yaml" "where" "Réglages du site" -}}
+{{- $sl := dict
+  "name" "Nom de l'association" "email" "Adresse de contact" "donation_url" "Lien de don" "opening_date" "Date d'ouverture de l'école"
+  "street" "Adresse, Rue" "postalCode" "Adresse, Code postal" "city" "Adresse, Ville"
+  "school_year" "Tarifs, Scolarité annuelle" "stage_week" "Tarifs, Semaine de stage"
+  "sibling_discount.second" "Tarifs, Réduction fratrie, Deuxième enfant" "sibling_discount.third" "Tarifs, Réduction fratrie, Troisième enfant"
+  "deposit" "Tarifs, Caution" "september_fees.membership" "Tarifs, Adhésion de l'enfant" "september_fees.supplies" "Tarifs, Fournitures scolaires"
+  "september_fees.snack" "Tarifs, Goûter du matin" "lunch_supervision" "Tarifs, Surveillance du midi"
+-}}
 {{- range slice "name" "email" "donation_url" "opening_date" -}}
-  {{- if not (index $s .) }}{{ errorf "data/settings.yaml : champ obligatoire absent : %s" . }}{{ end -}}
+  {{- if not (index $s .) }}{{ $errs = $errs | append (merge $se (dict "msg" (printf "« %s » est vide (%s)" (index $sl .) .) "fix" $fill)) }}{{ end -}}
 {{- end -}}
 {{- range slice "street" "postalCode" "city" -}}
-  {{- if not (index ($s.address | default dict) .) }}{{ errorf "data/settings.yaml : champ obligatoire absent : address.%s" . }}{{ end -}}
+  {{- if not (index ($s.address | default dict) .) }}{{ $errs = $errs | append (merge $se (dict "msg" (printf "« %s » est vide (address.%s)" (index $sl .) .) "fix" $fill)) }}{{ end -}}
 {{- end -}}
 {{- range $s.social -}}
-  {{- if not (and .id .url) }}{{ errorf "data/settings.yaml : social : chaque entrée exige id et url" }}{{ end -}}
+  {{- if not (and .id .url) }}{{ $errs = $errs | append (merge $se (dict "msg" "un réseau social n'a pas de « Réseau » ou d'« Adresse de la page » (social : id et url)" "fix" "Complétez ou supprimez ce réseau social dans le CMS.")) }}{{ end -}}
 {{- end -}}
 {{- $p := $s.pricing | default dict -}}
 {{- range slice "school_year" "stage_week" -}}
-  {{- if not (index $p .) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.%s" . }}{{ end -}}
+  {{- if not (index $p .) }}{{ $errs = $errs | append (merge $se (dict "msg" (printf "« %s » est vide (pricing.%s)" (index $sl .) .) "fix" $fill)) }}{{ end -}}
 {{- end -}}
-{{- if not (and $p.monthly.count $p.monthly.amount) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.monthly.count ou amount" }}{{ end -}}
-{{- if (try (time.AsTime $s.opening_date)).Err }}{{ errorf "data/settings.yaml : date invalide dans opening_date (attendu AAAA-MM-JJ)" }}{{ end -}}
+{{- if not (and $p.monthly.count $p.monthly.amount) }}{{ $errs = $errs | append (merge $se (dict "msg" "« Tarifs, Paiement mensuel » est incomplet : nombre de mensualités ou montant vide (pricing.monthly.count ou amount)" "fix" $fill)) }}{{ end -}}
+{{- if (try (time.AsTime $s.opening_date)).Err }}{{ $errs = $errs | append (merge $se (dict "msg" "« Date d'ouverture de l'école » n'est pas une date valide, attendu AAAA-MM-JJ (opening_date)" "fix" $fixDate)) }}{{ end -}}
 {{- range slice "sibling_discount.second" "sibling_discount.third" "deposit" "september_fees.membership" "september_fees.supplies" "september_fees.snack" "lunch_supervision" -}}
   {{- $v := $p -}}{{- range split . "." -}}{{- $v = index ($v | default dict) . -}}{{- end -}}
-  {{- if not (in (slice "int" "int64" "uint64") (printf "%T" $v)) }}{{ errorf "data/settings.yaml : champ obligatoire absent ou non entier : pricing.%s" . }}{{ end -}}
+  {{- if not (in (slice "int" "int64" "uint64") (printf "%T" $v)) }}{{ $errs = $errs | append (merge $se (dict "msg" (printf "« %s » est vide ou n'est pas un nombre entier (pricing.%s)" (index $sl .) .) "fix" $fixInt)) }}{{ end -}}
 {{- end -}}
-{{- if not (and $p.club_nature.year $p.club_nature.card_10) }}{{ errorf "data/settings.yaml : champ obligatoire absent : pricing.club_nature.year ou card_10" }}{{ end -}}
+{{- if not (and $p.club_nature.year $p.club_nature.card_10) }}{{ $errs = $errs | append (merge $se (dict "msg" "« Tarifs, Club nature » est incomplet : année ou carte de 10 séances vide (pricing.club_nature.year ou card_10)" "fix" $fill)) }}{{ end -}}
 {{- with $s.banner -}}
-  {{- if and .enabled (not (index (.text | default dict) site.Language.Lang)) }}{{ errorf "data/settings.yaml : banner.text.%s absent alors que le bandeau est activé" site.Language.Lang }}{{ end -}}
+  {{- if and .enabled (not (index (.text | default dict) site.Language.Lang)) }}{{ $errs = $errs | append (merge $se (dict "msg" (printf "le bandeau d'annonce est activé mais son texte est vide (banner.text.%s)" site.Language.Lang) "fix" "Écrivez le texte du bandeau, ou décochez « Afficher le bandeau »." )) }}{{ end -}}
 {{- end -}}
 
 {{- /*
@@ -40,59 +58,86 @@
   date  dates obligatoires ; optdate  dates facultatives ; enum  champ -> valeurs permises ;
   image  champ -> champ du texte alternatif (image facultative, présente dans le bundle si renseignée) ;
   pdf  champs obligatoires désignant un PDF du dossier de la page.
+  label et labels : nom de la fiche et des champs dans le CMS, pour des messages compréhensibles.
 */ -}}
 {{- $rules := dict
-  "actualites" (dict "required" (slice "title" "summary") "date" (slice "date") "optdate" (slice "event_date") "bool" (slice "pinned") "image" (dict "flyer" "flyer_alt"))
-  "equipe" (dict "required" (slice "name" "group") "int" (slice "order") "enum" (dict "group" (slice "equipe" "ca")) "image" (dict "photo" "photo_alt"))
-  "stages" (dict "required" (slice "title" "dates" "ages" "registration_url") "date" (slice "start_date"))
-  "postes" (dict "required" (slice "title" "summary") "bool" (slice "open"))
-  "temoignages" (dict "required" (slice "author" "text") "bool" (slice "placeholder") "int" (slice "order") "enum" (dict "relation" (slice "parent" "former_pupil")) "image" (dict "photo" "photo_alt"))
-  "faq" (dict "required" (slice "title" "category") "int" (slice "order") "enum" (dict "category" (slice "ecole" "vie-quotidienne" "inscription" "association" "extrascolaire")))
-  "partenaires" (dict "required" (slice "name" "category") "int" (slice "order") "enum" (dict "category" (slice "pedagogique" "territoire" "associatif")) "image" (dict "logo" "logo_alt"))
-  "evenements" (dict "required" (slice "title" "period") "int" (slice "order") "image" (dict "photo" "photo_alt"))
-  "documents" (dict "required" (slice "title" "file") "int" (slice "order") "pdf" (slice "file"))
+  "actualites" (dict "required" (slice "title" "summary") "date" (slice "date") "optdate" (slice "event_date") "bool" (slice "pinned") "image" (dict "flyer" "flyer_alt")
+    "label" "Actualité" "labels" (dict "title" "Titre" "summary" "Résumé" "date" "Date de publication" "event_date" "Date de l'événement" "pinned" "Épingler en tête de liste" "flyer" "Image ou flyer" "flyer_alt" "Description de l'image"))
+  "equipe" (dict "required" (slice "name" "group") "int" (slice "order") "enum" (dict "group" (slice "equipe" "ca")) "image" (dict "photo" "photo_alt")
+    "label" "Personne de l'équipe ou du CA" "labels" (dict "name" "Prénom et nom" "group" "Groupe" "order" "Ordre d'affichage" "photo" "Photo" "photo_alt" "Description de la photo"))
+  "stages" (dict "required" (slice "title" "dates" "ages" "registration_url") "date" (slice "start_date")
+    "label" "Stage" "labels" (dict "title" "Nom du stage" "dates" "Dates et horaires affichés" "ages" "Âges" "registration_url" "Lien d'inscription" "start_date" "Premier jour"))
+  "postes" (dict "required" (slice "title" "summary") "bool" (slice "open")
+    "label" "Poste" "labels" (dict "title" "Intitulé du poste" "summary" "Résumé" "open" "Poste ouvert"))
+  "temoignages" (dict "required" (slice "author" "text") "bool" (slice "placeholder") "int" (slice "order") "enum" (dict "relation" (slice "parent" "former_pupil")) "image" (dict "photo" "photo_alt")
+    "label" "Témoignage" "labels" (dict "author" "Auteur ou autrice" "text" "Témoignage" "placeholder" "Témoignage fictif" "order" "Ordre d'affichage" "relation" "Lien avec l'école" "photo" "Photo" "photo_alt" "Description de la photo"))
+  "faq" (dict "required" (slice "title" "category") "int" (slice "order") "enum" (dict "category" (slice "ecole" "vie-quotidienne" "inscription" "association" "extrascolaire"))
+    "label" "Question fréquente" "labels" (dict "title" "Question" "category" "Rubrique" "order" "Ordre dans la rubrique"))
+  "partenaires" (dict "required" (slice "name" "category") "int" (slice "order") "enum" (dict "category" (slice "pedagogique" "territoire" "associatif")) "image" (dict "logo" "logo_alt")
+    "label" "Partenaire" "labels" (dict "name" "Nom" "category" "Catégorie" "order" "Ordre d'affichage" "logo" "Logo" "logo_alt" "Description du logo"))
+  "evenements" (dict "required" (slice "title" "period") "int" (slice "order") "image" (dict "photo" "photo_alt")
+    "label" "Événement" "labels" (dict "title" "Nom de l'événement" "period" "Période" "order" "Ordre d'affichage" "photo" "Photo" "photo_alt" "Description de la photo"))
+  "documents" (dict "required" (slice "title" "file") "int" (slice "order") "pdf" (slice "file")
+    "label" "Document" "labels" (dict "title" "Titre du document" "file" "Fichier PDF" "order" "Ordre d'affichage"))
 -}}
+{{- /* Pages où chaque collection s'affiche : l'accueil, ou les pages qui ont une section du type correspondant. */ -}}
+{{- $collectionOf := dict "team" "equipe" "faq" "faq" "partners" "partenaires" "events" "evenements" "documents" "documents" "stages" "stages" "jobs" "postes" -}}
+{{- $seenBy := dict "actualites" $home "temoignages" $home -}}
+{{- $done := slice -}}
+{{- range site.Pages -}}
+  {{- $pg := . -}}
+  {{- range .Params.sections -}}
+    {{- with index $collectionOf (.type | default "") -}}
+      {{- $k := printf "%s %s" . $pg.RelPermalink -}}
+      {{- if not (in $done $k) -}}
+        {{- $done = $done | append $k -}}
+        {{- $seenBy = merge $seenBy (dict . ((index $seenBy . | default slice) | append (dict "title" $pg.Title "url" $pg.RelPermalink))) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- range $section, $r := $rules -}}
   {{- with site.GetPage (printf "/%s" $section) -}}
     {{- range .RegularPages -}}
       {{- $page := . -}}
-      {{- $file := .File.Path -}}
+      {{- $name := .Params.name | default .Params.author | default .Title | default .File.ContentBaseName -}}
+      {{- $e := dict "file" .File.Path "where" (printf "%s « %s »" $r.label $name) "seen" (index $seenBy $section | default slice) -}}
       {{- range $r.required -}}
-        {{- if not (index $page.Params .) }}{{ errorf "%s : champ obligatoire absent ou vide : %s" $file . }}{{ end -}}
+        {{- if not (index $page.Params .) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "« %s » est vide (%s)" (index $r.labels .) .) "fix" $fill)) }}{{ end -}}
       {{- end -}}
       {{- range $r.bool -}}
-        {{- if ne (printf "%T" (index $page.Params .)) "bool" }}{{ errorf "%s : champ obligatoire absent ou non booléen : %s" $file . }}{{ end -}}
+        {{- if ne (printf "%T" (index $page.Params .)) "bool" }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "« %s » doit être coché ou décoché (%s)" (index $r.labels .) .) "fix" "Cochez ou décochez la case dans le CMS, puis enregistrez.")) }}{{ end -}}
       {{- end -}}
       {{- range $r.int -}}
-        {{- if not (in (slice "int" "int64" "uint64") (printf "%T" (index $page.Params .))) }}{{ errorf "%s : champ obligatoire absent ou non entier : %s" $file . }}{{ end -}}
+        {{- if not (in (slice "int" "int64" "uint64") (printf "%T" (index $page.Params .))) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "« %s » est vide ou n'est pas un nombre entier (%s)" (index $r.labels .) .) "fix" $fixInt)) }}{{ end -}}
       {{- end -}}
       {{- range $r.date -}}
         {{- $f := . -}}
         {{- $v := index $page.Params $f -}}
-        {{- if not $v }}{{ errorf "%s : champ obligatoire absent : %s" $file $f }}{{ else if (try (time.AsTime $v)).Err }}{{ errorf "%s : date invalide dans %s (attendu AAAA-MM-JJ)" $file $f }}{{ end -}}
+        {{- if not $v }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "« %s » est vide (%s)" (index $r.labels $f) $f) "fix" $fixDate)) }}{{ else if (try (time.AsTime $v)).Err }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "« %s » n'est pas une date valide, attendu AAAA-MM-JJ (%s)" (index $r.labels $f) $f) "fix" $fixDate)) }}{{ end -}}
       {{- end -}}
       {{- range $r.optdate -}}
         {{- $f := . -}}
-        {{- with index $page.Params $f }}{{ if (try (time.AsTime .)).Err }}{{ errorf "%s : date invalide dans %s (attendu AAAA-MM-JJ)" $file $f }}{{ end }}{{ end -}}
+        {{- with index $page.Params $f }}{{ if (try (time.AsTime .)).Err }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "« %s » n'est pas une date valide, attendu AAAA-MM-JJ (%s)" (index $r.labels $f) $f) "fix" $fixDate)) }}{{ end }}{{ end -}}
       {{- end -}}
       {{- range $field, $allowed := $r.enum -}}
         {{- $v := index $page.Params $field -}}
-        {{- if not (in $allowed $v) }}{{ errorf "%s : %s doit valoir l'une des valeurs %s (reçu : %q)" $file $field (delimit $allowed ", ") $v }}{{ end -}}
+        {{- if not (in $allowed $v) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "« %s » a une valeur inattendue : %q, attendu l'une des valeurs %s (%s)" (index $r.labels $field) $v (delimit $allowed ", ") $field) "fix" $fixList)) }}{{ end -}}
       {{- end -}}
       {{- range $field, $alt := $r.image -}}
         {{- with index $page.Params $field -}}
-          {{- if not (partial "resolve-resource.html" (dict "page" $page "path" .)) }}{{ errorf "%s : %s : image introuvable : %s" $file $field . }}{{ end -}}
-          {{- if not (index $page.Params $alt) }}{{ errorf "%s : %s est renseigné, %s est obligatoire" $file $field $alt }}{{ end -}}
+          {{- if not (partial "resolve-resource.html" (dict "page" $page "path" .)) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "l'image choisie dans « %s » est introuvable : %s (%s)" (index $r.labels $field) . $field) "fix" $fixImg)) }}{{ end -}}
+          {{- if not (index $page.Params $alt) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "« %s » est vide alors qu'une image est choisie (%s)" (index $r.labels $alt) $alt) "fix" $fixAlt)) }}{{ end -}}
         {{- end -}}
       {{- end -}}
       {{- range $r.pdf -}}
         {{- $f := . -}}
         {{- with index $page.Params $f -}}
           {{- $res := partial "resolve-resource.html" (dict "page" $page "path" .) -}}
-          {{- if not $res }}{{ errorf "%s : %s : fichier introuvable : %s" $file $f . }}{{ else if ne $res.MediaType.SubType "pdf" }}{{ errorf "%s : %s doit être un PDF (reçu : %s)" $file $f $res.MediaType.Type }}{{ end -}}
+          {{- if not $res }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "le fichier choisi dans « %s » est introuvable : %s (%s)" (index $r.labels $f) . $f) "fix" "Choisissez à nouveau le fichier PDF dans le CMS.")) }}{{ else if ne $res.MediaType.SubType "pdf" }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "« %s » doit être un PDF, reçu : %s (%s)" (index $r.labels $f) $res.MediaType.Type $f) "fix" "Choisissez un fichier PDF dans le CMS.")) }}{{ end -}}
         {{- end -}}
       {{- end -}}
-      {{- if and $strict (eq $section "temoignages") .Params.placeholder }}{{ errorf "%s : témoignage fictif (placeholder: true) interdit en build strict" $file }}{{ end -}}
+      {{- if and $strict (eq $section "temoignages") .Params.placeholder }}{{ $errs = $errs | append (merge $e (dict "msg" "témoignage fictif interdit en production (placeholder: true)" "fix" "Remplacez-le par un vrai témoignage, ou supprimez-le.")) }}{{ end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
@@ -124,48 +169,50 @@
   {{- $page := . -}}
   {{- with .Params.sections -}}
     {{- $file := $page.File.Path -}}
+    {{- $seen := slice (dict "title" $page.Title "url" $page.RelPermalink) -}}
     {{- $ids := slice -}}
     {{- range . -}}
       {{- $sec := . -}}
-      {{- if not (findRE `^[a-z0-9]+(-[a-z0-9]+)*$` (.id | default "")) }}{{ errorf "%s : section %q : id absent ou invalide (minuscules, chiffres et tirets)" $file .title }}{{ end -}}
-      {{- if in $ids .id }}{{ errorf "%s : id de section en double : %s" $file .id }}{{ end -}}
+      {{- $e := dict "file" $file "where" (printf "Page « %s », section « %s »" $page.Title (.title | default .id | default "sans titre")) "seen" $seen -}}
+      {{- if not (findRE `^[a-z0-9]+(-[a-z0-9]+)*$` (.id | default "")) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "l'ancre est vide ou invalide : %q, seuls les minuscules, chiffres et tirets sont permis (id)" (.id | default "")) "fix" "Corrigez « Ancre (repère dans l'adresse) » dans le CMS, par ex. « vie-a-l-ecole ».")) }}{{ end -}}
+      {{- if in $ids .id }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "l'ancre %s est déjà utilisée par une autre section de la page (id)" .id) "fix" "Donnez une ancre différente à chaque section dans le CMS.")) }}{{ end -}}
       {{- $ids = $ids | append .id -}}
-      {{- if not .title }}{{ errorf "%s : section %s : title obligatoire" $file .id }}{{ end -}}
+      {{- if not .title }}{{ $errs = $errs | append (merge $e (dict "msg" "« Titre de la section » est vide (title)" "fix" $fill)) }}{{ end -}}
       {{- $r := index $types (.type | default "") | default (dict) -}}
-      {{- if not (isset $types (.type | default "")) }}{{ errorf "%s : section %s : type inconnu %q (attendu : %s)" $file .id .type (delimit $typeNames ", ") }}{{ end -}}
+      {{- if not (isset $types (.type | default "")) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "type de section inconnu %q, attendu l'un des types %s (type)" .type (delimit $typeNames ", ")) "fix" "Recréez la section dans le CMS en choisissant son type dans la liste.")) }}{{ end -}}
       {{- range .parts -}}
-        {{- if not (and .title .body) }}{{ errorf "%s : section %s : chaque bloc dépliable (parts) exige title et body" $file $sec.id }}{{ end -}}
+        {{- if not (and .title .body) }}{{ $errs = $errs | append (merge $e (dict "msg" "un bloc dépliable n'a pas de titre ou de texte (parts : title et body)" "fix" "Complétez ou supprimez ce bloc dépliable dans le CMS.")) }}{{ end -}}
       {{- end -}}
       {{- range $r.required -}}
-        {{- if not (index $sec .) }}{{ errorf "%s : section %s : champ obligatoire absent : %s" $file $sec.id . }}{{ end -}}
+        {{- if not (index $sec .) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "un champ obligatoire est vide (%s)" .) "fix" $fill)) }}{{ end -}}
       {{- end -}}
       {{- range $field, $allowed := $r.enum -}}
-        {{- with index $sec $field }}{{ if not (in $allowed .) }}{{ errorf "%s : section %s : %s doit valoir l'une des valeurs %s (reçu : %q)" $file $sec.id $field (delimit $allowed ", ") . }}{{ end }}{{ end -}}
+        {{- with index $sec $field }}{{ if not (in $allowed .) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "valeur inattendue : %q, attendu l'une des valeurs %s (%s)" . (delimit $allowed ", ") $field) "fix" $fixList)) }}{{ end }}{{ end -}}
       {{- end -}}
       {{- range $field, $sub := $r.list -}}
         {{- $items := index $sec $field -}}
-        {{- if not $items }}{{ errorf "%s : section %s : liste %s absente ou vide" $file $sec.id $field }}{{ end -}}
+        {{- if not $items }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "la liste est vide (%s)" $field) "fix" "Ajoutez au moins un élément à la liste dans le CMS.")) }}{{ end -}}
         {{- range $items -}}
           {{- $item := . -}}
-          {{- range $sub }}{{ if not (index $item .) }}{{ errorf "%s : section %s : %s : champ obligatoire absent dans un élément : %s" $file $sec.id $field . }}{{ end }}{{ end -}}
+          {{- range $sub }}{{ if not (index $item .) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "un élément de la liste a un champ vide (%s : %s)" $field .) "fix" "Complétez ou supprimez cet élément dans le CMS.")) }}{{ end }}{{ end -}}
         {{- end -}}
       {{- end -}}
       {{- if eq .type "figures" -}}
         {{- range .items -}}
-          {{- if .compute }}{{ if not (in (slice "years" "staff") .compute) }}{{ errorf "%s : section %s : compute doit valoir years ou staff (reçu : %q)" $file $sec.id .compute }}{{ end -}}
-          {{- else if not (and .value .label) }}{{ errorf "%s : section %s : chaque chiffre exige value et label, ou compute" $file $sec.id }}{{ end -}}
+          {{- if .compute }}{{ if not (in (slice "years" "staff") .compute) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "calcul automatique inconnu : %q, attendu years ou staff (compute)" .compute) "fix" $fixList)) }}{{ end -}}
+          {{- else if not (and .value .label) }}{{ $errs = $errs | append (merge $e (dict "msg" "un chiffre n'a ni valeur et libellé, ni calcul automatique (value et label, ou compute)" "fix" "Complétez ou supprimez ce chiffre dans le CMS.")) }}{{ end -}}
         {{- end -}}
       {{- end -}}
       {{- if eq .type "video" -}}
-        {{- range .videos }}{{ if not (findRE `^[A-Za-z0-9_-]{11}$` (printf "%v" .id)) }}{{ errorf "%s : section %s : identifiant YouTube invalide : %v" $file $sec.id .id }}{{ end }}{{ end -}}
+        {{- range .videos }}{{ if not (findRE `^[A-Za-z0-9_-]{11}$` (printf "%v" .id)) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "identifiant YouTube invalide : %v (videos : id)" .id) "fix" "Copiez les 11 caractères après « v= » dans l'adresse de la vidéo YouTube.")) }}{{ end }}{{ end -}}
       {{- end -}}
       {{- with .photo -}}
-        {{- if not (partial "resolve-resource.html" (dict "page" $page "path" .)) }}{{ errorf "%s : section %s : photo : image introuvable : %s" $file $sec.id . }}{{ end -}}
-        {{- if not $sec.photo_alt }}{{ errorf "%s : section %s : photo est renseignée, photo_alt est obligatoire" $file $sec.id }}{{ end -}}
+        {{- if not (partial "resolve-resource.html" (dict "page" $page "path" .)) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "la photo est introuvable : %s (photo)" .) "fix" $fixImg)) }}{{ end -}}
+        {{- if not $sec.photo_alt }}{{ $errs = $errs | append (merge $e (dict "msg" "« Description de la photo » est vide alors qu'une photo est choisie (photo_alt)" "fix" $fixAlt)) }}{{ end -}}
       {{- end -}}
       {{- range .gallery -}}
-        {{- if not (and .image .alt) }}{{ errorf "%s : section %s : chaque photo de gallery exige image et alt" $file $sec.id }}{{ end -}}
-        {{- with .image }}{{ if not (partial "resolve-resource.html" (dict "page" $page "path" .)) }}{{ errorf "%s : section %s : gallery : image introuvable : %s" $file $sec.id . }}{{ end }}{{ end -}}
+        {{- if not (and .image .alt) }}{{ $errs = $errs | append (merge $e (dict "msg" "une photo de la galerie n'a pas d'image ou de description (gallery : image et alt)" "fix" $fixAlt)) }}{{ end -}}
+        {{- with .image }}{{ if not (partial "resolve-resource.html" (dict "page" $page "path" .)) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "une photo de la galerie est introuvable : %s (gallery : image)" .) "fix" $fixImg)) }}{{ end }}{{ end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -174,6 +221,8 @@
 {{- /* Page d'accueil : blocs du front matter ; les chemins d'image sont relatifs à assets/ (img/accueil/ ou /medias/) */ -}}
 {{- $file := printf "content/%s/_index.md" site.Language.Lang -}}
 {{- $hp := site.Home.Params -}}
+{{- $blockNames := dict "hero" "En-tête" "news" "Actualités" "words" "Tzama en trois mots" "why" "Pourquoi choisir Tzama" "day" "Une journée à Tzama" "gallery" "Tzama en images" "support" "Soutenir l'école" "visit" "Venir voir" -}}
+{{- $he := dict "file" $file "where" "Page d'accueil" "seen" $home -}}
 {{- $blocks := dict
   "hero" (slice "image" "image_alt" "tagline")
   "news" (slice "title")
@@ -186,53 +235,62 @@
 -}}
 {{- range $block, $fields := $blocks -}}
   {{- $b := index $hp $block | default dict -}}
+  {{- $e := merge $he (dict "where" (printf "Page d'accueil, bloc « %s »" (index $blockNames $block))) -}}
   {{- range $fields -}}
-    {{- if not (index $b .) }}{{ errorf "%s : champ obligatoire absent : %s.%s" $file $block . }}{{ end -}}
+    {{- if not (index $b .) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "un champ obligatoire est vide (%s.%s)" $block .) "fix" (cond (strings.HasSuffix . "_alt") $fixAlt $fill))) }}{{ end -}}
   {{- end -}}
 {{- end -}}
 {{- with $hp.hero -}}
-  {{- if not (or .intro .points) }}{{ errorf "%s : hero : renseigner intro ou points" $file }}{{ end -}}
-  {{- if gt (len (.points | default slice)) 4 }}{{ errorf "%s : hero.points : 4 points au plus" $file }}{{ end -}}
+  {{- $e := merge $he (dict "where" "Page d'accueil, bloc « En-tête »") -}}
+  {{- if not (or .intro .points) }}{{ $errs = $errs | append (merge $e (dict "msg" "ni introduction ni points forts (hero : intro ou points)" "fix" "Écrivez une introduction ou au moins un point fort dans le CMS.")) }}{{ end -}}
+  {{- if gt (len (.points | default slice)) 4 }}{{ $errs = $errs | append (merge $e (dict "msg" "plus de 4 points forts (hero.points)" "fix" "Gardez 4 points forts au plus.")) }}{{ end -}}
   {{- range .points | default slice -}}
-    {{- if not (strings.TrimSpace (printf "%v" .)) }}{{ errorf "%s : hero.points : point vide" $file }}{{ end -}}
+    {{- if not (strings.TrimSpace (printf "%v" .)) }}{{ $errs = $errs | append (merge $e (dict "msg" "un point fort est vide (hero.points)" "fix" "Complétez ou supprimez ce point fort dans le CMS.")) }}{{ end -}}
   {{- end -}}
 {{- end -}}
-{{- $images := slice (dict "field" "hero.image" "path" $hp.hero.image) (dict "field" "visit.photo" "path" $hp.visit.photo) -}}
+{{- $images := slice (dict "field" "hero.image" "path" $hp.hero.image "block" "hero") (dict "field" "visit.photo" "path" $hp.visit.photo "block" "visit") -}}
 {{- range ($hp.hero.photos | default slice) -}}
-  {{- if not (and .image .alt .caption) }}{{ errorf "%s : hero.photos : chaque entrée exige image, alt et caption" $file }}{{ end -}}
-  {{- $images = $images | append (dict "field" "hero.photos" "path" .image) -}}
+  {{- if not (and .image .alt .caption) }}{{ $errs = $errs | append (merge $he (dict "where" "Page d'accueil, bloc « En-tête »" "msg" "une photo n'a pas d'image, de description ou de légende (hero.photos : image, alt et caption)" "fix" "Complétez la photo dans le CMS : image, description de la photo et légende.")) }}{{ end -}}
+  {{- $images = $images | append (dict "field" "hero.photos" "path" .image "block" "hero") -}}
 {{- end -}}
 {{- range ($hp.day.items | default slice) -}}
   {{- with .photo -}}
-    {{- $images = $images | append (dict "field" "day.items" "path" .) -}}
+    {{- $images = $images | append (dict "field" "day.items" "path" . "block" "day") -}}
   {{- end -}}
-  {{- if and .photo (not (and .photo_alt .photo_caption)) }}{{ errorf "%s : day.items : une photo exige photo_alt et photo_caption" $file }}{{ end -}}
+  {{- if and .photo (not (and .photo_alt .photo_caption)) }}{{ $errs = $errs | append (merge $he (dict "where" "Page d'accueil, bloc « Une journée à Tzama »" "msg" "une photo n'a pas de description ou de légende (day.items : photo_alt et photo_caption)" "fix" "Ajoutez la description de la photo et sa légende dans le CMS.")) }}{{ end -}}
 {{- end -}}
 {{- $gallery := $hp.gallery.items | default slice -}}
-{{- if lt (len $gallery) 2 }}{{ errorf "%s : gallery.items : au moins deux photos" $file }}{{ end -}}
+{{- $ge := merge $he (dict "where" "Page d'accueil, bloc « Tzama en images »") -}}
+{{- if lt (len $gallery) 2 }}{{ $errs = $errs | append (merge $ge (dict "msg" "le carrousel a moins de deux photos (gallery.items)" "fix" "Ajoutez au moins deux photos au carrousel dans le CMS.")) }}{{ end -}}
 {{- range $gallery -}}
-  {{- if not (and .image .alt .caption) }}{{ errorf "%s : gallery.items : chaque entrée exige image, alt et caption" $file }}{{ end -}}
-  {{- $images = $images | append (dict "field" "gallery.items" "path" .image) -}}
+  {{- if not (and .image .alt .caption) }}{{ $errs = $errs | append (merge $ge (dict "msg" "une photo n'a pas d'image, de description ou de légende (gallery.items : image, alt et caption)" "fix" "Complétez la photo dans le CMS : image, description de la photo et légende.")) }}{{ end -}}
+  {{- $images = $images | append (dict "field" "gallery.items" "path" .image "block" "gallery") -}}
 {{- end -}}
 {{- range $images -}}
-  {{- if and .path (not (partial "resolve-resource.html" (dict "page" site.Home "path" .path))) }}{{ errorf "%s : %s : image introuvable : %s" $file .field .path }}{{ end -}}
+  {{- if and .path (not (partial "resolve-resource.html" (dict "page" site.Home "path" .path))) }}{{ $errs = $errs | append (merge $he (dict "where" (printf "Page d'accueil, bloc « %s »" (index $blockNames .block)) "msg" (printf "image introuvable : %s (%s)" .path .field) "fix" $fixImg)) }}{{ end -}}
 {{- end -}}
 {{- range slice "words" "why" "day" -}}
   {{- $items := (index $hp . | default dict).items -}}
-  {{- if not $items }}{{ errorf "%s : champ obligatoire absent : %s.items" $file . }}{{ end -}}
+  {{- $e := merge $he (dict "where" (printf "Page d'accueil, bloc « %s »" (index $blockNames .))) -}}
+  {{- if not $items }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "la liste des éléments est vide (%s.items)" .) "fix" "Ajoutez au moins un élément dans le CMS.")) }}{{ end -}}
   {{- $block := . -}}
   {{- range $items -}}
-    {{- if not (and .title .text) }}{{ errorf "%s : %s.items : chaque entrée exige title et text" $file $block }}{{ end -}}
+    {{- if not (and .title .text) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "un élément n'a pas de titre ou de texte (%s.items : title et text)" $block) "fix" "Complétez ou supprimez cet élément dans le CMS.")) }}{{ end -}}
   {{- end -}}
 {{- end -}}
 {{- /* doodles du sprite proposés pour illustrer un point ou un moment */ -}}
 {{- $doodles := slice "d-feuille-chene" "d-feuille-simple" "d-fougere" "d-soleil" "d-main-droite" "d-coeur" "d-etoile" -}}
 {{- range slice "why" "day" -}}
   {{- $block := . -}}
+  {{- $e := merge $he (dict "where" (printf "Page d'accueil, bloc « %s »" (index $blockNames .))) -}}
   {{- range (index $hp . | default dict).items -}}
-    {{- if not (in $doodles .icon) }}{{ errorf "%s : %s.items : icon doit valoir %s (reçu : %v)" $file $block (delimit $doodles ", ") .icon }}{{ end -}}
+    {{- if not (in $doodles .icon) }}{{ $errs = $errs | append (merge $e (dict "msg" (printf "dessin inconnu : %v, attendu l'un des dessins %s (%s.items : icon)" .icon (delimit $doodles ", ") $block) "fix" $fixList)) }}{{ end -}}
   {{- end -}}
 {{- end -}}
 {{- $why := len ($hp.why.items | default slice) -}}
-{{- if or (lt $why 4) (gt $why 6) }}{{ errorf "%s : why.items : de 4 à 6 points (reçu : %d)" $file $why }}{{ end -}}
-{{- if not ($hp.visit.text | default slice) }}{{ errorf "%s : champ obligatoire absent : visit.text" $file }}{{ end -}}
+{{- if or (lt $why 4) (gt $why 6) }}{{ $errs = $errs | append (merge $he (dict "where" "Page d'accueil, bloc « Pourquoi choisir Tzama »" "msg" (printf "il faut de 4 à 6 points, il y en a %d (why.items)" $why) "fix" "Ajoutez ou supprimez des points dans le CMS.")) }}{{ end -}}
+{{- if not ($hp.visit.text | default slice) }}{{ $errs = $errs | append (merge $he (dict "where" "Page d'accueil, bloc « Venir voir »" "msg" "le texte est vide (visit.text)" "fix" $fill)) }}{{ end -}}
+
+{{- $out := slice -}}
+{{- range $errs }}{{ $out = $out | append (partial "content-error.html" .) }}{{ end -}}
+{{- return $out -}}

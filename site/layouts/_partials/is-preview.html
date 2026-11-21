@@ -1,0 +1,2 @@
+{{- /* Build de prévisualisation de PR (HUGO_PARAMS_PREVIEW=true, posé par la CI) : erreurs de contenu non bloquantes. */ -}}
+{{- return (eq (printf "%v" site.Params.preview) "true") -}}
