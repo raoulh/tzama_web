@@ -1,8 +1,4 @@
 ---
-# Les originaux d'un bundle ne sont publiés que s'ils sont servis tels quels (PDF, flyers) ; les variantes traitées le sont toujours.
-cascade:
-  build:
-    publishResources: false
 title: Accueil
 hero:
   image: img/accueil/decouverte-foret.jpg
@@ -146,7 +142,7 @@ gallery:
       caption: Au travail dans le sous-bois
     - image: img/accueil/mousse-mains.jpg
       alt: Gros plan sur des mains d'enfant posées sur la mousse d'un tronc d'arbre.
-      caption: Toucher la mousse
+      caption: Connexion avec la nature
     - image: img/accueil/yourte-plafond.jpg
       alt: "Le toit d'une yourte vu d'en dessous : des perches de bois rayonnent autour du puits de lumière."
       caption: Le toit de la yourte
@@ -161,4 +157,7 @@ visit:
   photo: img/accueil/campement-activites.jpg
   photo_alt: Des enfants autour d'une table en bois, sous les arbres, pendant une activité au campement.
   photo_caption: Au campement
+cascade:
+  build:
+    publishResources: false
 ---
