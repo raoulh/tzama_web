@@ -207,6 +207,8 @@ sections:
         title: "Webinaire « Enseigner autrement : l'école dehors, apprendre avec la nature »"
       - id: c8mdWI6PZeQ
         title: 'Webinaire Enseigner autrement : le potager à l’école – Cultiver pour mieux apprendre'
+      - id: MMGbLK76J7o
+        title: 'Compétences psychosociales à l’école : apprendre à vivre et grandir ensemble'
   - type: schedule
     title: Une semaine type à Tzama
     id: semaine-type
